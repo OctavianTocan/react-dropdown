@@ -3,11 +3,10 @@
  * @brief Context provider for dropdown state management
  */
 
-'use client';
+"use client";
 
-import { useClickOutside as useHookzClickOutside } from '@react-hookz/web';
-import { createContext, useContext, ReactNode, useRef, useState } from 'react';
-import type { DropdownContextValue } from './types';
+import { createContext, useContext, ReactNode, useRef, useState, useEffect, useCallback } from "react";
+import type { DropdownContextValue } from "./types";
 
 /**
  * @brief Dropdown context for managing state across dropdown components
@@ -24,8 +23,8 @@ export function useDropdownContext<T>() {
 
   if (!context) {
     throw new Error(
-      'useDropdownContext must be used within a DropdownProvider. ' +
-        'Wrap your component with <DropdownRoot> to provide context.'
+      "useDropdownContext must be used within a DropdownProvider. " +
+        "Wrap your component with <DropdownRoot> to provide context.",
     );
   }
 
@@ -61,7 +60,7 @@ export function useKeyboardNavigation<T>(
   items: T[],
   getItemKey: (item: T) => string,
   onSelect: (item: T) => void,
-  closeDropdown: () => void
+  closeDropdown: () => void,
 ) {
   const focusedIndexRef = useRef<number>(-1);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
@@ -72,23 +71,23 @@ export function useKeyboardNavigation<T>(
    */
   const handleKeyDown = (event: React.KeyboardEvent) => {
     switch (event.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         event.preventDefault();
         focusedIndexRef.current = Math.min(focusedIndexRef.current + 1, items.length - 1);
         setFocusedIndex(focusedIndexRef.current);
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         event.preventDefault();
         focusedIndexRef.current = Math.max(focusedIndexRef.current - 1, 0);
         setFocusedIndex(focusedIndexRef.current);
         break;
-      case 'Enter':
+      case "Enter":
         event.preventDefault();
         if (focusedIndexRef.current >= 0 && focusedIndexRef.current < items.length) {
           onSelect(items[focusedIndexRef.current]);
         }
         break;
-      case 'Escape':
+      case "Escape":
         event.preventDefault();
         closeDropdown();
         break;
@@ -116,15 +115,35 @@ export function useKeyboardNavigation<T>(
  * @param closeDropdown Callback to close dropdown
  * @param isOpen Current open state
  */
-export function useClickOutside(dropdownRef: React.RefObject<HTMLElement>, closeDropdown: () => void, isOpen: boolean) {
-  useHookzClickOutside(
-    dropdownRef,
-    (event) => {
-      if (!isOpen) return;
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        closeDropdown();
+export function useClickOutside(
+  dropdownRef: React.RefObject<HTMLElement | null>,
+  closeDropdown: () => void,
+  isOpen: boolean,
+) {
+  const closeDropdownRef = useRef(closeDropdown);
+  closeDropdownRef.current = closeDropdown;
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      if (!dropdownRef.current) return;
+
+      const target = event.target as Node;
+      if (!dropdownRef.current.contains(target)) {
+        closeDropdownRef.current();
       }
     },
-    ['mousedown']
+    [dropdownRef],
   );
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    document.addEventListener("mousedown", handleClickOutside, { passive: true });
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isOpen, handleClickOutside]);
 }

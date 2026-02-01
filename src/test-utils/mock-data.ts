@@ -12,11 +12,11 @@ export interface MockItem {
 }
 
 export const mockItems: MockItem[] = [
-  { id: '1', name: 'Item One', value: 1 },
-  { id: '2', name: 'Item Two', value: 2 },
-  { id: '3', name: 'Item Three', value: 3 },
-  { id: '4', name: 'Item Four', value: 4 },
-  { id: '5', name: 'Item Five', value: 5 },
+  { id: "1", name: "Item One", value: 1 },
+  { id: "2", name: "Item Two", value: 2 },
+  { id: "3", name: "Item Three", value: 3 },
+  { id: "4", name: "Item Four", value: 4 },
+  { id: "5", name: "Item Five", value: 5 },
 ];
 
 // --- LANGUAGE MOCKS --- //
@@ -28,16 +28,16 @@ export interface MockLanguage {
 }
 
 export const mockLanguages: MockLanguage[] = [
-  { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español' },
-  { code: 'fr', name: 'French', nativeName: 'Français' },
-  { code: 'de', name: 'German', nativeName: 'Deutsch' },
-  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
-  { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
-  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
-  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
-  { code: 'ko', name: 'Korean', nativeName: '한국어' },
-  { code: 'zh', name: 'Chinese', nativeName: '中文' },
+  { code: "en", name: "English", nativeName: "English" },
+  { code: "es", name: "Spanish", nativeName: "Español" },
+  { code: "fr", name: "French", nativeName: "Français" },
+  { code: "de", name: "German", nativeName: "Deutsch" },
+  { code: "it", name: "Italian", nativeName: "Italiano" },
+  { code: "pt", name: "Portuguese", nativeName: "Português" },
+  { code: "ru", name: "Russian", nativeName: "Русский" },
+  { code: "ja", name: "Japanese", nativeName: "日本語" },
+  { code: "ko", name: "Korean", nativeName: "한국어" },
+  { code: "zh", name: "Chinese", nativeName: "中文" },
 ];
 
 // --- EDGE CASE DATASETS --- //
@@ -55,15 +55,17 @@ export const largeItemSet: MockItem[] = Array.from({ length: 100 }, (_, index) =
 }));
 
 export const specialCharItems: MockItem[] = [
-  { id: 'special-1', name: 'Item with & ampersand', value: 1 },
-  { id: 'special-2', name: 'Item with <angle> brackets', value: 2 },
-  { id: 'special-3', name: 'Item with "quotes"', value: 3 },
-  { id: 'special-4', name: "Item with 'single quotes'", value: 4 },
-  { id: 'special-5', name: 'Item with émojis 🎉', value: 5 },
+  { id: "special-1", name: "Item with & ampersand", value: 1 },
+  { id: "special-2", name: "Item with <angle> brackets", value: 2 },
+  { id: "special-3", name: 'Item with "quotes"', value: 3 },
+  { id: "special-4", name: "Item with 'single quotes'", value: 4 },
+  { id: "special-5", name: "Item with émojis 🎉", value: 5 },
 ];
 
 // --- HELPERS --- //
 // WHY: Utility functions keep test data transformations DRY and intention revealing.
+import { vi } from "vitest";
+
 export const getMockItemKey = (item: MockItem) => item.id;
 export const getMockItemDisplay = (item: MockItem) => item.name;
 
@@ -71,8 +73,7 @@ export const getMockLanguageKey = (language: MockLanguage) => language.code;
 export const getMockLanguageDisplay = (language: MockLanguage) => language.name;
 
 export const createMockOnSelect = <T>() => {
-  const mock = jest.fn<void, [T]>();
+  const mock = vi.fn<(item: T) => void>();
   return { mock };
 };
-export const createMockFilterItems = <T>() =>
-  jest.fn((items: T[], _query: string) => items) as jest.Mock<T[], [T[], string]>;
+export const createMockFilterItems = <T>() => vi.fn((items: T[], _query: string) => items);

@@ -1,0 +1,25 @@
+# Build output
+dist/
+
+# Dependencies (managed by workspace root)
+node_modules/
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test coverage
+coverage/
+
+# Storybook
+storybook-static/

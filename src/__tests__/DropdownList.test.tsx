@@ -3,17 +3,18 @@
  * @brief Unit tests for DropdownList component
  */
 
-import React from 'react';
-import { render, screen, fireEvent } from '../test-utils/test-helpers';
-import { DropdownList, DropdownProvider } from '../index';
-import { createMockDropdownContext } from '../test-utils/test-helpers';
-import { mockItems, getMockItemKey, getMockItemDisplay } from '../test-utils/mock-data';
+import { vi } from "vitest";
+import React from "react";
+import { render, screen, fireEvent } from "../test-utils/test-helpers";
+import { DropdownList, DropdownProvider } from "../index";
+import { createMockDropdownContext } from "../test-utils/test-helpers";
+import { mockItems, getMockItemKey, getMockItemDisplay } from "../test-utils/mock-data";
 
-describe('DropdownList', () => {
-  describe('Rendering', () => {
-    it('renders items', () => {
+describe("DropdownList", () => {
+  describe("Rendering", () => {
+    it("renders items", () => {
       const mockContext = createMockDropdownContext();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
 
       render(
         <DropdownProvider value={mockContext}>
@@ -24,16 +25,16 @@ describe('DropdownList', () => {
             getItemKey={getMockItemKey}
             getItemDisplay={getMockItemDisplay}
           />
-        </DropdownProvider>
+        </DropdownProvider>,
       );
 
-      expect(screen.getByText('Item One')).toBeInTheDocument();
-      expect(screen.getByText('Item Two')).toBeInTheDocument();
+      expect(screen.getByText("Item One")).toBeInTheDocument();
+      expect(screen.getByText("Item Two")).toBeInTheDocument();
     });
 
-    it('shows no results message when hasResults is false', () => {
+    it("shows no results message when hasResults is false", () => {
       const mockContext = createMockDropdownContext();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
 
       render(
         <DropdownProvider value={mockContext}>
@@ -44,15 +45,15 @@ describe('DropdownList', () => {
             getItemKey={getMockItemKey}
             getItemDisplay={getMockItemDisplay}
           />
-        </DropdownProvider>
+        </DropdownProvider>,
       );
 
-      expect(screen.getByText('No results found')).toBeInTheDocument();
+      expect(screen.getByText("No results found")).toBeInTheDocument();
     });
 
-    it('highlights selected item', () => {
+    it("highlights selected item", () => {
       const mockContext = createMockDropdownContext();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
 
       render(
         <DropdownProvider value={mockContext}>
@@ -64,19 +65,19 @@ describe('DropdownList', () => {
             getItemKey={getMockItemKey}
             getItemDisplay={getMockItemDisplay}
           />
-        </DropdownProvider>
+        </DropdownProvider>,
       );
 
-      const firstItem = screen.getByText('Item One').closest('[role="option"]');
+      const firstItem = screen.getByText("Item One").closest('[role="option"]');
       expect(firstItem).not.toBeNull();
-      expect(firstItem).toHaveClass('bg-blue-50');
+      expect(firstItem).toHaveClass("bg-blue-50");
     });
   });
 
-  describe('Interaction', () => {
-    it('calls onSelect when item is clicked', () => {
+  describe("Interaction", () => {
+    it("calls onSelect when item is clicked", () => {
       const mockContext = createMockDropdownContext();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
 
       render(
         <DropdownProvider value={mockContext}>
@@ -87,10 +88,10 @@ describe('DropdownList', () => {
             getItemKey={getMockItemKey}
             getItemDisplay={getMockItemDisplay}
           />
-        </DropdownProvider>
+        </DropdownProvider>,
       );
 
-      const firstItem = screen.getByText('Item One');
+      const firstItem = screen.getByText("Item One");
       fireEvent.click(firstItem);
 
       expect(onSelect).toHaveBeenCalledWith(mockItems[0]);

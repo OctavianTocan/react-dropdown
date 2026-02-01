@@ -3,20 +3,20 @@
  * @brief Shared testing utilities for dropdown component suite
  */
 
-import React, { ReactElement, ReactNode } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import type { DropdownContextValue, DropdownRootProps, DropdownTriggerProps } from '../types';
-import { DropdownRoot } from '../DropdownRoot';
-import { DropdownTrigger } from '../DropdownTrigger';
-import { DropdownContent } from '../DropdownContent';
-import { DropdownSearchable } from '../DropdownSearchable';
-import { DropdownSimple } from '../DropdownSimple';
+import React, { ReactElement, ReactNode } from "react";
+import { render, RenderOptions } from "@testing-library/react";
+import type { DropdownContextValue, DropdownRootProps, DropdownTriggerProps } from "../types";
+import { DropdownRoot } from "../DropdownRoot";
+import { DropdownTrigger } from "../DropdownTrigger";
+import { DropdownContent } from "../DropdownContent";
+import { DropdownSearchable } from "../DropdownSearchable";
+import { DropdownSimple } from "../DropdownSimple";
 
 // --- INTERNAL TYPES --- //
 // WHY: Simplify helper signatures and keep configuration extensible.
 type TriggerOverrides = Partial<DropdownTriggerProps>;
 
-type DropdownVariant = 'searchable' | 'simple' | 'custom';
+type DropdownVariant = "searchable" | "simple" | "custom";
 
 interface RenderDropdownOptions {
   /** Selects which dropdown helper to render within DropdownRoot */
@@ -27,7 +27,7 @@ interface RenderDropdownOptions {
 
 // --- CUSTOM RENDERER --- //
 // WHY: Centralise provider wiring to keep tests concise.
-const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) => {
+const customRender = (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">) => {
   const Wrapper = ({ children }: { children: ReactNode }) => <>{children}</>;
   return render(ui, { wrapper: Wrapper, ...options });
 };
@@ -42,80 +42,68 @@ export const renderDropdown = <T,>(
   props: DropdownRootProps<T>,
   triggerOverrides?: TriggerOverrides,
   dropdownChildren?: ReactNode,
-  options: RenderDropdownOptions = {}
+  options: RenderDropdownOptions = {},
 ) => {
   const resolvedProps: DropdownRootProps<T> = {
     ...props,
     selectedItem: props.selectedItem ?? null,
     disabled: props.disabled ?? false,
-    placeholder: props.placeholder ?? 'Select an option',
-    className: props.className ?? '',
+    placeholder: props.placeholder ?? "Select an option",
+    className: props.className ?? "",
   };
 
-  const { dropdownVariant = dropdownChildren ? 'custom' : 'searchable', searchPlaceholder } =
-    options;
+  const { dropdownVariant = dropdownChildren ? "custom" : "searchable", searchPlaceholder } = options;
 
-  const {
-    displayValue = '',
-    placeholder: triggerPlaceholder,
-    ...triggerRest
-  } = triggerOverrides ?? {};
+  const { displayValue = "", placeholder: triggerPlaceholder, ...triggerRest } = triggerOverrides ?? {};
 
   const resolveDropdown = () => {
-    if (dropdownVariant === 'simple') {
+    if (dropdownVariant === "simple") {
       return <DropdownSimple data-testid="dropdown-content" />;
     }
 
-    if (dropdownVariant === 'custom') {
+    if (dropdownVariant === "custom") {
       return <DropdownContent>{dropdownChildren}</DropdownContent>;
     }
 
-    return (
-      <DropdownSearchable searchPlaceholder={searchPlaceholder} data-testid="dropdown-content" />
-    );
+    return <DropdownSearchable searchPlaceholder={searchPlaceholder} data-testid="dropdown-content" />;
   };
 
   return customRender(
     <DropdownRoot {...resolvedProps}>
       <DropdownTrigger
         displayValue={displayValue}
-        placeholder={triggerPlaceholder ?? resolvedProps.placeholder ?? 'Select an option'}
+        placeholder={triggerPlaceholder ?? resolvedProps.placeholder ?? "Select an option"}
         {...triggerRest}
       />
       {resolveDropdown()}
-    </DropdownRoot>
+    </DropdownRoot>,
   );
 };
 
 // --- CONTEXT FACTORY --- //
 // WHY: Create strongly typed dropdown contexts with targeted overrides.
 export const createMockDropdownContext = <T,>(
-  overrides: Partial<DropdownContextValue<T>> = {}
+  overrides: Partial<DropdownContextValue<T>> = {},
 ): DropdownContextValue<T> => {
-  const defaultFilter: DropdownContextValue<T>['filterItems'] = (items) => items;
+  const defaultFilter: DropdownContextValue<T>["filterItems"] = (items) => items;
   return {
     isOpen: overrides.isOpen ?? false,
-    setIsOpen: overrides.setIsOpen ?? createNoop<DropdownContextValue<T>['setIsOpen']>(),
+    setIsOpen: overrides.setIsOpen ?? createNoop<DropdownContextValue<T>["setIsOpen"]>(),
     selectedItem: overrides.selectedItem ?? null,
-    setSelectedItem:
-      overrides.setSelectedItem ?? createNoop<DropdownContextValue<T>['setSelectedItem']>(),
-    searchQuery: overrides.searchQuery ?? '',
-    setSearchQuery:
-      overrides.setSearchQuery ?? createNoop<DropdownContextValue<T>['setSearchQuery']>(),
+    setSelectedItem: overrides.setSelectedItem ?? createNoop<DropdownContextValue<T>["setSelectedItem"]>(),
+    searchQuery: overrides.searchQuery ?? "",
+    setSearchQuery: overrides.setSearchQuery ?? createNoop<DropdownContextValue<T>["setSearchQuery"]>(),
     items: overrides.items ?? [],
     filteredItems: overrides.filteredItems ?? overrides.items ?? [],
-    getItemKey: overrides.getItemKey ?? ((() => '') as DropdownContextValue<T>['getItemKey']),
-    getItemDisplay:
-      overrides.getItemDisplay ?? ((() => '') as DropdownContextValue<T>['getItemDisplay']),
+    getItemKey: overrides.getItemKey ?? ((() => "") as DropdownContextValue<T>["getItemKey"]),
+    getItemDisplay: overrides.getItemDisplay ?? ((() => "") as DropdownContextValue<T>["getItemDisplay"]),
     filterItems: overrides.filterItems ?? defaultFilter,
-    onSelect: overrides.onSelect ?? createNoop<DropdownContextValue<T>['onSelect']>(),
+    onSelect: overrides.onSelect ?? createNoop<DropdownContextValue<T>["onSelect"]>(),
     disabled: overrides.disabled ?? false,
     closeOnSelect: overrides.closeOnSelect ?? true,
-    closeDropdown:
-      overrides.closeDropdown ?? createNoop<DropdownContextValue<T>['closeDropdown']>(),
-    toggleDropdown:
-      overrides.toggleDropdown ?? createNoop<DropdownContextValue<T>['toggleDropdown']>(),
-    dropdownPlacement: overrides.dropdownPlacement ?? 'bottom',
+    closeDropdown: overrides.closeDropdown ?? createNoop<DropdownContextValue<T>["closeDropdown"]>(),
+    toggleDropdown: overrides.toggleDropdown ?? createNoop<DropdownContextValue<T>["toggleDropdown"]>(),
+    dropdownPlacement: overrides.dropdownPlacement ?? "bottom",
     getItemDescription: overrides.getItemDescription,
     getItemIcon: overrides.getItemIcon,
     getItemSection: overrides.getItemSection,
@@ -127,8 +115,10 @@ export const createMockDropdownContext = <T,>(
 
 // --- MISCELLANEOUS TEST HELPERS --- //
 // WHY: Utility helpers keep tests expressive without repetition.
+import { vi } from "vitest";
+
 export const createMockFunction = <Args extends any[], Result>() => {
-  return jest.fn() as jest.Mock<Result, Args>;
+  return vi.fn() as ReturnType<typeof vi.fn>;
 };
 
 export const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -137,5 +127,5 @@ export const getTestId = (id: string) => `[data-testid="${id}"]`;
 
 // --- RE-EXPORTS --- //
 // WHY: Allow tests to import everything from a single helper entry point.
-export * from '@testing-library/react';
-export * from '@testing-library/user-event';
+export * from "@testing-library/react";
+export * from "@testing-library/user-event";
