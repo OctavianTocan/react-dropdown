@@ -1,0 +1,71 @@
+{
+  "name": "@octavian-tocan/react-dropdown",
+  "version": "1.0.0",
+  "description": "A flexible, composable dropdown (select) component system for React with TypeScript support",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "react",
+    "dropdown",
+    "select",
+    "combobox",
+    "menu",
+    "typescript",
+    "composable",
+    "accessible",
+    "motion",
+    "animation"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OctavianTocan/react-dropdown.git"
+  },
+  "homepage": "https://github.com/OctavianTocan/react-dropdown#readme",
+  "bugs": {
+    "url": "https://github.com/OctavianTocan/react-dropdown/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "motion": ">=12"
+  },
+  "dependencies": {
+    "@react-hookz/web": "^25.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.15"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
