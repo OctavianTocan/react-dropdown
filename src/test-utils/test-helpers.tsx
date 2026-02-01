@@ -86,6 +86,9 @@ export const createMockDropdownContext = <T,>(
   overrides: Partial<DropdownContextValue<T>> = {},
 ): DropdownContextValue<T> => {
   const defaultFilter: DropdownContextValue<T>["filterItems"] = (items) => items;
+  // Derive computedPlacement from dropdownPlacement for backwards compatibility
+  const effectivePlacement = overrides.dropdownPlacement ?? "bottom";
+  const computedPlacement = effectivePlacement === "auto" ? "bottom" : effectivePlacement;
   return {
     isOpen: overrides.isOpen ?? false,
     setIsOpen: overrides.setIsOpen ?? createNoop<DropdownContextValue<T>["setIsOpen"]>(),
@@ -102,14 +105,20 @@ export const createMockDropdownContext = <T,>(
     disabled: overrides.disabled ?? false,
     closeOnSelect: overrides.closeOnSelect ?? true,
     closeDropdown: overrides.closeDropdown ?? createNoop<DropdownContextValue<T>["closeDropdown"]>(),
+    closeImmediate: overrides.closeImmediate ?? createNoop<DropdownContextValue<T>["closeImmediate"]>(),
     toggleDropdown: overrides.toggleDropdown ?? createNoop<DropdownContextValue<T>["toggleDropdown"]>(),
+    animationState: overrides.animationState ?? "idle",
+    computedPlacement: overrides.computedPlacement ?? computedPlacement,
     dropdownPlacement: overrides.dropdownPlacement ?? "bottom",
+    offset: overrides.offset ?? 8,
     getItemDescription: overrides.getItemDescription,
     getItemIcon: overrides.getItemIcon,
     getItemSection: overrides.getItemSection,
     getItemSeparator: overrides.getItemSeparator,
     getItemDisabled: overrides.getItemDisabled,
     getItemClassName: overrides.getItemClassName,
+    enterDuration: overrides.enterDuration ?? 0.2,
+    exitDuration: overrides.exitDuration ?? 0.15,
   };
 };
 

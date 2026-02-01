@@ -3,12 +3,13 @@
  * @brief List component for displaying dropdown items
  */
 
-'use client';
+"use client";
 
-import React, { useRef, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
-import { useDropdownContext } from './DropdownContext';
-import type { DropdownListProps, DropdownSectionMeta } from './types';
+import React, { useRef, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { useDropdownContext } from "./DropdownContext";
+import type { DropdownListProps, DropdownSectionMeta } from "./types";
 
 /**
  * @brief Container for a section of grouped items
@@ -48,7 +49,7 @@ interface GroupedItems<T> {
  */
 const groupItemsBySection = <T,>(
   items: T[],
-  resolveSection?: (item: T) => DropdownSectionMeta | null | undefined
+  resolveSection?: (item: T) => DropdownSectionMeta | null | undefined,
 ): GroupedItems<T> => {
   if (!resolveSection) {
     return { sections: [], ungrouped: items };
@@ -101,6 +102,8 @@ const groupItemsBySection = <T,>(
  * @param props.getItemSeparator Optional function to determine if separator should appear
  * @param props.getItemDisabled Optional function to determine if item is disabled
  * @param props.getItemClassName Optional function to get custom className
+ * @param props.staggered Whether to use staggered animations for list items
+ * @param props.staggerDelay Delay in seconds between each item animation
  * @param props.className Additional CSS classes for the list container
  * @param props['data-testid'] Test ID for the list element
  * @returns JSX element for the item list
@@ -119,8 +122,10 @@ export function DropdownList<T>({
   getItemSeparator,
   getItemDisabled,
   getItemClassName,
-  className = '',
-  'data-testid': testId = 'dropdown-list',
+  staggered = false,
+  staggerDelay = 0.04,
+  className = "",
+  "data-testid": testId = "dropdown-list",
 }: DropdownListProps<T>) {
   const {
     isOpen,
@@ -133,6 +138,8 @@ export function DropdownList<T>({
     onSelect: contextOnSelect,
     closeDropdown,
     closeOnSelect,
+    computedPlacement,
+    enterDuration,
   } = useDropdownContext<T>();
   /** @brief Ref to the list element for scrolling and DOM queries */
   const listRef = useRef<HTMLUListElement>(null);
@@ -152,13 +159,11 @@ export function DropdownList<T>({
   useEffect(() => {
     // Only scroll when transitioning from closed to open
     if (isOpen && !prevIsOpenRef.current && listRef.current && selectedItem) {
-      const selectedElement = listRef.current.querySelector(
-        `[data-key="${getItemKey(selectedItem)}"]`
-      );
+      const selectedElement = listRef.current.querySelector(`[data-key="${getItemKey(selectedItem)}"]`);
       if (selectedElement) {
         selectedElement.scrollIntoView({
-          behavior: 'auto',
-          block: 'start',
+          behavior: "auto",
+          block: "start",
         });
       }
     }
@@ -212,10 +217,7 @@ export function DropdownList<T>({
    * @description Groups items into sections and ungrouped items based on section metadata.
    * Recomputes when items or section accessor changes.
    */
-  const groupedItems = useMemo(
-    () => groupItemsBySection(items, sectionAccessor),
-    [items, sectionAccessor]
-  );
+  const groupedItems = useMemo(() => groupItemsBySection(items, sectionAccessor), [items, sectionAccessor]);
 
   /**
    * @brief Resolves description text for an item
@@ -252,10 +254,11 @@ export function DropdownList<T>({
    * @description Creates a list item with section metadata (label, icon, description)
    * that serves as a header for a group of related items.
    * @param section Section bucket containing metadata and items
+   * @param index The index of this element for stagger animation
    * @returns JSX element for the section header
    */
-  const renderSectionHeader = (section: SectionBucket<T>) => {
-    return (
+  const renderSectionHeader = (section: SectionBucket<T>, index: number) => {
+    const content = (
       <li
         key={`section-${section.meta.key}`}
         role="presentation"
@@ -271,13 +274,30 @@ export function DropdownList<T>({
             <span>{section.meta.label}</span>
           </div>
           {section.meta.description && (
-            <span className="text-[11px] font-normal normal-case text-gray-400">
-              {section.meta.description}
-            </span>
+            <span className="text-[11px] font-normal normal-case text-gray-400">{section.meta.description}</span>
           )}
         </div>
       </li>
     );
+
+    if (staggered) {
+      return (
+        <motion.div
+          key={`section-wrapper-${section.meta.key}`}
+          initial={{ opacity: 0, y: computedPlacement === "top" ? -10 : 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: enterDuration * 0.5,
+            delay: index * staggerDelay,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+        >
+          {content}
+        </motion.div>
+      );
+    }
+
+    return content;
   };
 
   /**
@@ -305,26 +325,21 @@ export function DropdownList<T>({
    * default DropdownOption component. Handles selection state, disabled state, and
    * custom styling.
    * @param item The item to render
+   * @param index The index of this element for stagger animation
    * @returns JSX element for the option (wrapped in li)
    */
-  const renderOption = (item: T) => {
+  const renderOption = (item: T, index: number) => {
     const key = getItemKey(item);
     const displayText = getItemDisplay(item);
     const isSelected = selectedItem ? getItemKey(selectedItem) === key : false;
     const isDisabled = disabledAccessor ? disabledAccessor(item) : false;
-    const customClassName = classNameAccessor
-      ? classNameAccessor(item, isSelected, isDisabled)
-      : '';
+    const customClassName = classNameAccessor ? classNameAccessor(item, isSelected, isDisabled) : "";
 
-    if (renderItem) {
-      return (
-        <li key={key} data-key={key}>
-          {renderItem(item, isSelected, resolvedOnSelect)}
-        </li>
-      );
-    }
-
-    return (
+    const optionContent = renderItem ? (
+      <li key={key} data-key={key}>
+        {renderItem(item, isSelected, resolvedOnSelect)}
+      </li>
+    ) : (
       <li key={key} data-key={key}>
         <DropdownOption
           dataKey={key}
@@ -339,6 +354,25 @@ export function DropdownList<T>({
         />
       </li>
     );
+
+    if (staggered) {
+      return (
+        <motion.div
+          key={`motion-${key}`}
+          initial={{ opacity: 0, y: computedPlacement === "top" ? -10 : 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: enterDuration * 0.5,
+            delay: index * staggerDelay,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+        >
+          {optionContent}
+        </motion.div>
+      );
+    }
+
+    return optionContent;
   };
 
   /**
@@ -346,12 +380,11 @@ export function DropdownList<T>({
    * @description Shows a "No results found" message when hasResults is false.
    */
   if (!hasResults) {
-    return (
-      <div className={`p-4 text-center text-sm text-gray-500 ${className}`}>No results found</div>
-    );
+    return <div className={`p-4 text-center text-sm text-gray-500 ${className}`}>No results found</div>;
   }
 
   const renderedItems: ReactNode[] = [];
+  let itemIndex = 0;
 
   /**
    * @brief Renders ungrouped items with optional separators
@@ -362,15 +395,12 @@ export function DropdownList<T>({
    */
   groupedItems.ungrouped.forEach((item) => {
     const originalIndex = items.findIndex((i) => getItemKey(i) === getItemKey(item));
-    renderedItems.push(renderOption(item));
+    renderedItems.push(renderOption(item, itemIndex));
+    itemIndex++;
     // Show separator after item if getItemSeparator returns true (for all except last)
     if (separatorAccessor && originalIndex >= 0 && separatorAccessor(item, originalIndex)) {
       renderedItems.push(
-        <li
-          key={`separator-${originalIndex}`}
-          role="separator"
-          className="border-b border-gray-200 my-1"
-        />
+        <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />,
       );
     }
   });
@@ -383,22 +413,23 @@ export function DropdownList<T>({
    * maintaining consistent separator behavior across grouped and ungrouped items.
    */
   groupedItems.sections.forEach((section) => {
-    renderedItems.push(renderSectionHeader(section));
+    renderedItems.push(renderSectionHeader(section, itemIndex));
+    itemIndex++;
     section.items.forEach((item) => {
       const originalIndex = items.findIndex((i) => getItemKey(i) === getItemKey(item));
-      renderedItems.push(renderOption(item));
+      renderedItems.push(renderOption(item, itemIndex));
+      itemIndex++;
       // Show separator after item if getItemSeparator returns true (for all except last)
       if (separatorAccessor && originalIndex >= 0 && separatorAccessor(item, originalIndex)) {
         renderedItems.push(
-          <li
-            key={`separator-${originalIndex}`}
-            role="separator"
-            className="border-b border-gray-200 my-1"
-          />
+          <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />,
         );
       }
     });
   });
+
+  // Reverse items when opening upward with staggered animations
+  const finalItems = staggered && computedPlacement === "top" ? [...renderedItems].reverse() : renderedItems;
 
   return (
     <ul
@@ -407,7 +438,7 @@ export function DropdownList<T>({
       role="listbox"
       data-testid={testId}
     >
-      {renderedItems}
+      {finalItems}
     </ul>
   );
 }
@@ -439,7 +470,7 @@ function DropdownOption<T>({
   description,
   icon,
   isDisabled = false,
-  className = '',
+  className = "",
 }: {
   item: T;
   onSelect: (item: T) => void;
@@ -464,18 +495,17 @@ function DropdownOption<T>({
     }
   };
 
-  const baseClasses = 'px-3 py-1.5 text-sm transition-colors';
-  const selectedClasses = isSelected ? 'bg-blue-50 text-blue-600 font-medium' : '';
-  const hasCustomHover = className.includes('hover:');
-  const disabledClasses = isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+  const baseClasses = "px-3 py-1.5 text-sm transition-colors";
+  const selectedClasses = isSelected ? "bg-blue-50 text-blue-600 font-medium" : "";
+  const hasCustomHover = className.includes("hover:");
+  const disabledClasses = isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer";
   // Remove hover classes from className since we'll handle hover via inline styles
-  const classNameWithoutHover = className.replace(/hover:[^\s]+/g, '').trim();
-  const combinedClasses =
-    `${baseClasses} ${selectedClasses} ${disabledClasses} ${classNameWithoutHover}`.trim();
+  const classNameWithoutHover = className.replace(/hover:[^\s]+/g, "").trim();
+  const combinedClasses = `${baseClasses} ${selectedClasses} ${disabledClasses} ${classNameWithoutHover}`.trim();
 
   // Extract hover background color from className if present
   const hoverBgMatch = className.match(/hover:!?bg-\[([^\]]+)\]/);
-  const hoverBgColor = hoverBgMatch ? hoverBgMatch[1] : hasCustomHover ? '#fee2e2' : '#f3f4f6'; // red-100 or gray-100
+  const hoverBgColor = hoverBgMatch ? hoverBgMatch[1] : hasCustomHover ? "#fee2e2" : "#f3f4f6"; // red-100 or gray-100
 
   return (
     <div

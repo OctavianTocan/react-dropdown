@@ -3,11 +3,34 @@
  * @brief Main provider component for dropdown functionality
  */
 
-'use client';
+"use client";
 
-import { useState, useCallback, useRef, useMemo, useLayoutEffect } from 'react';
-import { DropdownProvider, useClickOutside } from './DropdownContext';
-import type { DropdownRootProps, DropdownContextValue } from './types';
+import { useState, useCallback, useRef, useMemo, useLayoutEffect, useEffect } from "react";
+import { DropdownProvider, useClickOutside } from "./DropdownContext";
+import type { DropdownRootProps, DropdownContextValue, DropdownAnimationState } from "./types";
+
+/**
+ * @brief Computes dropdown placement based on trigger position in viewport
+ * @param triggerRect The bounding rect of the trigger element
+ * @param placement The requested placement ('auto', 'top', or 'bottom')
+ * @returns Computed placement ('top' or 'bottom')
+ */
+function computePlacement(triggerRect: DOMRect | null, placement: "auto" | "top" | "bottom"): "top" | "bottom" {
+  if (placement !== "auto") {
+    return placement;
+  }
+
+  if (!triggerRect) {
+    return "bottom";
+  }
+
+  // Check if trigger is in the lower half of the viewport
+  const viewportHeight = window.innerHeight;
+  const triggerCenter = triggerRect.top + triggerRect.height / 2;
+  const isInLowerHalf = triggerCenter > viewportHeight / 2;
+
+  return isInLowerHalf ? "top" : "bottom";
+}
 
 /**
  * @brief Main provider component that manages dropdown state
@@ -29,8 +52,10 @@ export function DropdownRoot<T>({
   filterItems,
   disabled = false,
   placeholder,
-  className = '',
-  dropdownPlacement = 'bottom',
+  className = "",
+  placement = "bottom",
+  dropdownPlacement,
+  offset = 8,
   getItemDescription,
   getItemIcon,
   getItemSection,
@@ -41,16 +66,26 @@ export function DropdownRoot<T>({
   onOpenChange,
   triggerRef,
   usePortal = false,
-  'data-testid': testId = 'dropdown-root',
+  enterDuration = 0.2,
+  exitDuration = 0.15,
+  "data-testid": testId = "dropdown-root",
 }: DropdownRootProps<T>) {
+  // Support deprecated dropdownPlacement prop
+  const effectivePlacement = dropdownPlacement || placement;
+
   // State management
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<T | null>(initialSelectedItem);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [animationState, setAnimationState] = useState<DropdownAnimationState>("idle");
+  const [computedPlacement, setComputedPlacement] = useState<"top" | "bottom">(
+    effectivePlacement === "auto" ? "bottom" : effectivePlacement,
+  );
 
   // Refs for DOM manipulation
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const skipExitAnimationRef = useRef(false);
 
   // Default filter function if not provided
   const defaultFilter = useCallback(
@@ -62,7 +97,7 @@ export function DropdownRoot<T>({
       const normalizedQuery = query.toLowerCase().trim();
       return items.filter((item) => getItemDisplay(item).toLowerCase().includes(normalizedQuery));
     },
-    [getItemDisplay]
+    [getItemDisplay],
   );
 
   // Memoized filter function
@@ -73,14 +108,34 @@ export function DropdownRoot<T>({
     return filterFunction(items, searchQuery);
   }, [items, searchQuery, filterFunction]);
 
+  // Compute placement when opening
+  useEffect(() => {
+    if (isOpen && effectivePlacement === "auto") {
+      const triggerElement = triggerRef?.current || dropdownRef.current?.querySelector("button");
+      const rect = triggerElement?.getBoundingClientRect() || null;
+      setComputedPlacement(computePlacement(rect, effectivePlacement));
+    } else if (effectivePlacement !== "auto") {
+      setComputedPlacement(effectivePlacement);
+    }
+  }, [isOpen, effectivePlacement, triggerRef]);
+
   /**
    * @brief Opens the dropdown and focuses search input
    */
   const openDropdown = useCallback(() => {
     if (disabled) return;
+    skipExitAnimationRef.current = false;
+    setAnimationState("entering");
     setIsOpen(true);
     onOpenChange?.(true);
-  }, [disabled, onOpenChange]);
+
+    // Reset to idle after enter animation
+    const timer = setTimeout(() => {
+      setAnimationState("idle");
+    }, enterDuration * 1000);
+
+    return () => clearTimeout(timer);
+  }, [disabled, onOpenChange, enterDuration]);
 
   /**
    * @brief Synchronously focus search input after dropdown opens
@@ -92,11 +147,40 @@ export function DropdownRoot<T>({
   }, [isOpen]);
 
   /**
-   * @brief Closes the dropdown and clears search
+   * @brief Closes the dropdown and clears search with exit animation
    */
   const closeDropdown = useCallback(() => {
+    if (!isOpen) return;
+
+    if (skipExitAnimationRef.current) {
+      setIsOpen(false);
+      setSearchQuery("");
+      setAnimationState("idle");
+      onOpenChange?.(false);
+      return;
+    }
+
+    setAnimationState("exiting");
+
+    // Close after exit animation
+    const timer = setTimeout(() => {
+      setIsOpen(false);
+      setSearchQuery("");
+      setAnimationState("idle");
+      onOpenChange?.(false);
+    }, exitDuration * 1000);
+
+    return () => clearTimeout(timer);
+  }, [isOpen, onOpenChange, exitDuration]);
+
+  /**
+   * @brief Closes the dropdown immediately without exit animation
+   */
+  const closeImmediate = useCallback(() => {
+    skipExitAnimationRef.current = true;
     setIsOpen(false);
-    setSearchQuery('');
+    setSearchQuery("");
+    setAnimationState("idle");
     onOpenChange?.(false);
   }, [onOpenChange]);
 
@@ -119,7 +203,7 @@ export function DropdownRoot<T>({
         closeDropdown();
       }
     },
-    [onSelect, closeDropdown, closeOnSelect]
+    [onSelect, closeDropdown, closeOnSelect],
   );
 
   /**
@@ -151,8 +235,12 @@ export function DropdownRoot<T>({
       disabled,
       closeOnSelect,
       closeDropdown,
+      closeImmediate,
       toggleDropdown,
-      dropdownPlacement,
+      animationState,
+      computedPlacement,
+      dropdownPlacement: computedPlacement,
+      offset,
       getItemDescription,
       getItemIcon,
       getItemSection,
@@ -161,6 +249,8 @@ export function DropdownRoot<T>({
       getItemClassName,
       triggerRef,
       usePortal,
+      enterDuration,
+      exitDuration,
     }),
     [
       isOpen,
@@ -178,8 +268,11 @@ export function DropdownRoot<T>({
       disabled,
       closeOnSelect,
       closeDropdown,
+      closeImmediate,
       toggleDropdown,
-      dropdownPlacement,
+      animationState,
+      computedPlacement,
+      offset,
       getItemDescription,
       getItemIcon,
       getItemSection,
@@ -188,7 +281,9 @@ export function DropdownRoot<T>({
       getItemClassName,
       triggerRef,
       usePortal,
-    ]
+      enterDuration,
+      exitDuration,
+    ],
   );
 
   return (

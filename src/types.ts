@@ -3,12 +3,17 @@
  * @brief TypeScript interfaces for the reusable dropdown system
  */
 
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
 /**
  * @brief Supported dropdown placement options relative to the trigger
  */
-export type DropdownPlacement = 'bottom' | 'top';
+export type DropdownPlacement = "bottom" | "top" | "auto";
+
+/**
+ * @brief Animation state for the dropdown
+ */
+export type DropdownAnimationState = "entering" | "exiting" | "idle";
 
 /**
  * @brief Metadata used to render grouped sections inside the dropdown list
@@ -31,7 +36,7 @@ export interface BaseDropdownProps {
   /** Optional CSS class name for custom styling */
   className?: string;
   /** Optional test identifier for automated testing */
-  'data-testid'?: string;
+  "data-testid"?: string;
   /** Optional children elements */
   children?: ReactNode;
 }
@@ -56,8 +61,18 @@ export interface DropdownRootProps<T> extends BaseDropdownProps {
   disabled?: boolean;
   /** Optional placeholder text for trigger */
   placeholder?: string;
-  /** Optional placement configuration for the dropdown */
+  /**
+   * Dropdown placement relative to the trigger.
+   * - 'bottom': Always opens downward
+   * - 'top': Always opens upward
+   * - 'auto': Automatically detects best placement based on viewport position
+   * Default: 'bottom'
+   */
+  placement?: DropdownPlacement;
+  /** @deprecated Use `placement` instead. Will be removed in next major version. */
   dropdownPlacement?: DropdownPlacement;
+  /** Distance in pixels between trigger and dropdown content. Default: 8 */
+  offset?: number;
   /** Optional function to retrieve description text shown beneath the label */
   getItemDescription?: (item: T) => string | null | undefined;
   /** Optional function to retrieve an icon rendered alongside the label */
@@ -81,6 +96,10 @@ export interface DropdownRootProps<T> extends BaseDropdownProps {
   triggerRef?: React.RefObject<HTMLElement | null>;
   /** Whether to render dropdown in a portal (avoids overflow clipping) */
   usePortal?: boolean;
+  /** Duration in seconds for enter animation. Default: 0.2 */
+  enterDuration?: number;
+  /** Duration in seconds for exit animation. Default: 0.15 */
+  exitDuration?: number;
 }
 
 /**
@@ -97,7 +116,16 @@ export interface DropdownTriggerProps extends BaseDropdownProps {
  * @brief Props for DropdownContent component (pure container)
  */
 export interface DropdownContentProps extends BaseDropdownProps {
-  // DropdownContent is now a pure container that accepts children
+  /** Disable animations (useful for mobile or performance) */
+  disableAnimation?: boolean;
+  /** Whether to render dropdown in a portal. Default: false */
+  portal?: boolean;
+  /** Custom container element for portal rendering. Default: document.body */
+  portalContainer?: Element;
+  /** Whether to show a backdrop behind the dropdown. Default: false */
+  backdrop?: boolean;
+  /** Custom className for the backdrop element */
+  backdropClassName?: string;
 }
 
 /**
@@ -144,6 +172,10 @@ export interface DropdownListProps<T> extends BaseDropdownProps {
   getItemDisabled?: (item: T) => boolean;
   /** Optional function to get custom className for item */
   getItemClassName?: (item: T, isSelected: boolean, isDisabled: boolean) => string;
+  /** Whether to use staggered animations for list items. Default: false */
+  staggered?: boolean;
+  /** Delay in seconds between each item animation when staggered is true. Default: 0.04 */
+  staggerDelay?: number;
 }
 
 /**
@@ -168,6 +200,22 @@ export interface DropdownOptionProps<T> extends BaseDropdownProps {
   isDisabled?: boolean;
   /** Optional custom className for the option */
   className?: string;
+}
+
+/**
+ * @brief Props for DropdownHeader component
+ */
+export interface DropdownHeaderProps extends BaseDropdownProps {
+  /** Whether to show a separator line below the header. Default: false */
+  separator?: boolean;
+}
+
+/**
+ * @brief Props for DropdownFooter component
+ */
+export interface DropdownFooterProps extends BaseDropdownProps {
+  /** Whether to show a separator line above the footer. Default: true */
+  separator?: boolean;
 }
 
 /**
@@ -202,12 +250,20 @@ export interface DropdownContextValue<T> {
   disabled: boolean;
   /** Whether to close dropdown on selection */
   closeOnSelect: boolean;
-  /** Function to close dropdown */
+  /** Function to close dropdown with exit animation */
   closeDropdown: () => void;
+  /** Function to close dropdown immediately without exit animation */
+  closeImmediate: () => void;
   /** Function to toggle dropdown open/closed state */
   toggleDropdown: () => void;
-  /** Placement configuration shared with dropdown components */
+  /** Current animation state of the dropdown */
+  animationState: DropdownAnimationState;
+  /** Computed placement after auto-detection (always 'top' or 'bottom') */
+  computedPlacement: "top" | "bottom";
+  /** @deprecated Use computedPlacement instead */
   dropdownPlacement?: DropdownPlacement;
+  /** Distance in pixels between trigger and dropdown content */
+  offset: number;
   /** Optional function to retrieve supporting descriptions */
   getItemDescription?: (item: T) => string | null | undefined;
   /** Optional function to retrieve icon elements */
@@ -224,4 +280,8 @@ export interface DropdownContextValue<T> {
   triggerRef?: React.RefObject<HTMLElement | null>;
   /** Whether to render dropdown in a portal */
   usePortal?: boolean;
+  /** Duration in seconds for enter animation */
+  enterDuration: number;
+  /** Duration in seconds for exit animation */
+  exitDuration: number;
 }

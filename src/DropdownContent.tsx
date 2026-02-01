@@ -3,19 +3,14 @@
  * @brief Pure dropdown container component for composition
  */
 
-'use client';
+"use client";
 
-import { useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { useDropdownContext } from './DropdownContext';
-import { ELEVATED_SHADOW, EXIT_ANIMATION_DURATION_MS } from './design-tokens';
-import type { BaseDropdownProps } from './types';
-
-interface DropdownContentProps extends BaseDropdownProps {
-  /** Disable animations (useful for mobile or performance) */
-  disableAnimation?: boolean;
-}
+import { useEffect, useState, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { useDropdownContext } from "./DropdownContext";
+import { ELEVATED_SHADOW } from "./design-tokens";
+import type { DropdownContentProps } from "./types";
 
 /**
  * @brief Pure dropdown container for composing dropdown contents
@@ -30,26 +25,59 @@ interface DropdownContentProps extends BaseDropdownProps {
  */
 export function DropdownContent({
   children,
-  className = '',
+  className = "",
   disableAnimation = false,
-  'data-testid': testId = 'dropdown-content',
+  portal = false,
+  portalContainer,
+  backdrop = false,
+  backdropClassName = "",
+  "data-testid": testId = "dropdown-content",
 }: DropdownContentProps) {
-  const { isOpen, dropdownPlacement, triggerRef, usePortal } = useDropdownContext();
+  const {
+    isOpen,
+    computedPlacement,
+    triggerRef,
+    usePortal: contextUsePortal,
+    offset,
+    enterDuration,
+    exitDuration,
+    closeDropdown,
+  } = useDropdownContext();
+
+  // Support both prop-level and context-level portal settings
+  const shouldUsePortal = portal || contextUsePortal;
+
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
   const [portalPosition, setPortalPosition] = useState({ top: 0, right: 0 });
   const prevIsOpen = useRef(isOpen);
 
+  // Resolve portal container
+  const resolvedPortalContainer = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    return portalContainer || document.body;
+  }, [portalContainer]);
+
   // Calculate position for portal mode
   useEffect(() => {
-    if (usePortal && isOpen && triggerRef?.current) {
+    if (shouldUsePortal && isOpen && triggerRef?.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setPortalPosition({
-        top: rect.bottom + 4, // 4px gap below trigger
-        right: window.innerWidth - rect.right, // Align dropdown's right edge with trigger's right edge
-      });
+      if (computedPlacement === "top") {
+        setPortalPosition({
+          top: rect.top - offset, // Position above trigger
+          right: window.innerWidth - rect.right,
+        });
+      } else {
+        setPortalPosition({
+          top: rect.bottom + offset, // Position below trigger with offset
+          right: window.innerWidth - rect.right,
+        });
+      }
     }
-  }, [isOpen, usePortal, triggerRef]);
+  }, [isOpen, shouldUsePortal, triggerRef, offset, computedPlacement]);
+
+  // Convert exitDuration to ms for timeout
+  const exitDurationMs = exitDuration * 1000;
 
   useEffect(() => {
     if (isOpen) {
@@ -65,25 +93,25 @@ export function DropdownContent({
         const timer = setTimeout(() => {
           setShouldRender(false);
           setIsClosing(false);
-        }, EXIT_ANIMATION_DURATION_MS);
+        }, exitDurationMs);
         return () => clearTimeout(timer);
       }
     }
     prevIsOpen.current = isOpen;
-  }, [isOpen, disableAnimation]);
+  }, [isOpen, disableAnimation, exitDurationMs]);
 
-  const placementClass = dropdownPlacement === 'top' ? 'bottom-full mb-1' : 'mt-1';
-  const flexDirClass = dropdownPlacement === 'top' ? 'flex-col-reverse' : 'flex-col';
+  const placementClass = computedPlacement === "top" ? "bottom-full mb-1" : "mt-1";
+  const flexDirClass = computedPlacement === "top" ? "flex-col-reverse" : "flex-col";
 
   // Transform origin for animations based on placement
-  const transformOrigin = dropdownPlacement === 'top' ? 'bottom center' : 'top center';
+  const transformOrigin = computedPlacement === "top" ? "bottom center" : "top center";
 
   // Animation variants for Framer Motion
   const variants = {
     initial: {
       opacity: 0,
       scale: 0.95,
-      y: dropdownPlacement === 'top' ? 8 : -8,
+      y: computedPlacement === "top" ? 8 : -8,
     },
     animate: {
       opacity: 1,
@@ -94,37 +122,70 @@ export function DropdownContent({
     exit: {
       opacity: 0,
       scale: 0.95,
-      y: dropdownPlacement === 'top' ? 8 : -8,
+      y: computedPlacement === "top" ? 8 : -8,
     },
   };
+
+  // Backdrop variants
+  const backdropVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  };
+
+  const dropdownContent = (
+    <motion.div
+      className={`${shouldUsePortal ? "fixed" : "absolute"} z-50 ${shouldUsePortal ? "" : "w-full"} ${shouldUsePortal ? "" : "min-w-[320px]!"} ${shouldUsePortal ? "" : placementClass} bg-white border border-gray-200 rounded-lg flex ${flexDirClass} overflow-hidden ${className}`}
+      style={
+        shouldUsePortal
+          ? {
+              top: computedPlacement === "top" ? undefined : portalPosition.top,
+              bottom: computedPlacement === "top" ? window.innerHeight - portalPosition.top : undefined,
+              right: portalPosition.right,
+              transformOrigin,
+            }
+          : { transformOrigin }
+      }
+      initial={disableAnimation ? false : "initial"}
+      animate="animate"
+      exit={disableAnimation ? undefined : "exit"}
+      variants={variants}
+      transition={{
+        duration: enterDuration,
+        ease: [0.16, 1, 0.3, 1], // Custom ease for smooth feel
+      }}
+      data-testid={testId}
+    >
+      {children}
+    </motion.div>
+  );
 
   const content = (
     <AnimatePresence>
       {shouldRender && (
-        <motion.div
-          className={`${usePortal ? 'fixed' : 'absolute'} z-50 ${usePortal ? '' : 'w-full'} ${usePortal ? '' : 'min-w-[320px]!'} ${usePortal ? '' : placementClass} bg-white border border-gray-200 rounded-lg flex ${flexDirClass} overflow-hidden ${className}`}
-          style={
-            usePortal ? { top: portalPosition.top, right: portalPosition.right, transformOrigin } : { transformOrigin }
-          }
-          initial={disableAnimation ? false : 'initial'}
-          animate="animate"
-          exit={disableAnimation ? undefined : 'exit'}
-          variants={variants}
-          transition={{
-            duration: 0.15,
-            ease: [0.16, 1, 0.3, 1], // Custom ease for smooth feel
-          }}
-          data-testid={testId}
-        >
-          {children}
-        </motion.div>
+        <>
+          {backdrop && (
+            <motion.div
+              className={`fixed inset-0 z-40 ${backdropClassName}`}
+              onClick={closeDropdown}
+              initial={disableAnimation ? false : "initial"}
+              animate="animate"
+              exit={disableAnimation ? undefined : "exit"}
+              variants={backdropVariants}
+              transition={{ duration: enterDuration * 0.5 }}
+              data-testid="dropdown-backdrop"
+              aria-hidden="true"
+            />
+          )}
+          {dropdownContent}
+        </>
       )}
     </AnimatePresence>
   );
 
-  // Render in portal if usePortal is true
-  if (usePortal && typeof document !== 'undefined') {
-    return createPortal(content, document.body);
+  // Render in portal if enabled
+  if (shouldUsePortal && resolvedPortalContainer) {
+    return createPortal(content, resolvedPortalContainer);
   }
 
   return content;
