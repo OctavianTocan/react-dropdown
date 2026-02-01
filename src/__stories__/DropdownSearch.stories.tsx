@@ -6,14 +6,14 @@ import {
   DropdownContent,
   DropdownSearch,
   DropdownList,
-} from './index';
+} from '../index';
 import {
   simpleItems,
   languages,
   getLanguageKey,
   getLanguageDisplay,
   type Language,
-} from './__storybook__/mock-data';
+} from '../__storybook__/mock-data';
 
 /**
  * DropdownSearch - Search input for filtering dropdown items

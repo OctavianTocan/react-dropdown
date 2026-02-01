@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import React from 'react';
-import { DropdownRoot, DropdownTrigger, DropdownSearchable } from './index';
+import { DropdownRoot, DropdownTrigger, DropdownSearchable } from '../index';
 import {
   simpleItems,
   languages,
@@ -10,8 +10,8 @@ import {
   getItemKey,
   getItemDisplay,
   type Language,
-} from './__storybook__/mock-data';
-import { createDropdownStory } from './__storybook__/story-helpers';
+} from '../__storybook__/mock-data';
+import { createDropdownStory } from '../__storybook__/story-helpers';
 
 type DropdownStoryArgs = {
   items?: any[];

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import React from 'react';
-import { DropdownTrigger, DropdownProvider } from './index';
-import type { DropdownContextValue } from './types';
-import { createMockContext } from './__storybook__/story-helpers';
+import { DropdownTrigger, DropdownProvider } from '../index';
+import type { DropdownContextValue } from '../types';
+import { createMockContext } from '../__storybook__/story-helpers';
 
 /**
  * DropdownTrigger - The button that opens/closes the dropdown

@@ -7,9 +7,9 @@ import {
   DropdownSearch,
   DropdownList,
   DropdownSearchable,
-} from './index';
-import { simpleItems, getLanguageKey, getLanguageDisplay } from './__storybook__/mock-data';
-import { createDropdownStory, dropdownRootArgTypes } from './__storybook__/story-helpers';
+} from '../index';
+import { simpleItems, getLanguageKey, getLanguageDisplay } from '../__storybook__/mock-data';
+import { createDropdownStory, dropdownRootArgTypes } from '../__storybook__/story-helpers';
 
 type DropdownStoryArgs = {
   items?: string[];

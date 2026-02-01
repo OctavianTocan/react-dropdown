@@ -7,9 +7,9 @@ import {
   DropdownSearch,
   DropdownList,
   DropdownProvider,
-} from './index';
-import { createDropdownStory, createMockContext } from './__storybook__/story-helpers';
-import { users, getUserKey, getUserDisplay, type User } from './__storybook__/mock-data';
+} from '../index';
+import { createDropdownStory, createMockContext } from '../__storybook__/story-helpers';
+import { users, getUserKey, getUserDisplay, type User } from '../__storybook__/mock-data';
 
 type DropdownStoryArgs = {
   items?: User[];

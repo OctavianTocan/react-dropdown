@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import React from 'react';
-import { createDropdownStory } from './__storybook__/story-helpers';
-import { aiModels, getModelKey, getModelDisplay, type AIModel } from './__storybook__/mock-data';
+import { createDropdownStory } from '../__storybook__/story-helpers';
+import { aiModels, getModelKey, getModelDisplay, type AIModel } from '../__storybook__/mock-data';
 
 type DropdownStoryArgs = {
   items?: AIModel[];

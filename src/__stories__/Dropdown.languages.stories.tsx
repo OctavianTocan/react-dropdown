@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import React from 'react';
-import { createDropdownStory, dropdownRootArgTypes } from './__storybook__/story-helpers';
+import { createDropdownStory, dropdownRootArgTypes } from '../__storybook__/story-helpers';
 import {
   languages,
   getLanguageKey,
   getLanguageDisplay,
   type Language,
-} from './__storybook__/mock-data';
+} from '../__storybook__/mock-data';
 
 type DropdownStoryArgs = {
   items?: Language[];

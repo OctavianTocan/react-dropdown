@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import React from 'react';
-import { DropdownRoot, DropdownTrigger, DropdownSimple } from './index';
-import { smallList } from './__storybook__/mock-data';
-import { createDropdownStory } from './__storybook__/story-helpers';
+import { DropdownRoot, DropdownTrigger, DropdownSimple } from '../index';
+import { smallList } from '../__storybook__/mock-data';
+import { createDropdownStory } from '../__storybook__/story-helpers';
 
 type DropdownStoryArgs = {
   items?: string[];
