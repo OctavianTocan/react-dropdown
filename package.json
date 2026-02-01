@@ -1,6 +1,6 @@
 {
   "name": "@octavian-tocan/react-dropdown",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A flexible, composable dropdown (select) component system for React with TypeScript support",
   "author": "Octavian Tocan",
   "license": "MIT",
