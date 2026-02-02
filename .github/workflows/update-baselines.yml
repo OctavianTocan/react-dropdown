@@ -1,0 +1,53 @@
+name: Update Visual Baselines
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-baselines:
+    name: Update Baselines
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        run: pnpm build-storybook
+
+      - name: Run Lost Pixel in update mode
+        id: lp
+        uses: lost-pixel/lost-pixel@v3.18.1
+        env:
+          LOST_PIXEL_MODE: update
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        if: ${{ failure() && steps.lp.conclusion == 'failure' }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update lost-pixel baselines"
+          delete-branch: true
+          branch: "lost-pixel-update/${{ github.ref_name }}"
+          title: "chore: Lost Pixel baseline update - ${{ github.ref_name }}"
+          body: |
+            Automated baseline update PR created by Lost Pixel.
+
+            This PR updates the visual regression test baselines.
+            Please review the changes carefully before merging.

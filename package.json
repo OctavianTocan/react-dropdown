@@ -39,7 +39,9 @@
     "clean": "rm -rf dist coverage",
     "prepublishOnly": "pnpm run build",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "visual-test": "lost-pixel",
+    "visual-test:update": "LOST_PIXEL_MODE=update lost-pixel"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -73,6 +75,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.3.0",
     "jsdom": "^25.0.0",
+    "lost-pixel": "^3.18.1",
     "motion": "^12.29.0",
     "prettier": "^3.8.1",
     "react": "^19.0.0",
