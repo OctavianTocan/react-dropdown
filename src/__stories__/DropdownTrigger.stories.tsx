@@ -1,8 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import React from 'react';
-import { DropdownTrigger, DropdownProvider } from '../index';
-import type { DropdownContextValue } from '../types';
-import { createMockContext } from '../__storybook__/story-helpers';
+import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
+import { DropdownTrigger, DropdownProvider } from "../index";
+import { createMockContext } from "../__storybook__/story-helpers";
 
 /**
  * DropdownTrigger - The button that opens/closes the dropdown
@@ -26,30 +25,29 @@ import { createMockContext } from '../__storybook__/story-helpers';
  * - Disabled state prevents interaction
  */
 const meta = {
-  title: 'Components/Dropdown/Building Blocks/Trigger',
+  title: "Components/Dropdown/Building Blocks/Trigger",
   component: DropdownTrigger,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     docs: {
       description: {
-        component:
-          'Interactive button that opens and closes the dropdown. Displays selected value or placeholder.',
+        component: "Interactive button that opens and closes the dropdown. Displays selected value or placeholder.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     displayValue: {
-      description: 'The value to display in the trigger button',
-      control: 'text',
+      description: "The value to display in the trigger button",
+      control: "text",
     },
     placeholder: {
-      description: 'Text shown when no value is selected',
-      control: 'text',
+      description: "Text shown when no value is selected",
+      control: "text",
     },
     className: {
-      description: 'Additional CSS classes',
-      control: 'text',
+      description: "Additional CSS classes",
+      control: "text",
     },
   },
 } satisfies Meta<typeof DropdownTrigger>;
@@ -63,8 +61,8 @@ type Story = StoryObj<typeof meta>;
  */
 export const WithPlaceholder: Story = {
   args: {
-    displayValue: '',
-    placeholder: 'Select an option',
+    displayValue: "",
+    placeholder: "Select an option",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext()}>
@@ -79,8 +77,8 @@ export const WithPlaceholder: Story = {
  */
 export const WithSelectedValue: Story = {
   args: {
-    displayValue: 'Apple',
-    placeholder: 'Select an option',
+    displayValue: "Apple",
+    placeholder: "Select an option",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext()}>
@@ -95,8 +93,8 @@ export const WithSelectedValue: Story = {
  */
 export const Disabled: Story = {
   args: {
-    displayValue: '',
-    placeholder: 'Dropdown disabled',
+    displayValue: "",
+    placeholder: "Dropdown disabled",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext({ disabled: true })}>
@@ -111,8 +109,8 @@ export const Disabled: Story = {
  */
 export const OpenState: Story = {
   args: {
-    displayValue: 'Banana',
-    placeholder: 'Select a fruit',
+    displayValue: "Banana",
+    placeholder: "Select a fruit",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext({ isOpen: true })}>
@@ -127,8 +125,8 @@ export const OpenState: Story = {
  */
 export const LongValue: Story = {
   args: {
-    displayValue: 'Very Long Option Name That Might Wrap Or Get Truncated',
-    placeholder: 'Select',
+    displayValue: "Very Long Option Name That Might Wrap Or Get Truncated",
+    placeholder: "Select",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext()}>
@@ -143,9 +141,9 @@ export const LongValue: Story = {
  */
 export const CustomStyling: Story = {
   args: {
-    displayValue: 'Custom',
-    placeholder: 'Select an option',
-    className: 'bg-blue-50! text-blue-900! border-blue-300!',
+    displayValue: "Custom",
+    placeholder: "Select an option",
+    className: "bg-blue-50! text-blue-900! border-blue-300!",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext()}>
@@ -160,8 +158,8 @@ export const CustomStyling: Story = {
  */
 export const SelectedAndOpen: Story = {
   args: {
-    displayValue: 'Python',
-    placeholder: 'Select a language',
+    displayValue: "Python",
+    placeholder: "Select a language",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext({ isOpen: true })}>

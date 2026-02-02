@@ -4,7 +4,7 @@
  */
 
 import React, { ReactElement, ReactNode } from "react";
-import { render, RenderOptions } from "@testing-library/react";
+import { render, RenderOptions, RenderResult } from "@testing-library/react";
 import type { DropdownContextValue, DropdownRootProps, DropdownTriggerProps } from "../types";
 import { DropdownRoot } from "../DropdownRoot";
 import { DropdownTrigger } from "../DropdownTrigger";
@@ -32,6 +32,7 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">
   return render(ui, { wrapper: Wrapper, ...options });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createNoop = <Fn extends (...args: any[]) => any>(): Fn => {
   return ((..._args: Parameters<Fn>) => undefined) as Fn;
 };
@@ -42,8 +43,8 @@ export const renderDropdown = <T,>(
   props: DropdownRootProps<T>,
   triggerOverrides?: TriggerOverrides,
   dropdownChildren?: ReactNode,
-  options: RenderDropdownOptions = {},
-) => {
+  options: RenderDropdownOptions = {}
+): RenderResult => {
   const resolvedProps: DropdownRootProps<T> = {
     ...props,
     selectedItem: props.selectedItem ?? null,
@@ -76,14 +77,14 @@ export const renderDropdown = <T,>(
         {...triggerRest}
       />
       {resolveDropdown()}
-    </DropdownRoot>,
+    </DropdownRoot>
   );
 };
 
 // --- CONTEXT FACTORY --- //
 // WHY: Create strongly typed dropdown contexts with targeted overrides.
 export const createMockDropdownContext = <T,>(
-  overrides: Partial<DropdownContextValue<T>> = {},
+  overrides: Partial<DropdownContextValue<T>> = {}
 ): DropdownContextValue<T> => {
   const defaultFilter: DropdownContextValue<T>["filterItems"] = (items) => items;
   // Derive computedPlacement from dropdownPlacement for backwards compatibility
@@ -126,7 +127,7 @@ export const createMockDropdownContext = <T,>(
 // WHY: Utility helpers keep tests expressive without repetition.
 import { vi } from "vitest";
 
-export const createMockFunction = <Args extends any[], Result>() => {
+export const createMockFunction = () => {
   return vi.fn() as ReturnType<typeof vi.fn>;
 };
 

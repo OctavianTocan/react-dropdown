@@ -1,25 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import React from 'react';
-import {
-  DropdownRoot,
-  DropdownTrigger,
-  DropdownContent,
-  DropdownSearch,
-  DropdownList,
-  DropdownProvider,
-} from '../index';
-import { createDropdownStory, createMockContext } from '../__storybook__/story-helpers';
-import { users, getUserKey, getUserDisplay, type User } from '../__storybook__/mock-data';
+import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
+import { DropdownRoot, DropdownTrigger, DropdownContent, DropdownSearch, DropdownList } from "../index";
+import { createDropdownStory } from "../__storybook__/story-helpers";
+import { users, getUserKey, getUserDisplay, type User } from "../__storybook__/mock-data";
 
 type DropdownStoryArgs = {
   items?: User[];
   selectedItem?: User | null;
   onSelect?: (item: User | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: 'top' | 'bottom';
+  dropdownPlacement?: "top" | "bottom";
   placeholder?: string;
-  triggerProps?: Record<string, any>;
-  dropdownProps?: Record<string, any>;
+  triggerProps?: Record<string, unknown>;
+  dropdownProps?: Record<string, unknown>;
 };
 
 /**
@@ -29,37 +22,37 @@ type DropdownStoryArgs = {
  * Demonstrates custom composition with headers and footers.
  */
 const meta: Meta<DropdownStoryArgs> = {
-  title: 'Components/Dropdown/Examples/Users',
+  title: "Components/Dropdown/Examples/Users",
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     docs: {
       description: {
-        component: 'User dropdown with roles, avatars, and custom composition.',
+        component: "User dropdown with roles, avatars, and custom composition.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     items: {
-      description: 'Array of user objects',
-      control: { type: 'object' as const },
+      description: "Array of user objects",
+      control: { type: "object" as const },
     },
     selectedItem: {
-      description: 'Currently selected user',
-      control: { type: 'object' as const },
+      description: "Currently selected user",
+      control: { type: "object" as const },
     },
     disabled: {
-      description: 'Disable the dropdown',
-      control: { type: 'boolean' as const },
+      description: "Disable the dropdown",
+      control: { type: "boolean" as const },
     },
     dropdownPlacement: {
-      description: 'Where the dropdown appears relative to the trigger',
-      control: { type: 'select' as const },
-      options: ['top', 'bottom'],
+      description: "Where the dropdown appears relative to the trigger",
+      control: { type: "select" as const },
+      options: ["top", "bottom"],
     },
     placeholder: {
-      description: 'Placeholder text for when no user is selected',
-      control: { type: 'text' as const },
+      description: "Placeholder text for when no user is selected",
+      control: { type: "text" as const },
     },
   },
 };
@@ -79,9 +72,9 @@ const UserTemplate = createDropdownStory<User>({
 export const Basic: Story = {
   render: UserTemplate,
   args: {
-    placeholder: 'Select a user',
-    triggerProps: { 'data-testid': 'user-dropdown-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search by name or role...' },
+    placeholder: "Select a user",
+    triggerProps: { "data-testid": "user-dropdown-trigger" },
+    dropdownProps: { searchPlaceholder: "Search by name or role..." },
   },
 };
 
@@ -92,7 +85,7 @@ export const Basic: Story = {
 export const WithCustomComposition: Story = {
   render: function WithCustomCompositionStory() {
     const [selected, setSelected] = React.useState<User | null>(null);
-    const [searchQuery, setSearchQuery] = React.useState('');
+    const [searchQuery, setSearchQuery] = React.useState("");
 
     const filteredUsers = users.filter(
       (user) =>
@@ -110,7 +103,7 @@ export const WithCustomComposition: Story = {
         placeholder="Select a team member"
       >
         <DropdownTrigger
-          displayValue={selected ? getUserDisplay(selected) : ''}
+          displayValue={selected ? getUserDisplay(selected) : ""}
           placeholder="Select a team member"
           data-testid="custom-user-dropdown-trigger"
         />
@@ -149,8 +142,8 @@ export const WithPreselection: Story = {
   render: UserTemplate,
   args: {
     selectedItem: users[0],
-    placeholder: 'Select a user',
-    triggerProps: { 'data-testid': 'preselected-user-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search by name or role...' },
+    placeholder: "Select a user",
+    triggerProps: { "data-testid": "preselected-user-trigger" },
+    dropdownProps: { searchPlaceholder: "Search by name or role..." },
   },
 };

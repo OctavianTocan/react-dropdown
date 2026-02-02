@@ -7,7 +7,7 @@
 
 import React, { useRef, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { useDropdownContext } from "./DropdownContext";
 import type { DropdownListProps, DropdownSectionMeta } from "./types";
 
@@ -49,7 +49,7 @@ interface GroupedItems<T> {
  */
 const groupItemsBySection = <T,>(
   items: T[],
-  resolveSection?: (item: T) => DropdownSectionMeta | null | undefined,
+  resolveSection?: (item: T) => DropdownSectionMeta | null | undefined
 ): GroupedItems<T> => {
   if (!resolveSection) {
     return { sections: [], ungrouped: items };
@@ -400,7 +400,7 @@ export function DropdownList<T>({
     // Show separator after item if getItemSeparator returns true (for all except last)
     if (separatorAccessor && originalIndex >= 0 && separatorAccessor(item, originalIndex)) {
       renderedItems.push(
-        <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />,
+        <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />
       );
     }
   });
@@ -422,7 +422,7 @@ export function DropdownList<T>({
       // Show separator after item if getItemSeparator returns true (for all except last)
       if (separatorAccessor && originalIndex >= 0 && separatorAccessor(item, originalIndex)) {
         renderedItems.push(
-          <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />,
+          <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />
         );
       }
     });

@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "../test-utils/test-helpers";
+import { render, screen, waitFor } from "../test-utils/test-helpers";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import {
@@ -49,7 +49,7 @@ describe("New Dropdown Features", () => {
               <div data-testid="header-content">Header Content</div>
             </DropdownHeader>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("header")).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe("New Dropdown Features", () => {
               Header
             </DropdownHeader>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("header")).toHaveClass("border-b");
@@ -78,7 +78,7 @@ describe("New Dropdown Features", () => {
           <DropdownContent>
             <DropdownHeader data-testid="header">Header</DropdownHeader>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("header")).not.toHaveClass("border-b");
@@ -93,7 +93,7 @@ describe("New Dropdown Features", () => {
               Header
             </DropdownHeader>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("header")).toHaveClass("custom-class");
@@ -110,7 +110,7 @@ describe("New Dropdown Features", () => {
               <div data-testid="footer-content">Footer Content</div>
             </DropdownFooter>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("footer")).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe("New Dropdown Features", () => {
           <DropdownContent>
             <DropdownFooter data-testid="footer">Footer</DropdownFooter>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("footer")).toHaveClass("border-t");
@@ -139,7 +139,7 @@ describe("New Dropdown Features", () => {
               Footer
             </DropdownFooter>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("footer")).not.toHaveClass("border-t");
@@ -154,7 +154,7 @@ describe("New Dropdown Features", () => {
               Footer
             </DropdownFooter>
           </DropdownContent>
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("footer")).toHaveClass("custom-class");
@@ -174,7 +174,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       expect(screen.getByTestId("dropdown-root")).toBeInTheDocument();
@@ -192,7 +192,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       expect(screen.getByTestId("dropdown-root")).toBeInTheDocument();
@@ -210,7 +210,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       expect(screen.getByTestId("dropdown-root")).toBeInTheDocument();
@@ -230,7 +230,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       expect(screen.getByTestId("dropdown-root")).toBeInTheDocument();
@@ -251,7 +251,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       const trigger = screen.getByTestId("dropdown-trigger");
@@ -277,7 +277,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       const trigger = screen.getByTestId("dropdown-trigger");
@@ -301,7 +301,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       const trigger = screen.getByTestId("dropdown-trigger");
@@ -332,7 +332,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       const trigger = screen.getByTestId("dropdown-trigger");
@@ -361,7 +361,7 @@ describe("New Dropdown Features", () => {
               staggerDelay={0.05}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       const trigger = screen.getByTestId("dropdown-trigger");
@@ -414,7 +414,7 @@ describe("New Dropdown Features", () => {
               getItemDisplay={(item) => item.name}
             />
           </DropdownContent>
-        </DropdownRoot>,
+        </DropdownRoot>
       );
 
       expect(screen.getByTestId("dropdown-root")).toBeInTheDocument();

@@ -1,18 +1,16 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import React from 'react';
-import { DropdownRoot, DropdownTrigger, DropdownSimple } from '../index';
-import { smallList } from '../__storybook__/mock-data';
-import { createDropdownStory } from '../__storybook__/story-helpers';
+import type { Meta, StoryObj } from "@storybook/react";
+import { createDropdownStory } from "../__storybook__/story-helpers";
+import { smallList } from "../__storybook__/mock-data";
 
 type DropdownStoryArgs = {
   items?: string[];
   selectedItem?: string | null;
   onSelect?: (item: string | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: 'top' | 'bottom';
+  dropdownPlacement?: "top" | "bottom";
   placeholder?: string;
-  triggerProps?: Record<string, any>;
-  dropdownProps?: Record<string, any>;
+  triggerProps?: Record<string, unknown>;
+  dropdownProps?: Record<string, unknown>;
 };
 
 /**
@@ -39,17 +37,17 @@ type DropdownStoryArgs = {
  * - Perfect for small, static lists
  */
 const meta: Meta<DropdownStoryArgs> = {
-  title: 'Components/Dropdown/Prebuilt/Simple',
+  title: "Components/Dropdown/Prebuilt/Simple",
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     docs: {
       description: {
         component:
-          'Pre-made simple dropdown with just the item list. Recommended for small lists (under 10-15 items) where search is unnecessary.',
+          "Pre-made simple dropdown with just the item list. Recommended for small lists (under 10-15 items) where search is unnecessary.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -62,19 +60,19 @@ const SimpleDropdownTemplate = createDropdownStory<string>({
 });
 
 const PriorityTemplate = createDropdownStory<string>({
-  defaultItems: ['Critical', 'High', 'Medium', 'Low', 'Trivial'],
+  defaultItems: ["Critical", "High", "Medium", "Low", "Trivial"],
   getItemKey: (item: string) => item,
   getItemDisplay: (item: string) => item,
 });
 
 const StatusTemplate = createDropdownStory<string>({
-  defaultItems: ['Backlog', 'Todo', 'In Progress', 'In Review', 'Done', 'Blocked'],
+  defaultItems: ["Backlog", "Todo", "In Progress", "In Review", "Done", "Blocked"],
   getItemKey: (item: string) => item,
   getItemDisplay: (item: string) => item,
 });
 
 const SizeTemplate = createDropdownStory<string>({
-  defaultItems: ['XS', 'Small', 'Medium', 'Large', 'XL', '2XL'],
+  defaultItems: ["XS", "Small", "Medium", "Large", "XL", "2XL"],
   getItemKey: (item: string) => item,
   getItemDisplay: (item: string) => item,
 });
@@ -86,8 +84,8 @@ const SizeTemplate = createDropdownStory<string>({
 export const Default: Story = {
   render: SimpleDropdownTemplate,
   args: {
-    placeholder: 'Select a color',
-    triggerProps: { 'data-testid': 'simple-trigger' },
+    placeholder: "Select a color",
+    triggerProps: { "data-testid": "simple-trigger" },
   },
 };
 
@@ -98,8 +96,8 @@ export const Default: Story = {
 export const SmallList: Story = {
   render: PriorityTemplate,
   args: {
-    placeholder: 'Select priority',
-    triggerProps: { 'data-testid': 'small-list-trigger' },
+    placeholder: "Select priority",
+    triggerProps: { "data-testid": "small-list-trigger" },
   },
 };
 
@@ -111,8 +109,8 @@ export const WithSelection: Story = {
   render: SimpleDropdownTemplate,
   args: {
     selectedItem: smallList[2],
-    placeholder: 'Select a color',
-    triggerProps: { 'data-testid': 'with-selection-trigger' },
+    placeholder: "Select a color",
+    triggerProps: { "data-testid": "with-selection-trigger" },
   },
 };
 
@@ -123,8 +121,8 @@ export const WithSelection: Story = {
 export const StatusSelector: Story = {
   render: StatusTemplate,
   args: {
-    placeholder: 'Select status',
-    triggerProps: { 'data-testid': 'status-trigger' },
+    placeholder: "Select status",
+    triggerProps: { "data-testid": "status-trigger" },
   },
 };
 
@@ -135,8 +133,8 @@ export const StatusSelector: Story = {
 export const SizeSelectorExample: Story = {
   render: SizeTemplate,
   args: {
-    placeholder: 'Select size',
-    triggerProps: { 'data-testid': 'size-trigger' },
+    placeholder: "Select size",
+    triggerProps: { "data-testid": "size-trigger" },
   },
 };
 
@@ -148,7 +146,7 @@ export const DisabledState: Story = {
   render: SimpleDropdownTemplate,
   args: {
     disabled: true,
-    placeholder: 'Disabled selector',
-    triggerProps: { 'data-testid': 'disabled-trigger' },
+    placeholder: "Disabled selector",
+    triggerProps: { "data-testid": "disabled-trigger" },
   },
 };

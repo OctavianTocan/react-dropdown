@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import React from 'react';
-import { DropdownRoot, DropdownTrigger, DropdownSearchable } from '../index';
+import type { Meta, StoryObj } from "@storybook/react";
+import { createDropdownStory } from "../__storybook__/story-helpers";
 import {
   simpleItems,
   languages,
@@ -10,18 +9,17 @@ import {
   getItemKey,
   getItemDisplay,
   type Language,
-} from '../__storybook__/mock-data';
-import { createDropdownStory } from '../__storybook__/story-helpers';
+} from "../__storybook__/mock-data";
 
 type DropdownStoryArgs = {
-  items?: any[];
-  selectedItem?: any | null;
-  onSelect?: (item: any | null) => void;
+  items?: string[];
+  selectedItem?: string | null;
+  onSelect?: (item: string | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: 'top' | 'bottom';
+  dropdownPlacement?: "top" | "bottom";
   placeholder?: string;
-  triggerProps?: Record<string, any>;
-  dropdownProps?: Record<string, any>;
+  triggerProps?: Record<string, unknown>;
+  dropdownProps?: Record<string, unknown>;
 };
 
 /**
@@ -46,17 +44,17 @@ type DropdownStoryArgs = {
  * - Handles focus management automatically
  */
 const meta: Meta<DropdownStoryArgs> = {
-  title: 'Components/Dropdown/Prebuilt/Searchable',
+  title: "Components/Dropdown/Prebuilt/Searchable",
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     docs: {
       description: {
         component:
-          'Pre-made searchable dropdown combining search input and item list. Recommended for most use cases with 15+ items.',
+          "Pre-made searchable dropdown combining search input and item list. Recommended for most use cases with 15+ items.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -87,9 +85,9 @@ const LargeDatasetTemplate = createDropdownStory<{ id: string; name: string }>({
 export const Default: Story = {
   render: BasicTemplate,
   args: {
-    placeholder: 'Select a fruit',
-    triggerProps: { 'data-testid': 'searchable-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search fruits...' },
+    placeholder: "Select a fruit",
+    triggerProps: { "data-testid": "searchable-trigger" },
+    dropdownProps: { searchPlaceholder: "Search fruits..." },
   },
 };
 
@@ -97,12 +95,12 @@ export const Default: Story = {
  * Custom search placeholder
  * Shows how to customize the search input text
  */
-export const CustomPlaceholder: Story = {
+export const CustomPlaceholder: StoryObj = {
   render: LanguageTemplate,
   args: {
-    placeholder: 'Choose your language',
-    triggerProps: { 'data-testid': 'custom-placeholder-trigger' },
-    dropdownProps: { searchPlaceholder: 'Type to find your language...' },
+    placeholder: "Choose your language",
+    triggerProps: { "data-testid": "custom-placeholder-trigger" },
+    dropdownProps: { searchPlaceholder: "Type to find your language..." },
   },
 };
 
@@ -110,12 +108,12 @@ export const CustomPlaceholder: Story = {
  * Large dataset performance test
  * Demonstrates handling of 150+ items with search
  */
-export const LargeDataset: Story = {
+export const LargeDataset: StoryObj = {
   render: LargeDatasetTemplate,
   args: {
-    placeholder: 'Select an item',
-    triggerProps: { 'data-testid': 'large-dataset-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search through 150 items...' },
+    placeholder: "Select an item",
+    triggerProps: { "data-testid": "large-dataset-trigger" },
+    dropdownProps: { searchPlaceholder: "Search through 150 items..." },
   },
 };
 
@@ -127,9 +125,9 @@ export const EmptyDataset: Story = {
   render: BasicTemplate,
   args: {
     items: [],
-    placeholder: 'No items available',
-    triggerProps: { 'data-testid': 'empty-dataset-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search...' },
+    placeholder: "No items available",
+    triggerProps: { "data-testid": "empty-dataset-trigger" },
+    dropdownProps: { searchPlaceholder: "Search..." },
   },
 };
 
@@ -137,8 +135,8 @@ export const EmptyDataset: Story = {
  * With custom filter function
  * Shows how to implement case-sensitive or custom filtering
  */
-export const CustomFilter: Story = {
-  render: function CustomFilterStory(args) {
+export const CustomFilter: StoryObj = {
+  render: function CustomFilterStory() {
     const customFilter = (items: Language[], query: string) => {
       const lowerQuery = query.toLowerCase();
       return items.filter(
@@ -156,14 +154,13 @@ export const CustomFilter: Story = {
       filterItems: customFilter,
     });
 
-    return FilteredTemplate(args);
-  },
-  args: {
-    placeholder: 'Select a language',
-    triggerProps: { 'data-testid': 'custom-filter-trigger' },
-    dropdownProps: {
-      searchPlaceholder: 'Search by name, native name, or region...',
-    },
+    return FilteredTemplate({
+      placeholder: "Select a language",
+      triggerProps: { "data-testid": "custom-filter-trigger" },
+      dropdownProps: {
+        searchPlaceholder: "Search by name, native name, or region...",
+      },
+    });
   },
 };
 
@@ -175,19 +172,19 @@ export const CustomFilter: Story = {
 export const HideSearchForSmallLists: Story = {
   render: BasicTemplate,
   args: {
-    items: ['Home', 'To-Do List', 'Transcribe', 'Record Call'],
-    placeholder: 'Select a page',
-    triggerProps: { 'data-testid': 'small-list-trigger' },
+    items: ["Home", "To-Do List", "Transcribe", "Record Call"],
+    placeholder: "Select a page",
+    triggerProps: { "data-testid": "small-list-trigger" },
     dropdownProps: {
       hideSearchThreshold: 4,
-      searchPlaceholder: 'Search...',
+      searchPlaceholder: "Search...",
     },
   },
   parameters: {
     docs: {
       description: {
         story:
-          'When `hideSearchThreshold` is set and items.length <= threshold, search is hidden and all items are visible by default. Perfect for small navigation menus.',
+          "When `hideSearchThreshold` is set and items.length <= threshold, search is hidden and all items are visible by default. Perfect for small navigation menus.",
       },
     },
   },

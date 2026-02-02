@@ -1,25 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
-import {
-  DropdownRoot,
-  DropdownTrigger,
-  DropdownContent,
-  DropdownSearch,
-  DropdownList,
-  DropdownSearchable,
-} from '../index';
-import { simpleItems, getLanguageKey, getLanguageDisplay } from '../__storybook__/mock-data';
-import { createDropdownStory, dropdownRootArgTypes } from '../__storybook__/story-helpers';
+import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
+import { DropdownRoot, DropdownTrigger, DropdownContent, DropdownSearch, DropdownList } from "../index";
+import { simpleItems } from "../__storybook__/mock-data";
+import { createDropdownStory, dropdownRootArgTypes } from "../__storybook__/story-helpers";
 
 type DropdownStoryArgs = {
   items?: string[];
   selectedItem?: string | null;
   onSelect?: (item: string | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: 'top' | 'bottom';
+  dropdownPlacement?: "top" | "bottom";
   placeholder?: string;
-  triggerProps?: Record<string, any>;
-  dropdownProps?: Record<string, any>;
+  triggerProps?: Record<string, unknown>;
+  dropdownProps?: Record<string, unknown>;
 };
 
 /**
@@ -33,17 +26,17 @@ type DropdownStoryArgs = {
  * - Custom composition or pre-made convenience components
  */
 const meta: Meta<DropdownStoryArgs> = {
-  title: 'Components/Dropdown/Core/Root',
+  title: "Components/Dropdown/Core/Root",
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     docs: {
       description: {
         component:
-          'A flexible, type-safe dropdown component for selecting items from a list. Supports search, keyboard navigation, and custom composition patterns.',
+          "A flexible, type-safe dropdown component for selecting items from a list. Supports search, keyboard navigation, and custom composition patterns.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: dropdownRootArgTypes,
 };
 
@@ -64,9 +57,9 @@ export const BasicUsage: Story = {
   render: BasicTemplate,
   args: {
     items: simpleItems,
-    placeholder: 'Select a fruit',
-    triggerProps: { 'data-testid': 'dropdown-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search fruits...' },
+    placeholder: "Select a fruit",
+    triggerProps: { "data-testid": "dropdown-trigger" },
+    dropdownProps: { searchPlaceholder: "Search fruits..." },
   },
 };
 
@@ -78,8 +71,8 @@ export const DisabledState: Story = {
   args: {
     items: simpleItems,
     disabled: true,
-    placeholder: 'Dropdown is disabled',
-    triggerProps: { 'data-testid': 'disabled-dropdown-trigger' },
+    placeholder: "Dropdown is disabled",
+    triggerProps: { "data-testid": "disabled-dropdown-trigger" },
   },
 };
 
@@ -90,16 +83,14 @@ export const TopPlacement: Story = {
   render: BasicTemplate,
   args: {
     items: simpleItems,
-    dropdownPlacement: 'top',
-    placeholder: 'Select an option',
-    triggerProps: { 'data-testid': 'top-placement-trigger' },
+    dropdownPlacement: "top",
+    placeholder: "Select an option",
+    triggerProps: { "data-testid": "top-placement-trigger" },
   },
   decorators: [
     (Story) => (
       <div className="flex flex-col items-center gap-3">
-        <p className="text-sm text-gray-500">
-          Dropdown renders above to avoid clipping near sticky footers.
-        </p>
+        <p className="text-sm text-gray-500">Dropdown renders above to avoid clipping near sticky footers.</p>
         <Story />
       </div>
     ),
@@ -113,9 +104,9 @@ export const EmptyState: Story = {
   render: BasicTemplate,
   args: {
     items: [],
-    placeholder: 'No items available',
-    triggerProps: { 'data-testid': 'empty-dropdown-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search...' },
+    placeholder: "No items available",
+    triggerProps: { "data-testid": "empty-dropdown-trigger" },
+    dropdownProps: { searchPlaceholder: "Search..." },
   },
 };
 
@@ -125,11 +116,9 @@ export const EmptyState: Story = {
 export const CustomComposition: Story = {
   render: function CustomCompositionStory() {
     const [selected, setSelected] = React.useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = React.useState('');
+    const [searchQuery, setSearchQuery] = React.useState("");
 
-    const filteredItems = simpleItems.filter((item) =>
-      item.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = simpleItems.filter((item) => item.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return (
       <DropdownRoot
@@ -141,7 +130,7 @@ export const CustomComposition: Story = {
         placeholder="Select a team member"
       >
         <DropdownTrigger
-          displayValue={selected ?? ''}
+          displayValue={selected ?? ""}
           placeholder="Select a team member"
           data-testid="custom-dropdown-trigger"
         />

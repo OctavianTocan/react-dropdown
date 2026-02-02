@@ -48,7 +48,7 @@ export function DropdownContent({
   const shouldUsePortal = portal || contextUsePortal;
 
   const [shouldRender, setShouldRender] = useState(isOpen);
-  const [isClosing, setIsClosing] = useState(false);
+  const [_isClosing, setIsClosing] = useState(false);
   const [portalPosition, setPortalPosition] = useState({ top: 0, right: 0 });
   const prevIsOpen = useRef(isOpen);
 

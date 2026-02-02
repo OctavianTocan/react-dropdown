@@ -51,7 +51,7 @@ export function DropdownRoot<T>({
   getItemDisplay,
   filterItems,
   disabled = false,
-  placeholder,
+  placeholder: _placeholder,
   className = "",
   placement = "bottom",
   dropdownPlacement,
@@ -79,7 +79,7 @@ export function DropdownRoot<T>({
   const [searchQuery, setSearchQuery] = useState("");
   const [animationState, setAnimationState] = useState<DropdownAnimationState>("idle");
   const [computedPlacement, setComputedPlacement] = useState<"top" | "bottom">(
-    effectivePlacement === "auto" ? "bottom" : effectivePlacement,
+    effectivePlacement === "auto" ? "bottom" : effectivePlacement
   );
 
   // Refs for DOM manipulation
@@ -97,7 +97,7 @@ export function DropdownRoot<T>({
       const normalizedQuery = query.toLowerCase().trim();
       return items.filter((item) => getItemDisplay(item).toLowerCase().includes(normalizedQuery));
     },
-    [getItemDisplay],
+    [getItemDisplay]
   );
 
   // Memoized filter function
@@ -188,7 +188,11 @@ export function DropdownRoot<T>({
    * @brief Toggles dropdown open/closed state
    */
   const toggleDropdown = useCallback(() => {
-    isOpen ? closeDropdown() : openDropdown();
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
   }, [isOpen, openDropdown, closeDropdown]);
 
   /**
@@ -203,7 +207,7 @@ export function DropdownRoot<T>({
         closeDropdown();
       }
     },
-    [onSelect, closeDropdown, closeOnSelect],
+    [onSelect, closeDropdown, closeOnSelect]
   );
 
   /**
@@ -283,7 +287,7 @@ export function DropdownRoot<T>({
       usePortal,
       enterDuration,
       exitDuration,
-    ],
+    ]
   );
 
   return (

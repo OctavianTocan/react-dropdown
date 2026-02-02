@@ -1,22 +1,16 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import React from 'react';
-import { createDropdownStory, dropdownRootArgTypes } from '../__storybook__/story-helpers';
-import {
-  languages,
-  getLanguageKey,
-  getLanguageDisplay,
-  type Language,
-} from '../__storybook__/mock-data';
+import type { Meta, StoryObj } from "@storybook/react";
+import { createDropdownStory, dropdownRootArgTypes } from "../__storybook__/story-helpers";
+import { languages, getLanguageKey, getLanguageDisplay, type Language } from "../__storybook__/mock-data";
 
 type DropdownStoryArgs = {
   items?: Language[];
   selectedItem?: Language | null;
   onSelect?: (item: Language | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: 'top' | 'bottom';
+  dropdownPlacement?: "top" | "bottom";
   placeholder?: string;
-  triggerProps?: Record<string, any>;
-  dropdownProps?: Record<string, any>;
+  triggerProps?: Record<string, unknown>;
+  dropdownProps?: Record<string, unknown>;
 };
 
 /**
@@ -26,16 +20,16 @@ type DropdownStoryArgs = {
  * Demonstrates handling of complex objects with multiple display properties.
  */
 const meta: Meta<DropdownStoryArgs> = {
-  title: 'Components/Dropdown/Examples/Languages',
+  title: "Components/Dropdown/Examples/Languages",
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     docs: {
       description: {
-        component: 'Language dropdown with native names and regional information.',
+        component: "Language dropdown with native names and regional information.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: dropdownRootArgTypes,
 };
 
@@ -54,9 +48,9 @@ const LanguageTemplate = createDropdownStory<Language>({
 export const Basic: Story = {
   render: LanguageTemplate,
   args: {
-    placeholder: 'Select a language',
-    triggerProps: { 'data-testid': 'language-dropdown-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search languages...' },
+    placeholder: "Select a language",
+    triggerProps: { "data-testid": "language-dropdown-trigger" },
+    dropdownProps: { searchPlaceholder: "Search languages..." },
   },
 };
 
@@ -67,9 +61,9 @@ export const WithPreselection: Story = {
   render: LanguageTemplate,
   args: {
     selectedItem: languages[0],
-    placeholder: 'Select a language',
-    triggerProps: { 'data-testid': 'preselected-language-trigger' },
-    dropdownProps: { searchPlaceholder: 'Search languages...' },
+    placeholder: "Select a language",
+    triggerProps: { "data-testid": "preselected-language-trigger" },
+    dropdownProps: { searchPlaceholder: "Search languages..." },
   },
 };
 
@@ -98,10 +92,10 @@ export const WithCustomFilter: Story = {
     return FilteredTemplate(args);
   },
   args: {
-    placeholder: 'Select a language',
-    triggerProps: { 'data-testid': 'filtered-language-trigger' },
+    placeholder: "Select a language",
+    triggerProps: { "data-testid": "filtered-language-trigger" },
     dropdownProps: {
-      searchPlaceholder: 'Search by name, native name, or region...',
+      searchPlaceholder: "Search by name, native name, or region...",
     },
   },
 };

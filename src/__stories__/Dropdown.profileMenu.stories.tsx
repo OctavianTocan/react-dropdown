@@ -7,7 +7,6 @@ import React, { useRef } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import Dropdown, {
   DropdownRoot,
-  DropdownTrigger,
   DropdownContent,
   DropdownList,
   DropdownHeader,
@@ -38,7 +37,7 @@ const user = {
 };
 
 // Avatar Trigger Component that uses context
-function AvatarTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement> }) {
+function AvatarTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement | null> }) {
   const { toggleDropdown, isOpen } = useDropdownContext();
 
   return (
@@ -72,7 +71,7 @@ function UserInfoFooter() {
 }
 
 // Custom trigger with name
-function NamedAvatarTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement> }) {
+function NamedAvatarTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement | null> }) {
   const { toggleDropdown, isOpen } = useDropdownContext();
 
   return (
@@ -105,11 +104,11 @@ function ButtonTrigger({
   label,
   className,
 }: {
-  triggerRef: React.RefObject<HTMLButtonElement>;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
   label: string;
   className?: string;
 }) {
-  const { toggleDropdown, isOpen } = useDropdownContext();
+  const { toggleDropdown, isOpen: _isOpen } = useDropdownContext();
 
   return (
     <button
@@ -123,7 +122,7 @@ function ButtonTrigger({
 }
 
 // Upward trigger
-function UpwardTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement> }) {
+function UpwardTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement | null> }) {
   const { toggleDropdown, isOpen } = useDropdownContext();
 
   return (
@@ -146,7 +145,7 @@ function UpwardTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonE
 }
 
 // Staggered trigger
-function StaggeredTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement> }) {
+function StaggeredTrigger({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement | null> }) {
   const { toggleDropdown, isOpen } = useDropdownContext();
 
   return (

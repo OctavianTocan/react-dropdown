@@ -166,7 +166,7 @@ describe("DropdownRoot", () => {
   describe("Search", () => {
     it("filters items using default filter function", async () => {
       const onSelect = createMockOnSelect();
-      const { container } = renderDropdown(
+      renderDropdown(
         {
           items: mockItems,
           getItemKey: getMockItemKey,
@@ -183,7 +183,7 @@ describe("DropdownRoot", () => {
               </div>
             ))}
           </div>
-        </>,
+        </>
       );
 
       const trigger = screen.getByTestId("dropdown-trigger");
@@ -236,7 +236,7 @@ describe("DropdownRoot", () => {
     });
 
     it("uses custom filterItems function when provided", async () => {
-      const customFilter = vi.fn((items, query) => {
+      const customFilter = vi.fn((items: typeof mockItems, query: string) => {
         return items.filter((item) => getMockItemDisplay(item).toUpperCase().includes(query.toUpperCase()));
       });
 
@@ -387,7 +387,7 @@ describe("DropdownRoot", () => {
   describe("Filter Behavior", () => {
     it("memoizes filtered items to prevent unnecessary recalculations", () => {
       const onSelect = createMockOnSelect();
-      const filterItems = vi.fn((items, query) => {
+      const filterItems = vi.fn((items: typeof mockItems, query: string) => {
         return items.filter((item) => getMockItemDisplay(item).toLowerCase().includes(query.toLowerCase()));
       });
 

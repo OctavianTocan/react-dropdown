@@ -8,7 +8,7 @@ import "@testing-library/jest-dom";
 import { renderHook, render, screen, act } from "../test-utils/test-helpers";
 import { useDropdownContext, DropdownProvider, useKeyboardNavigation, useClickOutside } from "../DropdownContext";
 import type { DropdownContextValue } from "../types";
-import { mockItems, getMockItemKey, getMockItemDisplay } from "../test-utils/mock-data";
+import { mockItems, getMockItemKey, getMockItemDisplay, type MockItem } from "../test-utils/mock-data";
 import { useRef } from "react";
 
 //---------------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ const TestComponent = () => {
   return <div data-testid="context-consumer">{JSON.stringify(context.isOpen)}</div>;
 };
 
-const createMockContext = (): DropdownContextValue<any> => ({
+const createMockContext = (): DropdownContextValue<MockItem> => ({
   isOpen: false,
   setIsOpen: vi.fn(),
   selectedItem: null,
@@ -36,7 +36,13 @@ const createMockContext = (): DropdownContextValue<any> => ({
   disabled: false,
   closeOnSelect: true,
   closeDropdown: vi.fn(),
+  closeImmediate: vi.fn(),
   toggleDropdown: vi.fn(),
+  animationState: "idle",
+  computedPlacement: "bottom",
+  offset: 8,
+  enterDuration: 0.2,
+  exitDuration: 0.15,
 });
 
 //---------------------------------------------------------------------------------------------
@@ -46,7 +52,7 @@ const createMockContext = (): DropdownContextValue<any> => ({
 describe("DropdownContext", () => {
   describe("useDropdownContext", () => {
     it("throws error when used outside provider", () => {
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useDropdownContext());
@@ -61,7 +67,7 @@ describe("DropdownContext", () => {
       render(
         <DropdownProvider value={mockContext}>
           <TestComponent />
-        </DropdownProvider>,
+        </DropdownProvider>
       );
 
       expect(screen.getByTestId("context-consumer")).toBeInTheDocument();
@@ -90,7 +96,7 @@ describe("DropdownContext", () => {
       ({
         key,
         preventDefault: vi.fn(),
-      }) as any;
+      }) as unknown as React.KeyboardEvent;
 
     it("increments focused index on ArrowDown", () => {
       const onSelect = vi.fn();

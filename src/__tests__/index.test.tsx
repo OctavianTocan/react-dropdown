@@ -167,8 +167,15 @@ describe("Dropdown Module Exports", () => {
         filterItems: (items) => items,
         onSelect: () => undefined,
         disabled: false,
+        closeOnSelect: true,
         closeDropdown: () => undefined,
+        closeImmediate: () => undefined,
         toggleDropdown: () => undefined,
+        animationState: "idle",
+        computedPlacement: "bottom",
+        offset: 8,
+        enterDuration: 0.2,
+        exitDuration: 0.15,
       };
 
       expect(contextValue.items).toEqual(mockItems);
