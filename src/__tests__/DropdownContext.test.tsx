@@ -56,7 +56,7 @@ describe("DropdownContext", () => {
 
       expect(() => {
         renderHook(() => useDropdownContext());
-      }).toThrow("useDropdownContext must be used within a DropdownProvider");
+      }).toThrow("useDropdownContext must be used within <Dropdown.Root>");
 
       consoleErrorSpy.mockRestore();
     });

@@ -1,7 +1,60 @@
 /**
- * @file index.ts
- * @brief Barrel export for dropdown components
+ * @fileoverview @octavian-tocan/react-dropdown - Composable dropdown system
+ *
+ * A flexible, composable dropdown (select) component system for React with TypeScript support.
+ * Built with accessibility in mind and featuring smooth animations powered by Motion.
+ *
+ * | Export | Description |
+ * |--------|-------------|
+ * | Dropdown | Compound component with Root, Trigger, Content, etc. |
+ * | DropdownRoot | Provider component that manages all state |
+ * | DropdownTrigger | Button that opens/closes the dropdown |
+ * | DropdownContent | Container for custom compositions |
+ * | DropdownSearch | Search input component |
+ * | DropdownList | Scrollable list of options |
+ * | DropdownSimple | Pre-made dropdown with list only |
+ * | DropdownSearchable | Pre-made dropdown with search + list |
+ * | DropdownMenu | Action menu variant |
+ *
+ * @example Basic usage with compound component
+ * ```tsx
+ * import Dropdown from '@octavian-tocan/react-dropdown';
+ *
+ * const items = [
+ *   { id: '1', label: 'Option 1' },
+ *   { id: '2', label: 'Option 2' },
+ * ];
+ *
+ * function MyDropdown() {
+ *   const [selected, setSelected] = useState(null);
+ *
+ *   return (
+ *     <Dropdown.Root
+ *       items={items}
+ *       selectedItem={selected}
+ *       onSelect={setSelected}
+ *       getItemKey={(item) => item.id}
+ *       getItemDisplay={(item) => item.label}
+ *     >
+ *       <Dropdown.Trigger displayValue={selected?.label ?? ''} placeholder="Select..." />
+ *       <Dropdown.Simple />
+ *     </Dropdown.Root>
+ *   );
+ * }
+ * ```
+ *
+ * @example Searchable dropdown
+ * ```tsx
+ * import Dropdown from '@octavian-tocan/react-dropdown';
+ *
+ * <Dropdown.Root items={items} onSelect={handleSelect} getItemKey={...} getItemDisplay={...}>
+ *   <Dropdown.Trigger displayValue={selected?.label ?? ''} />
+ *   <Dropdown.Searchable searchPlaceholder="Search..." />
+ * </Dropdown.Root>
+ * ```
  */
+
+"use client";
 
 // Export all dropdown components
 export { DropdownRoot } from "./DropdownRoot";

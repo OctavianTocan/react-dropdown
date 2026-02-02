@@ -1,0 +1,256 @@
+/**
+ * Optional default styles for @octavian-tocan/react-dropdown
+ *
+ * Import this file to get sensible default styling for the dropdown components.
+ * These styles use CSS custom properties (variables) for easy customization.
+ *
+ * Usage:
+ *   import '@octavian-tocan/react-dropdown/styles.css';
+ *
+ * Customization:
+ *   Override the CSS variables in your own stylesheet:
+ *
+ *   :root {
+ *     --dropdown-bg: #ffffff;
+ *     --dropdown-border: #e5e7eb;
+ *     --dropdown-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+ *   }
+ */
+
+/* CSS Custom Properties (Variables) */
+:root {
+  /* Colors */
+  --dropdown-bg: #ffffff;
+  --dropdown-bg-hover: #f9fafb;
+  --dropdown-bg-selected: #eff6ff;
+  --dropdown-border: #e5e7eb;
+  --dropdown-text: #111827;
+  --dropdown-text-muted: #6b7280;
+  --dropdown-text-placeholder: #9ca3af;
+  --dropdown-accent: #3b82f6;
+  --dropdown-accent-hover: #2563eb;
+
+  /* Spacing */
+  --dropdown-padding: 0.5rem;
+  --dropdown-item-padding: 0.5rem 0.75rem;
+  --dropdown-gap: 0.25rem;
+
+  /* Border radius */
+  --dropdown-radius: 0.5rem;
+  --dropdown-item-radius: 0.375rem;
+
+  /* Shadow */
+  --dropdown-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --dropdown-transition: 150ms ease;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dropdown-bg: #1f2937;
+    --dropdown-bg-hover: #374151;
+    --dropdown-bg-selected: #1e3a5f;
+    --dropdown-border: #374151;
+    --dropdown-text: #f9fafb;
+    --dropdown-text-muted: #9ca3af;
+    --dropdown-text-placeholder: #6b7280;
+    --dropdown-accent: #60a5fa;
+    --dropdown-accent-hover: #3b82f6;
+  }
+}
+
+/* Trigger Button */
+[data-dropdown-trigger] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: var(--dropdown-item-padding);
+  background-color: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: var(--dropdown-radius);
+  color: var(--dropdown-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition:
+    border-color var(--dropdown-transition),
+    box-shadow var(--dropdown-transition);
+  min-width: 10rem;
+}
+
+[data-dropdown-trigger]:hover {
+  border-color: var(--dropdown-accent);
+}
+
+[data-dropdown-trigger]:focus {
+  outline: none;
+  border-color: var(--dropdown-accent);
+  box-shadow: 0 0 0 2px var(--dropdown-accent) / 0.2;
+}
+
+[data-dropdown-trigger][data-placeholder="true"] {
+  color: var(--dropdown-text-placeholder);
+}
+
+[data-dropdown-trigger][disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dropdown Content Container */
+[data-dropdown-content] {
+  background-color: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: var(--dropdown-radius);
+  box-shadow: var(--dropdown-shadow);
+  padding: var(--dropdown-padding);
+  min-width: 10rem;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+/* Search Input */
+[data-dropdown-search] {
+  width: 100%;
+  padding: var(--dropdown-item-padding);
+  background-color: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: var(--dropdown-item-radius);
+  color: var(--dropdown-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin-bottom: var(--dropdown-gap);
+  transition: border-color var(--dropdown-transition);
+}
+
+[data-dropdown-search]:focus {
+  outline: none;
+  border-color: var(--dropdown-accent);
+}
+
+[data-dropdown-search]::placeholder {
+  color: var(--dropdown-text-placeholder);
+}
+
+/* Dropdown List */
+[data-dropdown-list] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dropdown-gap);
+}
+
+/* Dropdown Option */
+[data-dropdown-option] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--dropdown-item-padding);
+  border-radius: var(--dropdown-item-radius);
+  color: var(--dropdown-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: background-color var(--dropdown-transition);
+}
+
+[data-dropdown-option]:hover {
+  background-color: var(--dropdown-bg-hover);
+}
+
+[data-dropdown-option][data-selected="true"] {
+  background-color: var(--dropdown-bg-selected);
+  color: var(--dropdown-accent);
+}
+
+[data-dropdown-option][data-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+[data-dropdown-option][data-disabled="true"]:hover {
+  background-color: transparent;
+}
+
+/* Option Icon */
+[data-dropdown-option-icon] {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Option Content */
+[data-dropdown-option-content] {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Option Description */
+[data-dropdown-option-description] {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--dropdown-text-muted);
+  margin-top: 0.125rem;
+}
+
+/* Section Header */
+[data-dropdown-section] {
+  padding: var(--dropdown-item-padding);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dropdown-text-muted);
+}
+
+/* Separator */
+[data-dropdown-separator] {
+  height: 1px;
+  background-color: var(--dropdown-border);
+  margin: var(--dropdown-gap) 0;
+}
+
+/* Header and Footer */
+[data-dropdown-header],
+[data-dropdown-footer] {
+  padding: var(--dropdown-item-padding);
+  border-color: var(--dropdown-border);
+}
+
+[data-dropdown-header] {
+  border-bottom-width: 1px;
+  margin-bottom: var(--dropdown-gap);
+}
+
+[data-dropdown-footer] {
+  border-top-width: 1px;
+  margin-top: var(--dropdown-gap);
+}
+
+/* Empty State */
+[data-dropdown-empty] {
+  padding: var(--dropdown-item-padding);
+  text-align: center;
+  color: var(--dropdown-text-muted);
+  font-size: 0.875rem;
+}
+
+/* Scrollbar Styling */
+[data-dropdown-content]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-dropdown-content]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-dropdown-content]::-webkit-scrollbar-thumb {
+  background-color: var(--dropdown-border);
+  border-radius: 3px;
+}
+
+[data-dropdown-content]::-webkit-scrollbar-thumb:hover {
+  background-color: var(--dropdown-text-muted);
+}

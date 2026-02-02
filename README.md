@@ -1,5 +1,8 @@
 # @octavian-tocan/react-dropdown
 
+[![npm version](https://img.shields.io/npm/v/@octavian-tocan/react-dropdown.svg)](https://www.npmjs.com/package/@octavian-tocan/react-dropdown)
+[![license](https://img.shields.io/npm/l/@octavian-tocan/react-dropdown.svg)](https://github.com/OctavianTocan/react-dropdown/blob/main/LICENSE)
+
 A flexible, composable dropdown (select) component system for React with TypeScript support. Built with accessibility in mind and featuring smooth animations powered by Motion (the latest version of Framer Motion).
 
 ## Features
@@ -30,20 +33,59 @@ This package requires:
 - `react-dom` >= 18
 - `motion` >= 12 (Motion for React - the latest version of Framer Motion)
 
-## Quick Start
+## Quick Start (Copy & Paste)
 
-### Pre-made Searchable Dropdown
+Copy this complete example to get started immediately:
 
 ```tsx
-import Dropdown from '@octavian-tocan/react-dropdown';
+import { useState } from "react";
+import Dropdown from "@octavian-tocan/react-dropdown";
+
+const items = [
+  { id: "1", label: "Option 1" },
+  { id: "2", label: "Option 2" },
+  { id: "3", label: "Option 3" },
+];
+
+export function MyDropdown() {
+  const [selected, setSelected] = useState<(typeof items)[0] | null>(null);
+
+  return (
+    <Dropdown.Root
+      items={items}
+      selectedItem={selected}
+      onSelect={setSelected}
+      getItemKey={(item) => item.id}
+      getItemDisplay={(item) => item.label}
+    >
+      <Dropdown.Trigger displayValue={selected?.label ?? ""} placeholder="Select an option..." />
+      <Dropdown.Simple />
+    </Dropdown.Root>
+  );
+}
+```
+
+## Documentation
+
+- [Live Storybook](https://octaviantocan.github.io/react-dropdown) <!-- TODO: Update after deployment -->
+- [API Reference](./docs/API.md)
+- [Examples](./docs/EXAMPLES.md)
+- [Architecture](./docs/ARCHITECTURE.md)
+
+## Usage Examples
+
+### Searchable Dropdown
+
+```tsx
+import Dropdown from "@octavian-tocan/react-dropdown";
 
 function MyComponent() {
   const [selectedLanguage, setSelectedLanguage] = useState(null);
 
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'fr', name: 'French' },
+    { code: "en", name: "English" },
+    { code: "es", name: "Spanish" },
+    { code: "fr", name: "French" },
   ];
 
   return (
@@ -54,7 +96,7 @@ function MyComponent() {
       getItemKey={(lang) => lang.code}
       getItemDisplay={(lang) => lang.name}
     >
-      <Dropdown.Trigger displayValue={selectedLanguage?.name || ''} />
+      <Dropdown.Trigger displayValue={selectedLanguage?.name || ""} />
       <Dropdown.Searchable searchPlaceholder="Search languages..." />
     </Dropdown.Root>
   );
@@ -65,7 +107,7 @@ function MyComponent() {
 
 ```tsx
 <Dropdown.Root items={priorities} {...config}>
-  <Dropdown.Trigger displayValue={priority?.label || ''} />
+  <Dropdown.Trigger displayValue={priority?.label || ""} />
   <Dropdown.Simple />
 </Dropdown.Root>
 ```
@@ -73,13 +115,13 @@ function MyComponent() {
 ### Action Menu
 
 ```tsx
-import Dropdown from '@octavian-tocan/react-dropdown';
-import { MoreHorizontal } from 'lucide-react';
+import Dropdown from "@octavian-tocan/react-dropdown";
+import { MoreHorizontal } from "lucide-react";
 
 function MenuExample() {
   const menuItems = [
-    { id: '1', label: 'Edit', icon: <Edit />, onClick: handleEdit },
-    { id: '2', label: 'Delete', icon: <Trash />, onClick: handleDelete, showSeparator: true },
+    { id: "1", label: "Edit", icon: <Edit />, onClick: handleEdit },
+    { id: "2", label: "Delete", icon: <Trash />, onClick: handleDelete, showSeparator: true },
   ];
 
   return (

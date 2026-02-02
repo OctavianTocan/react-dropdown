@@ -23,8 +23,23 @@ export function useDropdownContext<T>() {
 
   if (!context) {
     throw new Error(
-      "useDropdownContext must be used within a DropdownProvider. " +
-        "Wrap your component with <DropdownRoot> to provide context.",
+      `useDropdownContext must be used within <Dropdown.Root>.
+
+Example:
+  import Dropdown from '@octavian-tocan/react-dropdown';
+
+  <Dropdown.Root
+    items={items}
+    selectedItem={selected}
+    onSelect={setSelected}
+    getItemKey={(item) => item.id}
+    getItemDisplay={(item) => item.label}
+  >
+    <Dropdown.Trigger displayValue={selected?.label ?? ''} />
+    <Dropdown.Simple />
+  </Dropdown.Root>
+
+See: https://github.com/OctavianTocan/react-dropdown#quick-start-copy--paste`
     );
   }
 
@@ -60,7 +75,7 @@ export function useKeyboardNavigation<T>(
   items: T[],
   getItemKey: (item: T) => string,
   onSelect: (item: T) => void,
-  closeDropdown: () => void,
+  closeDropdown: () => void
 ) {
   const focusedIndexRef = useRef<number>(-1);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
@@ -118,7 +133,7 @@ export function useKeyboardNavigation<T>(
 export function useClickOutside(
   dropdownRef: React.RefObject<HTMLElement | null>,
   closeDropdown: () => void,
-  isOpen: boolean,
+  isOpen: boolean
 ) {
   const closeDropdownRef = useRef(closeDropdown);
   closeDropdownRef.current = closeDropdown;
@@ -132,7 +147,7 @@ export function useClickOutside(
         closeDropdownRef.current();
       }
     },
-    [dropdownRef],
+    [dropdownRef]
   );
 
   useEffect(() => {

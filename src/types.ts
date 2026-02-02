@@ -43,19 +43,69 @@ export interface BaseDropdownProps {
 
 /**
  * @brief Props for DropdownRoot component
+ *
+ * @example Basic usage
+ * ```tsx
+ * <Dropdown.Root
+ *   items={items}
+ *   selectedItem={selected}
+ *   onSelect={setSelected}
+ *   getItemKey={(item) => item.id}
+ *   getItemDisplay={(item) => item.label}
+ * >
+ *   <Dropdown.Trigger displayValue={selected?.label ?? ''} />
+ *   <Dropdown.Simple />
+ * </Dropdown.Root>
+ * ```
  */
 export interface DropdownRootProps<T> extends BaseDropdownProps {
-  /** Array of items to display */
+  /**
+   * Array of items to display
+   * @example
+   * ```tsx
+   * const items = [{ id: '1', label: 'Option 1' }, { id: '2', label: 'Option 2' }];
+   * <Dropdown.Root items={items} ... />
+   * ```
+   */
   items: T[];
   /** Currently selected item */
   selectedItem?: T | null;
-  /** Callback invoked when selection changes */
+  /**
+   * Callback invoked when selection changes
+   * @example
+   * ```tsx
+   * <Dropdown.Root onSelect={(item) => setSelected(item)} ... />
+   * ```
+   */
   onSelect: (item: T) => void;
-  /** Function to get unique key for each item */
+  /**
+   * Function to get unique key for each item
+   * @example
+   * ```tsx
+   * <Dropdown.Root getItemKey={(item) => item.id} ... />
+   * ```
+   */
   getItemKey: (item: T) => string;
-  /** Function to get display text for each item */
+  /**
+   * Function to get display text for each item
+   * @example
+   * ```tsx
+   * <Dropdown.Root getItemDisplay={(item) => item.label} ... />
+   * ```
+   */
   getItemDisplay: (item: T) => string;
-  /** Optional function to filter items based on search query */
+  /**
+   * Optional function to filter items based on search query
+   * @example
+   * ```tsx
+   * <Dropdown.Root
+   *   filterItems={(items, query) =>
+   *     items.filter(item => item.label.toLowerCase().includes(query.toLowerCase()))
+   *   }
+   *   ...
+   * />
+   * ```
+   */
   filterItems?: (items: T[], query: string) => T[];
   /** Whether the dropdown is disabled */
   disabled?: boolean;
@@ -67,17 +117,46 @@ export interface DropdownRootProps<T> extends BaseDropdownProps {
    * - 'top': Always opens upward
    * - 'auto': Automatically detects best placement based on viewport position
    * Default: 'bottom'
+   * @example
+   * ```tsx
+   * <Dropdown.Root placement="auto" ... />
+   * ```
    */
   placement?: DropdownPlacement;
   /** @deprecated Use `placement` instead. Will be removed in next major version. */
   dropdownPlacement?: DropdownPlacement;
   /** Distance in pixels between trigger and dropdown content. Default: 8 */
   offset?: number;
-  /** Optional function to retrieve description text shown beneath the label */
+  /**
+   * Optional function to retrieve description text shown beneath the label
+   * @example
+   * ```tsx
+   * <Dropdown.Root getItemDescription={(item) => item.description} ... />
+   * ```
+   */
   getItemDescription?: (item: T) => string | null | undefined;
-  /** Optional function to retrieve an icon rendered alongside the label */
+  /**
+   * Optional function to retrieve an icon rendered alongside the label
+   * @example
+   * ```tsx
+   * <Dropdown.Root getItemIcon={(item) => <Icon name={item.icon} />} ... />
+   * ```
+   */
   getItemIcon?: (item: T) => ReactNode;
-  /** Optional function to group items under labeled section headers */
+  /**
+   * Optional function to group items under labeled section headers
+   * @example
+   * ```tsx
+   * <Dropdown.Root
+   *   getItemSection={(item) => ({
+   *     key: item.category,
+   *     label: item.category,
+   *     icon: '📁'
+   *   })}
+   *   ...
+   * />
+   * ```
+   */
   getItemSection?: (item: T) => DropdownSectionMeta | null | undefined;
   /** Optional function to determine if item should show a separator before it */
   getItemSeparator?: (item: T, index: number) => boolean;
@@ -94,7 +173,13 @@ export interface DropdownRootProps<T> extends BaseDropdownProps {
   onOpenChange?: (isOpen: boolean) => void;
   /** Ref to the trigger element for portal positioning */
   triggerRef?: React.RefObject<HTMLElement | null>;
-  /** Whether to render dropdown in a portal (avoids overflow clipping) */
+  /**
+   * Whether to render dropdown in a portal (avoids overflow clipping)
+   * @example
+   * ```tsx
+   * <Dropdown.Root usePortal={true} ... />
+   * ```
+   */
   usePortal?: boolean;
   /** Duration in seconds for enter animation. Default: 0.2 */
   enterDuration?: number;
