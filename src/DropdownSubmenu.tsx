@@ -140,6 +140,28 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
 }
 
 /**
+ * @brief Default item styling for {@link DropdownSubmenuTrigger}.
+ *
+ * Mirrors {@link DropdownMenuItem}'s default class so a bare `<MenuSubTrigger>`
+ * renders with the same flex row layout (icon ◯ label ◯ trailing) as a sibling
+ * `<MenuItem>`. Without this, consumers that didn't pass a `className` got an
+ * unstyled `<button>` whose icon + label collapsed into block flow — labels
+ * floated into the middle of the panel detached from their icons (ai-nexus
+ * sidebar conversation right-click menu, image #37).
+ *
+ * Consumer overrides are merged via {@link mergeSubmenuTriggerClassName} so
+ * later utilities still win (Tailwind's later-class-wins ordering).
+ */
+const DEFAULT_SUBMENU_TRIGGER_CLASSNAME =
+  "focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-submenu-trigger relative flex w-full cursor-default items-center outline-hidden select-none data-[state=open]:bg-foreground/[0.03] [&_svg]:pointer-events-none [&_svg]:shrink-0";
+
+function mergeSubmenuTriggerClassName(override: string | undefined): string {
+  return override
+    ? `${DEFAULT_SUBMENU_TRIGGER_CLASSNAME} ${override}`
+    : DEFAULT_SUBMENU_TRIGGER_CLASSNAME;
+}
+
+/**
  * @brief Props for `DropdownSubmenuTrigger`.
  */
 export interface DropdownSubmenuTriggerProps {
@@ -205,9 +227,11 @@ export function DropdownSubmenuTrigger({
     "data-state": isOpen ? ("open" as const) : ("closed" as const),
   };
 
+  const mergedClassName = mergeSubmenuTriggerClassName(className);
+
   if (asChild) {
     return (
-      <Slot ref={setRef} {...handlers}>
+      <Slot ref={setRef} className={mergedClassName} {...handlers}>
         {children}
       </Slot>
     );
@@ -216,7 +240,7 @@ export function DropdownSubmenuTrigger({
     <button
       type="button"
       ref={setRef as React.Ref<HTMLButtonElement>}
-      className={className}
+      className={mergedClassName}
       {...handlers}
     >
       {children}
