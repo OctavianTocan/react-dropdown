@@ -93,6 +93,40 @@ export type {
   DropdownSubmenuContentProps,
 } from "./DropdownSubmenu";
 
+// JSX-children panel-mode primitives. Use inside `DropdownPanelMenu` or
+// `DropdownContextMenuContent` to compose item trees as JSX rather than via
+// the data-driven `items + renderItem` API on `DropdownMenu`.
+export {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuShortcut,
+} from "./DropdownPanelItems";
+export type {
+  DropdownMenuItemProps,
+  DropdownMenuItemSelectEvent,
+  DropdownMenuSeparatorProps,
+  DropdownMenuLabelProps,
+} from "./DropdownPanelItems";
+
+// JSX-children dropdown panel — Radix-`DropdownMenu` parity surface for
+// consumers that need to render arbitrary item trees as children.
+export { DropdownPanelMenu } from "./DropdownPanelMenu";
+export type { DropdownPanelMenuProps } from "./DropdownPanelMenu";
+
+// Right-click context menu family. Reuses the regular dropdown's motion +
+// click-outside + keyboard infrastructure via `DropdownRoot`.
+export {
+  DropdownContextMenu,
+  DropdownContextMenuTrigger,
+  DropdownContextMenuContent,
+} from "./DropdownContextMenu";
+export type {
+  DropdownContextMenuProps,
+  DropdownContextMenuTriggerProps,
+  DropdownContextMenuContentProps,
+} from "./DropdownContextMenu";
+
 // Export types
 export type {
   BaseDropdownProps,

@@ -623,6 +623,16 @@ import {
     DropdownSearchable,
     DropdownSimple,
     DropdownMenu,
+    // JSX-children panel-mode menu (Radix-DropdownMenu parity)
+    DropdownPanelMenu,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuLabel,
+    DropdownMenuShortcut,
+    // Right-click context menu family
+    DropdownContextMenu,
+    DropdownContextMenuTrigger,
+    DropdownContextMenuContent,
     DropdownProvider,
     useDropdownContext,
     useKeyboardNavigation,

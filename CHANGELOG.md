@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (panel-mode JSX surface)
+
+- **`DropdownPanelMenu`** — sibling to the data-driven `DropdownMenu` that
+  accepts arbitrary JSX children instead of `items + renderItem`. Compose
+  any tree of `DropdownMenuItem` / `DropdownMenuLabel` / `DropdownMenuSeparator`
+  / `DropdownMenuShortcut` directly. Internally wraps `DropdownRoot` with a
+  no-op data path; the items dispatch via `useDropdownContext().closeDropdown`,
+  so close-on-select works without the data path. Reuses the same
+  `DropdownContent` motion variants for visual continuity.
+- **`DropdownMenuItem`** (JSX) — Radix-`DropdownMenu.Item`-shaped clickable row
+  with `onSelect({ preventDefault })`, `asChild` (for wrapping around `<a href>`
+  etc.), `inset`, `variant: 'default' | 'destructive'`, `disabled`. Calls
+  `closeDropdown()` on activation unless `event.preventDefault()` is called.
+  Activates via click, Enter, or Space.
+- **`DropdownMenuSeparator`**, **`DropdownMenuLabel`** (with `inset`),
+  **`DropdownMenuShortcut`** — supporting JSX primitives matching Radix's
+  surface so existing menu compositions migrate one-to-one.
+
+### Added (right-click context menu)
+
+- **`DropdownContextMenu`** family — three components (`DropdownContextMenu`,
+  `DropdownContextMenuTrigger`, `DropdownContextMenuContent`) that open the
+  same panel-mode UI on `oncontextmenu`. The trigger captures the right-click,
+  prevents the browser's native menu, and stores `clientX`/`clientY` so a
+  hidden 1×1 fixed-position anchor reuses `DropdownContent`'s existing
+  collision-flip + portal positioning to land the panel at the cursor. The
+  same `DropdownMenuItem` / Label / Separator JSX primitives work inside
+  without modification, which lets `frontend/components/ui/menu-context.tsx`
+  route the same item tree into either the panel or the context menu.
+- Trigger supports `asChild` so existing rows (e.g. `EntityRow`'s clickable
+  `div role="button"`) can host the right-click handler without an extra DOM
+  level.
+- Closing dismissals (click-outside, Escape, item activation) propagate via
+  `onOpenChange(false)`; opens publish `onOpenChange(true)`.
+
+### Tested
+
+- 8 new tests for `DropdownPanelMenu` (open/close, onSelect, preventDefault,
+  disabled, asChild, separator/label/shortcut, Enter activation).
+- 7 new tests for `DropdownContextMenu` (right-click open, native-menu
+  prevention, item click, click-outside, asChild trigger, disabled trigger,
+  onOpenChange).
+- Total: 167 tests passing (152 → 167).
+
 ### Added (headless API)
 
 - **`useDropdown` headless hook** — prop-getter API in the Headless UI /
