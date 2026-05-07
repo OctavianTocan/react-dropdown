@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useDropdownContext } from "./DropdownContext";
 import { ELEVATED_SHADOW } from "./design-tokens";
+import { DropdownSubmenuGroupProvider } from "./DropdownSubmenu";
 import type { DropdownContentProps } from "./types";
 
 /**
@@ -414,7 +415,12 @@ export function DropdownContent({
       data-testid={testId}
       data-placement={activePlacement}
     >
-      {children}
+      {/* Wrap children in a fresh submenu group so direct-child
+          DropdownSubmenus inside this panel coordinate (auto-close peers
+          when one opens). Nested submenus layer their own group so they
+          don't accidentally close their cousins above. See
+          `DropdownSubmenu.tsx` for the rationale. */}
+      <DropdownSubmenuGroupProvider>{children}</DropdownSubmenuGroupProvider>
     </motion.div>
   );
 

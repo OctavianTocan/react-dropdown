@@ -47,6 +47,92 @@ const HOVER_CLOSE_DELAY_MS = 200;
 const VIEWPORT_INSET = 8;
 
 /**
+ * @brief Coordinates sibling submenus inside a single parent panel.
+ *
+ * Without coordination, cycling the cursor between sibling triggers
+ * (Status → Labels → More) leaves the previous submenu visible while the
+ * next one opens — the trigger's hover-close is delayed by
+ * {@link HOVER_CLOSE_DELAY_MS}, but the next trigger's hover-open fires
+ * after only {@link HOVER_OPEN_DELAY_MS}, so both panels are visible for
+ * ~100 ms plus animation tail. The visible artefact: panels stack on top
+ * of each other when the user scrubs the cursor.
+ *
+ * Each {@link DropdownSubmenu} registers its `close` callback with the
+ * group on mount and removes it on unmount. When a submenu opens, it
+ * calls `closeOthers(self)` so peers in the same group close
+ * immediately.
+ *
+ * Each {@link DropdownSubmenu} also provides a fresh group to its
+ * children — nested submenus only coordinate within their own depth, so
+ * opening a sub-sub doesn't accidentally close the sibling sub.
+ */
+interface SubmenuGroupValue {
+  /** Adds `close` to the registry; returns an unregister fn. */
+  register: (close: () => void) => () => void;
+  /**
+   * Closes every registered peer except `self`. Called by a submenu when
+   * it opens to evict its siblings.
+   */
+  closeOthers: (self: () => void) => void;
+}
+
+const NOOP_SUBMENU_GROUP: SubmenuGroupValue = {
+  register: () => () => {
+    // no-op when no provider above (e.g. submenu rendered standalone in tests)
+  },
+  closeOthers: () => {
+    // no-op when no provider above
+  },
+};
+
+const SubmenuGroupContext = createContext<SubmenuGroupValue>(NOOP_SUBMENU_GROUP);
+
+/**
+ * @brief Hook returning the parent submenu-group coordinator.
+ *
+ * Returns a no-op group when used outside a provider so consumers don't
+ * need to wrap their tree explicitly — the coordination just becomes
+ * inactive for that subtree.
+ */
+function useSubmenuGroup(): SubmenuGroupValue {
+  return useContext(SubmenuGroupContext);
+}
+
+/**
+ * @brief Provider for a submenu peer-group at this nesting level.
+ *
+ * Wrap a panel's children in this provider so the submenus inside the
+ * panel coordinate (auto-close peers when one opens). {@link DropdownSubmenu}
+ * already wraps its OWN children in a fresh provider for descendants —
+ * external callers usually only need this around the ROOT dropdown
+ * panel's children when they want sibling submenus there to coordinate.
+ */
+export function DropdownSubmenuGroupProvider({
+  children,
+}: {
+  children: ReactNode;
+}): React.JSX.Element {
+  const closeFnsRef = useRef<Set<() => void>>(new Set());
+  const value = useMemo<SubmenuGroupValue>(
+    () => ({
+      register(close) {
+        closeFnsRef.current.add(close);
+        return () => {
+          closeFnsRef.current.delete(close);
+        };
+      },
+      closeOthers(self) {
+        for (const close of closeFnsRef.current) {
+          if (close !== self) close();
+        }
+      },
+    }),
+    [],
+  );
+  return <SubmenuGroupContext.Provider value={value}>{children}</SubmenuGroupContext.Provider>;
+}
+
+/**
  * @brief Internal context shared by `DropdownSubmenu` and its children.
  */
 interface SubmenuContextValue {
@@ -92,6 +178,12 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
   // the most recent intent.
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  // Peer coordinator from the closest ancestor panel — used to evict
+  // sibling submenus when this one opens so cycling between Status →
+  // Labels → More no longer briefly stacks two flyouts on top of each
+  // other.
+  const parentGroup = useSubmenuGroup();
+
   const cancelScheduled = useCallback((): void => {
     if (timerRef.current !== undefined) {
       clearTimeout(timerRef.current);
@@ -99,23 +191,40 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
     }
   }, []);
 
+  // `closeRef` lets us pass a stable identity to the parent group's
+  // register/closeOthers without forcing every sibling to retain a
+  // reference to a fresh function each render.
+  const closeRef = useRef<() => void>(() => {
+    // assigned below — stable identity is what matters for the registry.
+  });
+
   const open = useCallback((): void => {
     cancelScheduled();
+    // Evict sibling submenus first; otherwise their pending hover-close
+    // (HOVER_CLOSE_DELAY_MS = 200 ms) keeps them painted while we're
+    // already opening, briefly stacking two panels.
+    parentGroup.closeOthers(closeRef.current);
     setIsOpen(true);
-  }, [cancelScheduled]);
+  }, [cancelScheduled, parentGroup]);
 
   const close = useCallback((): void => {
     cancelScheduled();
     setIsOpen(false);
   }, [cancelScheduled]);
 
+  closeRef.current = close;
+
   const scheduleOpen = useCallback((): void => {
     cancelScheduled();
     timerRef.current = setTimeout(() => {
+      // Same eviction at the actual flip point — handles the case where
+      // the user scrubs hover triggers fast enough that several timers
+      // were scheduled and the latest one is the survivor.
+      parentGroup.closeOthers(closeRef.current);
       setIsOpen(true);
       timerRef.current = undefined;
     }, HOVER_OPEN_DELAY_MS);
-  }, [cancelScheduled]);
+  }, [cancelScheduled, parentGroup]);
 
   const scheduleClose = useCallback((): void => {
     cancelScheduled();
@@ -124,6 +233,14 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
       timerRef.current = undefined;
     }, HOVER_CLOSE_DELAY_MS);
   }, [cancelScheduled]);
+
+  // Register this submenu's `close` with the parent group on mount.
+  // Identity comes from the closeRef so the registry entry stays stable
+  // across re-renders — reference equality is what `closeOthers(self)`
+  // depends on to skip the active submenu.
+  useEffect(() => {
+    return parentGroup.register(closeRef.current);
+  }, [parentGroup]);
 
   // Always clear pending timers on unmount so a stale setTimeout can't
   // setState after the submenu is gone.
@@ -136,7 +253,13 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
     [isOpen, open, close, scheduleOpen, scheduleClose, cancelScheduled],
   );
 
-  return <SubmenuContext.Provider value={value}>{children}</SubmenuContext.Provider>;
+  return (
+    <SubmenuContext.Provider value={value}>
+      {/* Fresh group for nested submenus — descendants only coordinate
+          with their own siblings, not with this submenu's peers. */}
+      <DropdownSubmenuGroupProvider>{children}</DropdownSubmenuGroupProvider>
+    </SubmenuContext.Provider>
+  );
 }
 
 /**
@@ -153,7 +276,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
  * later utilities still win (Tailwind's later-class-wins ordering).
  */
 const DEFAULT_SUBMENU_TRIGGER_CLASSNAME =
-  "focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-submenu-trigger relative flex w-full cursor-default items-center outline-hidden select-none data-[state=open]:bg-foreground/[0.03] [&_svg]:pointer-events-none [&_svg]:shrink-0";
+  "focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm text-left [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-submenu-trigger relative flex w-full cursor-default items-center outline-hidden select-none data-[state=open]:bg-foreground/[0.03] [&_svg]:pointer-events-none [&_svg]:shrink-0";
 
 function mergeSubmenuTriggerClassName(override: string | undefined): string {
   return override

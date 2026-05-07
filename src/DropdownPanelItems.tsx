@@ -103,9 +103,14 @@ export interface DropdownMenuItemProps
  * Default item styling. Mirrors the existing `components/ui/dropdown-menu.tsx`
  * Radix wrapper so visual parity holds during migration. Consumers can override
  * any of these by passing a `className`.
+ *
+ * `text-left` is load-bearing: native `<button>` defaults to
+ * `text-align: center`, which inherits into any nested label `<span>` (even
+ * one wrapped in `flex-1`). Without the override, short labels visibly drift
+ * to the horizontal center of the row instead of sitting next to the icon.
  */
 const DEFAULT_ITEM_CLASSNAME =
-	"focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm data-inset:pl-9.5 [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-menu-item relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0";
+	"focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm text-left data-inset:pl-9.5 [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-menu-item relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0";
 
 /**
  * @brief Clickable item row inside a panel-mode dropdown / context menu.
