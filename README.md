@@ -65,9 +65,43 @@ export function MyDropdown() {
 }
 ```
 
+## Two APIs
+
+This package ships **two parallel APIs** that share the same keyboard, focus,
+and ARIA wiring under the hood:
+
+- **Component API** (the `Dropdown.*` exports above) — batteries included.
+  Use this when you want a styled trigger, portaled content, motion, and
+  collision detection out of the box. ~90% of call sites.
+- **Headless API** (`useDropdown`) — prop-getter hook in the
+  Headless UI / Downshift / Reach style. Use this when you need full control
+  over markup, motion, or portal strategy. See
+  [HEADLESS.md](./docs/HEADLESS.md) for the full guide.
+
+```tsx
+import { useDropdown } from "@octavian-tocan/react-dropdown";
+
+const dropdown = useDropdown({ items });
+return (
+  <>
+    <button {...dropdown.getTriggerProps()}>Open</button>
+    {dropdown.isOpen && (
+      <ul {...dropdown.getContentProps()}>
+        {items.map((item, i) => (
+          <li key={item.id} {...dropdown.getItemProps({ index: i, onSelect: () => pick(item) })}>
+            {item.label}
+          </li>
+        ))}
+      </ul>
+    )}
+  </>
+);
+```
+
 ## Documentation
 
 - [Live Storybook](https://octaviantocan.github.io/react-dropdown) <!-- TODO: Update after deployment -->
+- [Headless API Guide](./docs/HEADLESS.md) — `useDropdown` prop getters
 - [API Reference](./docs/API.md)
 - [Examples](./docs/EXAMPLES.md)
 - [Architecture](./docs/ARCHITECTURE.md)
