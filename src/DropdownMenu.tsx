@@ -18,7 +18,7 @@ import { DropdownRoot } from './DropdownRoot';
 import { DropdownContent } from './DropdownContent';
 import { DropdownList } from './DropdownList';
 import { useDropdownContext } from './DropdownContext';
-import type { DropdownRootProps } from './types';
+import type { DropdownRootProps, DropdownListProps } from './types';
 
 /**
  * @brief Props for DropdownMenu component
@@ -33,6 +33,14 @@ export interface DropdownMenuProps<T>
   listClassName?: string;
   /** Optional callback invoked when dropdown open state changes */
   onOpenChange?: (isOpen: boolean) => void;
+  /**
+   * Optional custom render function for each list item.
+   * When provided, overrides the default DropdownOption rendering.
+   * @param item The data item to render
+   * @param isSelected Whether this item is the currently selected value
+   * @param onSelect Callback to invoke when this item is chosen
+   */
+  renderItem?: DropdownListProps<T>['renderItem'];
 }
 
 /**
@@ -101,11 +109,13 @@ export function DropdownMenu<T>({
   disabled = false,
   placeholder,
   className = '',
-  dropdownPlacement = 'bottom',
+  placement,
+  dropdownPlacement,
   closeOnSelect = true,
   trigger,
   contentClassName = '',
   listClassName = '',
+  renderItem,
   onOpenChange,
   usePortal = false,
   'data-testid': testId = 'dropdown-menu',
@@ -129,6 +139,7 @@ export function DropdownMenu<T>({
       disabled={disabled}
       placeholder={placeholder}
       className={className}
+      placement={placement}
       dropdownPlacement={dropdownPlacement}
       closeOnSelect={closeOnSelect}
       onOpenChange={onOpenChange}
@@ -150,6 +161,7 @@ export function DropdownMenu<T>({
           getItemDisabled={getItemDisabled}
           getItemClassName={getItemClassName}
           getItemSection={getItemSection}
+          renderItem={renderItem}
           className={listClassName}
         />
       </DropdownContent>
