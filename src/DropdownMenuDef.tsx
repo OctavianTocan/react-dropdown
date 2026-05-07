@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { DropdownMenu } from './DropdownMenu';
 import type { DropdownPlacement, MenuItemDef } from './types';
@@ -30,6 +30,12 @@ function buildKey(item: MenuItemDef, index: number): string {
 export interface DropdownMenuDefProps {
   /** Element that triggers the dropdown to open. */
   trigger: ReactNode;
+  /**
+   * When `true`, the `trigger` element is rendered directly with the
+   * dropdown's behavior props merged onto it (Radix-style slot pattern).
+   * The single child of `trigger` becomes the actual trigger element.
+   */
+  asChild?: boolean;
   /** Ordered list of menu item definitions to render. */
   items: readonly MenuItemDef[];
   /** Where the dropdown should appear relative to the trigger. */
@@ -89,43 +95,75 @@ function ActionRow({
   );
 }
 
-/** Renders a single child item inside an open submenu panel. */
-function renderSubmenuChild(
-  item: MenuItemDef,
-  index: number,
+/**
+ * Renders a list of MenuItemDef children, recursing into `SubmenuRow` for
+ * any nested submenu items. Used by both the top-level `DropdownMenuDef`
+ * (with the parent-managed accordion state) and each `SubmenuRow` (which
+ * manages its own independent accordion state for the next level down).
+ *
+ * @param items Child items to render
+ * @param openSubmenuId Currently expanded submenu id at this level, or null
+ * @param onToggleSubmenu Toggles a submenu open/closed at this level
+ * @param onActionDone Closes the entire dropdown chain — fired on action click
+ * @returns Array of rendered nodes
+ */
+function renderItems(
+  items: readonly MenuItemDef[],
+  openSubmenuId: string | null,
+  onToggleSubmenu: (id: string) => void,
   onActionDone: () => void,
 ): ReactNode {
-  const key = buildKey(item, index);
-  switch (item.type) {
-    case 'separator':
-      return <SeparatorRow key={key} />;
-    case 'label':
-      return <LabelRow key={key} text={item.text} />;
-    case 'action':
-      return (
-        <ActionRow
-          key={key}
-          label={item.label}
-          icon={item.icon}
-          shortcut={item.shortcut}
-          disabled={item.disabled}
-          onClick={() => {
-            item.onClick();
-            onActionDone();
-          }}
-        />
-      );
-    case 'submenu':
-      // Nested submenus beyond the first level render as plain labels.
-      return <LabelRow key={key} text={item.label} />;
-  }
+  return items.map((item, index) => {
+    const key = buildKey(item, index);
+    switch (item.type) {
+      case 'separator':
+        return <SeparatorRow key={key} />;
+      case 'label':
+        return <LabelRow key={key} text={item.text} />;
+      case 'action':
+        return (
+          <ActionRow
+            key={key}
+            label={item.label}
+            icon={item.icon}
+            shortcut={item.shortcut}
+            disabled={item.disabled}
+            onClick={() => {
+              item.onClick();
+              onActionDone();
+            }}
+          />
+        );
+      case 'submenu':
+        return (
+          <SubmenuRow
+            key={key}
+            id={item.id}
+            label={item.label}
+            icon={item.icon}
+            childItems={item.children}
+            isOpen={openSubmenuId === item.id}
+            onToggle={onToggleSubmenu}
+            onActionDone={onActionDone}
+          />
+        );
+    }
+  });
 }
 
+/**
+ * @brief Inline-accordion submenu row for `DropdownMenuDef`
+ *
+ * Each row owns the accordion state for ITS OWN children — so submenus can
+ * nest arbitrarily deep with each level toggling independently. Only one
+ * direct child submenu can be expanded at a time within the same parent (the
+ * familiar accordion behavior).
+ */
 function SubmenuRow({
   id,
   label,
   icon,
-  children,
+  childItems,
   isOpen,
   onToggle,
   onActionDone,
@@ -133,11 +171,24 @@ function SubmenuRow({
   id: string;
   label: string;
   icon?: ReactNode;
-  children: readonly MenuItemDef[];
+  childItems: readonly MenuItemDef[];
   isOpen: boolean;
   onToggle: (id: string) => void;
   onActionDone: () => void;
 }): React.JSX.Element {
+  // Independent accordion state for THIS row's children, so nested submenus
+  // toggle without colliding with the parent's selection.
+  const [openChildSubmenuId, setOpenChildSubmenuId] = useState<string | null>(null);
+  // Reset nested expansion when this row collapses — reopening always starts
+  // with all of its children collapsed.
+  useEffect(() => {
+    if (!isOpen) setOpenChildSubmenuId(null);
+  }, [isOpen]);
+
+  const handleToggleChildSubmenu = useCallback((childId: string): void => {
+    setOpenChildSubmenuId((prev) => (prev === childId ? null : childId));
+  }, []);
+
   return (
     <div>
       <button
@@ -174,7 +225,7 @@ function SubmenuRow({
           aria-label={label}
           className="ml-4 mt-0.5 border-l border-border/50 pl-1"
         >
-          {children.map((child, idx) => renderSubmenuChild(child, idx, onActionDone))}
+          {renderItems(childItems, openChildSubmenuId, handleToggleChildSubmenu, onActionDone)}
         </div>
       )}
     </div>
@@ -205,6 +256,7 @@ function SubmenuRow({
  */
 export function DropdownMenuDef({
   trigger,
+  asChild,
   items,
   placement,
   contentClassName,
@@ -237,6 +289,7 @@ export function DropdownMenuDef({
   return (
     <DropdownMenu<WrappedItem>
       trigger={trigger}
+      asChild={asChild}
       items={wrappedItems}
       onSelect={(item) => {
         // Only action items need an explicit handler here; the dropdown
@@ -280,11 +333,12 @@ export function DropdownMenuDef({
                 id={def.id}
                 label={def.label}
                 icon={def.icon}
-                children={def.children}
+                childItems={def.children}
                 isOpen={openSubmenuId === def.id}
                 onToggle={handleToggleSubmenu}
-                // Clicking a child action triggers onSelect on the parent submenu
-                // WrappedItem so that closeOnSelect fires and the dropdown closes.
+                // Clicking a nested action triggers `onSelect(item)` on the
+                // parent WrappedItem so that `closeOnSelect` fires on the root
+                // dropdown and the entire chain closes.
                 onActionDone={() => onSelect(item)}
               />
             );

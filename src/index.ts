@@ -70,9 +70,28 @@ export { DropdownSearchable } from "./DropdownSearchable";
 export { DropdownSimple } from "./DropdownSimple";
 export { DropdownMenu } from "./DropdownMenu";
 export type { DropdownMenuProps } from "./DropdownMenu";
+export { DropdownMenuDef } from "./DropdownMenuDef";
+export type { DropdownMenuDefProps } from "./DropdownMenuDef";
 
 // Export context and hooks
 export { DropdownProvider, useDropdownContext, useKeyboardNavigation, useClickOutside } from "./DropdownContext";
+export { useMenuKeyboard } from "./useMenuKeyboard";
+export type { MenuKeyboardApi, UseMenuKeyboardOptions } from "./useMenuKeyboard";
+export { useDropdown } from "./useDropdown";
+export type {
+  UseDropdownOptions,
+  UseDropdownReturn,
+  GetTriggerPropsArg,
+  GetContentPropsArg,
+  GetItemPropsArg,
+} from "./useDropdown";
+export { Slot } from "./Slot";
+export type { SlotProps } from "./Slot";
+export { DropdownSubmenu, DropdownSubmenuTrigger, DropdownSubmenuContent } from "./DropdownSubmenu";
+export type {
+  DropdownSubmenuTriggerProps,
+  DropdownSubmenuContentProps,
+} from "./DropdownSubmenu";
 
 // Export types
 export type {
@@ -89,6 +108,10 @@ export type {
   DropdownAnimationState,
   DropdownHeaderProps,
   DropdownFooterProps,
+  MenuItemDef,
+  DropdownEasing,
+  DropdownAutoFocusHandler,
+  DropdownAlign,
 } from "./types";
 
 // Import components for compound export

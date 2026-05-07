@@ -5,7 +5,8 @@
 
 "use client";
 
-import { createContext, useContext, ReactNode, useRef, useState, useEffect, useCallback } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import type { DropdownContextValue } from "./types";
 
 /**
@@ -96,12 +97,14 @@ export function useKeyboardNavigation<T>(
         focusedIndexRef.current = Math.max(focusedIndexRef.current - 1, 0);
         setFocusedIndex(focusedIndexRef.current);
         break;
-      case "Enter":
+      case "Enter": {
         event.preventDefault();
-        if (focusedIndexRef.current >= 0 && focusedIndexRef.current < items.length) {
-          onSelect(items[focusedIndexRef.current]);
+        const focusedItem = items[focusedIndexRef.current];
+        if (focusedItem !== undefined) {
+          onSelect(focusedItem);
         }
         break;
+      }
       case "Escape":
         event.preventDefault();
         closeDropdown();

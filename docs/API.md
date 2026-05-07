@@ -56,10 +56,17 @@ import Dropdown from "@octavian-tocan/react-dropdown";
 | `triggerRef`         | `RefObject<HTMLElement>`                                        | -                 | Ref to trigger element (required for portal)   |
 | `enterDuration`      | `number`                                                        | `0.2`             | Enter animation duration in seconds            |
 | `exitDuration`       | `number`                                                        | `0.15`            | Exit animation duration in seconds             |
+| `enterEase`          | `[number, number, number, number]`                              | `[0.16,1,0.3,1]`  | Cubic-bezier easing curve for the enter motion |
+| `exitEase`           | `[number, number, number, number]`                              | `enterEase`       | Cubic-bezier easing curve for the exit motion  |
+| `respectReducedMotion` | `boolean`                                                     | `true`            | Honor `prefers-reduced-motion`; collapse scale/y to opacity-only fade |
+| `collisionDetection` | `boolean`                                                       | `true`            | Flip explicit `top` / `bottom` placements that would overflow the viewport |
+| `anchorRef`          | `RefObject<HTMLElement>`                                        | -                 | Visual anchor for positioning, distinct from `triggerRef` (the click target) |
+| `onOpenAutoFocus`    | `(event: { preventDefault: () => void }) => void`               | -                 | Called before focus moves into the content on open; preventDefault to opt out |
+| `onCloseAutoFocus`   | `(event: { preventDefault: () => void }) => void`               | -                 | Called before focus is restored to the trigger on close; preventDefault to route focus elsewhere |
 | `getItemDescription` | `(item: T) => string \| null`                                   | -                 | Get description text for items                 |
 | `getItemIcon`        | `(item: T) => ReactNode`                                        | -                 | Get icon element for items                     |
 | `getItemSection`     | `(item: T) => DropdownSectionMeta \| null`                      | -                 | Group items into sections                      |
-| `getItemSeparator`   | `(item: T, index: number) => boolean`                           | -                 | Show separator before item                     |
+| `getItemSeparator`   | `(item: T, index: number) => boolean`                           | -                 | Render divider ABOVE this item (suppressed at the top of the list) |
 | `getItemDisabled`    | `(item: T) => boolean`                                          | -                 | Determine if item is disabled                  |
 | `getItemClassName`   | `(item: T, isSelected: boolean, isDisabled: boolean) => string` | -                 | Custom className for items                     |
 | `className`          | `string`                                                        | `''`              | Additional CSS class for root container        |
@@ -189,7 +196,7 @@ Scrollable list component that renders dropdown items.
 | `getItemDescription` | `(item: T) => string \| null`                                     | -            | Get description text                         |
 | `getItemIcon`        | `(item: T) => ReactNode`                                          | -            | Get icon element                             |
 | `getItemSection`     | `(item: T) => DropdownSectionMeta \| null`                        | -            | Group into sections                          |
-| `getItemSeparator`   | `(item: T, index: number) => boolean`                             | -            | Show separator                               |
+| `getItemSeparator`   | `(item: T, index: number) => boolean`                             | -            | Render divider ABOVE this item               |
 | `getItemDisabled`    | `(item: T) => boolean`                                            | -            | Item disabled state                          |
 | `getItemClassName`   | `(item, isSelected, isDisabled) => string`                        | -            | Custom item className                        |
 | `staggered`          | `boolean`                                                         | `false`      | Use staggered item animations                |
@@ -368,7 +375,62 @@ const menuItems: MenuItem[] = [
 
 ---
 
+## Keyboard interaction
+
+`DropdownMenu` (and any custom composition that wires `useMenuKeyboard`) ships
+the same keyboard surface Radix's `DropdownMenu` provides:
+
+| Key                    | Behavior                                                      |
+| ---------------------- | ------------------------------------------------------------- |
+| `ArrowDown`            | Move focus to next enabled item (wraps at the end)            |
+| `ArrowUp`              | Move focus to previous enabled item (wraps at the start)      |
+| `Home`                 | Jump focus to the first enabled item                          |
+| `End`                  | Jump focus to the last enabled item                           |
+| `Enter` / `Space`      | Activate the focused item (no-op when disabled)               |
+| `Escape`               | Close the menu                                                |
+| `Tab` / `Shift+Tab`    | Leave the menu (focus returns to the trigger via close)       |
+| Alphanumeric           | Type-ahead — buffer (500 ms) jumps to the first item whose display starts with the typed prefix |
+
+The active item is reported via `aria-activedescendant` and exposed on `<li>`
+as `data-focused="true"` for styling. Hover keeps keyboard focus in sync via
+an `onMouseEnter` that updates the focused index.
+
+---
+
 ## Hooks
+
+### useMenuKeyboard
+
+Headless hook for action-menu keyboard interaction. Used internally by
+`DropdownMenu`; export to wire the same surface into custom compositions
+built on `Dropdown.Root` + `Dropdown.Content` + `Dropdown.List`.
+
+```tsx
+import { useMenuKeyboard } from "@octavian-tocan/react-dropdown";
+
+const { focusedIndex, handleKeyDown, getItemTabIndex, setFocusedIndex } =
+    useMenuKeyboard({
+        items,
+        isOpen,
+        getItemDisplay: (item) => item.label,
+        getItemDisabled: (item) => item.disabled === true,
+        onActivate: (item) => item.onClick(),
+        onClose: closeDropdown,
+    });
+
+// Spread `handleKeyDown` onto the menu container, drive `aria-activedescendant`
+// from focusedIndex, and forward `focusedIndex` to `Dropdown.List` so the
+// active row gets `data-focused="true"`.
+```
+
+Returns:
+
+| Field             | Type                                  | Description                                                        |
+| ----------------- | ------------------------------------- | ------------------------------------------------------------------ |
+| `focusedIndex`    | `number`                              | Index of the currently focused item; `-1` when nothing is focused  |
+| `handleKeyDown`   | `(event: React.KeyboardEvent) => void`| Wire onto the menu container's `onKeyDown`                         |
+| `getItemTabIndex` | `(index: number) => number`           | Returns `0` for the focused item and `-1` otherwise                |
+| `setFocusedIndex` | `(index: number) => void`             | Updates the focused index — call from `onMouseEnter` for parity    |
 
 ### useDropdownContext
 

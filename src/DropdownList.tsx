@@ -48,11 +48,11 @@ interface GroupedItems<T> {
  * @returns Object containing sections array and ungrouped items array
  */
 const groupItemsBySection = <T,>(
-  items: T[],
+  items: readonly T[],
   resolveSection?: (item: T) => DropdownSectionMeta | null | undefined
 ): GroupedItems<T> => {
   if (!resolveSection) {
-    return { sections: [], ungrouped: items };
+    return { sections: [], ungrouped: [...items] };
   }
 
   const sectionIndex = new Map<string, number>();
@@ -75,7 +75,11 @@ const groupItemsBySection = <T,>(
       return;
     }
 
-    sections[existingIndex].items.push(item);
+    // existingIndex was just registered via sectionIndex.set(section.key, sections.length)
+    // immediately before the bucket was pushed, so it always points at a real
+    // entry; the optional chain satisfies `noUncheckedIndexedAccess` without
+    // changing runtime behavior.
+    sections[existingIndex]?.items.push(item);
   });
 
   return { sections, ungrouped };
@@ -99,7 +103,7 @@ const groupItemsBySection = <T,>(
  * @param props.getItemDescription Optional function to get description text
  * @param props.getItemIcon Optional function to get icon element
  * @param props.getItemSection Optional function to get section metadata
- * @param props.getItemSeparator Optional function to determine if separator should appear
+ * @param props.getItemSeparator Optional `(item, index) => boolean` — return true to render a divider ABOVE this item
  * @param props.getItemDisabled Optional function to determine if item is disabled
  * @param props.getItemClassName Optional function to get custom className
  * @param props.staggered Whether to use staggered animations for list items
@@ -125,6 +129,9 @@ export function DropdownList<T>({
   staggered = false,
   staggerDelay = 0.04,
   className = "",
+  focusedIndex,
+  getItemId,
+  onItemPointerEnter,
   "data-testid": testId = "dropdown-list",
 }: DropdownListProps<T>) {
   const {
@@ -192,10 +199,13 @@ export function DropdownList<T>({
    */
   const sectionAccessor = getItemSection ?? contextSection;
   /**
-   * @brief Accessor function to determine if a separator should be shown after an item
-   * @description Resolves getItemSeparator from props or context. This function is called
-   * with (item, index) and should return true if a separator should appear after the item.
-   * Typically used to add separators between all items except the last one.
+   * @brief Accessor function to determine if a separator should be shown
+   * BEFORE an item
+   * @description Resolves getItemSeparator from props or context. Called with
+   * `(item, index)` and should return true if a divider should appear ABOVE
+   * the item — useful for marking the start of an "advanced" or "destructive"
+   * group at the bottom of a menu. The renderer suppresses the divider when
+   * it would land at the very top of the list (or the top of a section).
    */
   const separatorAccessor = getItemSeparator ?? contextSeparator;
   /**
@@ -334,13 +344,31 @@ export function DropdownList<T>({
     const isSelected = selectedItem ? getItemKey(selectedItem) === key : false;
     const isDisabled = disabledAccessor ? disabledAccessor(item) : false;
     const customClassName = classNameAccessor ? classNameAccessor(item, isSelected, isDisabled) : "";
+    // Roving-tabindex / aria-activedescendant integration: when the menu is
+    // keyboard-driven (DropdownMenu wires `focusedIndex`), the matching <li>
+    // exposes a stable `id` and a `data-focused` attribute so the parent's
+    // `aria-activedescendant` resolves and consumers can style the active row.
+    const itemId = getItemId ? getItemId(item, index) : `dropdown-item-${key}`;
+    const isKeyboardFocused = focusedIndex !== undefined && focusedIndex === index;
 
     const optionContent = renderItem ? (
-      <li key={key} data-key={key}>
+      <li
+        key={key}
+        id={itemId}
+        data-key={key}
+        data-focused={isKeyboardFocused ? "true" : undefined}
+        onMouseEnter={onItemPointerEnter ? () => onItemPointerEnter(index) : undefined}
+      >
         {renderItem(item, isSelected, resolvedOnSelect)}
       </li>
     ) : (
-      <li key={key} data-key={key}>
+      <li
+        key={key}
+        id={itemId}
+        data-key={key}
+        data-focused={isKeyboardFocused ? "true" : undefined}
+        onMouseEnter={onItemPointerEnter ? () => onItemPointerEnter(index) : undefined}
+      >
         <DropdownOption
           dataKey={key}
           item={item}
@@ -387,44 +415,66 @@ export function DropdownList<T>({
   let itemIndex = 0;
 
   /**
-   * @brief Renders ungrouped items with optional separators
-   * @description Iterates through ungrouped items, renders each option, and conditionally
-   * adds a separator after each item based on the separatorAccessor function result.
-   * The original index is found to ensure correct separator placement relative to the
-   * original items array order.
+   * @brief Renders a divider list item using design-system tokens
+   * @description Themed via Tailwind's `bg-border` so it adapts to dark mode
+   * and design-system overrides. Marked `aria-hidden` because separators are
+   * decorative — the `role="separator"` already announces the boundary to
+   * screen readers.
+   * @param key Unique React key for the separator
+   * @returns A list element rendering a 1-px horizontal rule
+   */
+  const renderSeparator = (key: string): ReactNode => (
+    <li
+      key={key}
+      role="separator"
+      aria-hidden="true"
+      className="mx-1 my-1 h-px bg-border list-none"
+    />
+  );
+
+  /**
+   * @brief Renders ungrouped items, emitting a separator BEFORE any item the
+   * accessor flags true
+   *
+   * Placement is "before" so consumers can think in terms of "draw a divider
+   * above this item" — the typical case is grouping advanced/destructive
+   * actions at the bottom of a menu. The first item gets no separator above
+   * it even if marked, since a divider at the very top of the menu is rarely
+   * what the consumer means.
    */
   groupedItems.ungrouped.forEach((item) => {
     const originalIndex = items.findIndex((i) => getItemKey(i) === getItemKey(item));
+    if (
+      separatorAccessor &&
+      originalIndex > 0 &&
+      separatorAccessor(item, originalIndex)
+    ) {
+      renderedItems.push(renderSeparator(`separator-${originalIndex}`));
+    }
     renderedItems.push(renderOption(item, itemIndex));
     itemIndex++;
-    // Show separator after item if getItemSeparator returns true (for all except last)
-    if (separatorAccessor && originalIndex >= 0 && separatorAccessor(item, originalIndex)) {
-      renderedItems.push(
-        <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />
-      );
-    }
   });
 
   /**
-   * @brief Renders sectioned items with optional separators
-   * @description Iterates through sections, renders section headers, and for each item
-   * in a section, renders the option with optional separators. The original index is
-   * found to ensure correct separator placement relative to the original items array order,
-   * maintaining consistent separator behavior across grouped and ungrouped items.
+   * @brief Renders sectioned items with separators emitted BEFORE the marked
+   * item — same semantics as the ungrouped loop above, applied within each
+   * section's bucket
    */
   groupedItems.sections.forEach((section) => {
     renderedItems.push(renderSectionHeader(section, itemIndex));
     itemIndex++;
-    section.items.forEach((item) => {
+    section.items.forEach((item, indexInSection) => {
       const originalIndex = items.findIndex((i) => getItemKey(i) === getItemKey(item));
+      if (
+        separatorAccessor &&
+        originalIndex >= 0 &&
+        indexInSection > 0 &&
+        separatorAccessor(item, originalIndex)
+      ) {
+        renderedItems.push(renderSeparator(`separator-${originalIndex}`));
+      }
       renderedItems.push(renderOption(item, itemIndex));
       itemIndex++;
-      // Show separator after item if getItemSeparator returns true (for all except last)
-      if (separatorAccessor && originalIndex >= 0 && separatorAccessor(item, originalIndex)) {
-        renderedItems.push(
-          <li key={`separator-${originalIndex}`} role="separator" className="border-b border-gray-200 my-1" />
-        );
-      }
     });
   });
 

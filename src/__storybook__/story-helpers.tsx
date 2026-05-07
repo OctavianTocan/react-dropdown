@@ -146,6 +146,12 @@ export function createMockContext<T = unknown>(
     offset: 8,
     enterDuration: 0.2,
     exitDuration: 0.15,
+    enterEase: [0.16, 1, 0.3, 1] as const,
+    exitEase: [0.16, 1, 0.3, 1] as const,
+    respectReducedMotion: true,
+    collisionDetection: true,
+    align: "end" as const,
+    alignOffset: 0,
     dropdownPlacement: "bottom" as const,
     ...overrides,
   };

@@ -98,7 +98,7 @@ export const createMockDropdownContext = <T,>(
     searchQuery: overrides.searchQuery ?? "",
     setSearchQuery: overrides.setSearchQuery ?? createNoop<DropdownContextValue<T>["setSearchQuery"]>(),
     items: overrides.items ?? [],
-    filteredItems: overrides.filteredItems ?? overrides.items ?? [],
+    filteredItems: overrides.filteredItems ?? [...(overrides.items ?? [])],
     getItemKey: overrides.getItemKey ?? ((() => "") as DropdownContextValue<T>["getItemKey"]),
     getItemDisplay: overrides.getItemDisplay ?? ((() => "") as DropdownContextValue<T>["getItemDisplay"]),
     filterItems: overrides.filterItems ?? defaultFilter,
@@ -120,6 +120,15 @@ export const createMockDropdownContext = <T,>(
     getItemClassName: overrides.getItemClassName,
     enterDuration: overrides.enterDuration ?? 0.2,
     exitDuration: overrides.exitDuration ?? 0.15,
+    enterEase: overrides.enterEase ?? [0.16, 1, 0.3, 1],
+    exitEase: overrides.exitEase ?? [0.16, 1, 0.3, 1],
+    anchorRef: overrides.anchorRef,
+    onOpenAutoFocus: overrides.onOpenAutoFocus,
+    onCloseAutoFocus: overrides.onCloseAutoFocus,
+    respectReducedMotion: overrides.respectReducedMotion ?? true,
+    collisionDetection: overrides.collisionDetection ?? true,
+    align: overrides.align ?? "end",
+    alignOffset: overrides.alignOffset ?? 0,
   };
 };
 
