@@ -85,6 +85,11 @@ export type {
   GetContentPropsArg,
   GetItemPropsArg,
 } from "./useDropdown";
+// Shared open/close primitive backing both `DropdownRoot` and `useDropdown`.
+// Exported for consumers that need a small tested toggle hook on its own,
+// or that want to drive a custom open-state machine outside the dropdown.
+export { useToggleState } from "./useToggleState";
+export type { UseToggleStateOptions, UseToggleStateReturn } from "./useToggleState";
 export { Slot } from "./Slot";
 export type { SlotProps } from "./Slot";
 export { DropdownSubmenu, DropdownSubmenuTrigger, DropdownSubmenuContent } from "./DropdownSubmenu";

@@ -65,13 +65,13 @@ import {
   useEffect,
   useId,
   useRef,
-  useState,
   type HTMLAttributes,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type Ref,
 } from "react";
 import { useMenuKeyboard } from "./useMenuKeyboard";
+import { useToggleState } from "./useToggleState";
 
 /**
  * Compose two refs into a single callback ref.
@@ -252,17 +252,20 @@ export function useDropdown<T>(options: UseDropdownOptions<T>): UseDropdownRetur
   const baseId = idPrefix ?? `dropdown-${reactGeneratedId}`;
   const contentId = `${baseId}-content`;
 
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  // Open-state lives in the shared `useToggleState` primitive so all dropdown
+  // surfaces (component-driven, headless, panel, context-menu) funnel through
+  // a single source of truth for the open transition + onOpenChange contract.
+  const { isOpen, setIsOpen, open, close, toggle } = useToggleState({
+    defaultOpen,
+    onOpenChange,
+  });
 
   const triggerRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
 
   const handleClose = useCallback((): void => {
-    setIsOpen((prev) => {
-      if (prev) onOpenChange?.(false);
-      return false;
-    });
-  }, [onOpenChange]);
+    close();
+  }, [close]);
 
   // Keyboard activation translates to a synthetic click on the matching DOM
   // element so the consumer's per-item onSelect (registered via getItemProps)
@@ -293,7 +296,10 @@ export function useDropdown<T>(options: UseDropdownOptions<T>): UseDropdownRetur
 
   // Click-outside: close when a click lands outside both the trigger and the
   // content. Subscribed only while open so closed dropdowns don't pay the
-  // cost of a global listener.
+  // cost of a global listener. `pointerdown` is intentional here (and
+  // distinct from the component-driven `useClickOutside` which uses
+  // `mousedown`/`touchstart`) — the headless API is newer and pointer events
+  // unify mouse + touch + pen with no per-platform branching.
   useEffect(() => {
     if (!isOpen) return;
     const onPointerDown = (event: PointerEvent): void => {
@@ -301,35 +307,14 @@ export function useDropdown<T>(options: UseDropdownOptions<T>): UseDropdownRetur
       if (!target) return;
       if (triggerRef.current?.contains(target)) return;
       if (contentRef.current?.contains(target)) return;
+      // setIsOpen handles the onOpenChange-on-transition rule.
       setIsOpen(false);
-      onOpenChange?.(false);
     };
     document.addEventListener("pointerdown", onPointerDown);
     return (): void => {
       document.removeEventListener("pointerdown", onPointerDown);
     };
-  }, [isOpen, onOpenChange]);
-
-  const open = useCallback((): void => {
-    setIsOpen((prev) => {
-      if (!prev) onOpenChange?.(true);
-      return true;
-    });
-  }, [onOpenChange]);
-
-  const close = useCallback((): void => {
-    setIsOpen((prev) => {
-      if (prev) onOpenChange?.(false);
-      return false;
-    });
-  }, [onOpenChange]);
-
-  const toggle = useCallback((): void => {
-    setIsOpen((prev) => {
-      onOpenChange?.(!prev);
-      return !prev;
-    });
-  }, [onOpenChange]);
+  }, [isOpen, setIsOpen]);
 
   const getTriggerProps: UseDropdownReturn<T>["getTriggerProps"] = useCallback(
     (userProps) => {

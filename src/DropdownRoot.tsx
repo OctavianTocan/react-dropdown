@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useRef, useMemo, useLayoutEffect, useEffect } from "react";
 import { DropdownProvider, useClickOutside } from "./DropdownContext";
+import { useToggleState } from "./useToggleState";
 import type { DropdownRootProps, DropdownContextValue, DropdownAnimationState } from "./types";
 
 /**
@@ -129,8 +130,11 @@ export function DropdownRoot<T>({
   // Support deprecated dropdownPlacement prop
   const effectivePlacement = dropdownPlacement || placement;
 
-  // State management
-  const [isOpen, setIsOpen] = useState(false);
+  // Open-state delegated to the shared `useToggleState` primitive — the
+  // single source of truth across DropdownRoot + useDropdown + the
+  // panel/context-menu shells. The hook handles the
+  // "fire onOpenChange only on transition" rule.
+  const { isOpen, setIsOpen } = useToggleState({ onOpenChange });
   const [selectedItem, setSelectedItem] = useState<T | null>(initialSelectedItem);
   const [searchQuery, setSearchQuery] = useState("");
   const [computedPlacement, setComputedPlacement] = useState<"top" | "bottom">(
@@ -176,8 +180,9 @@ export function DropdownRoot<T>({
   /**
    * @brief Opens the dropdown and notifies the consumer synchronously
    *
-   * Fires `setIsOpen(true)` and `onOpenChange(true)` in the same tick as the
-   * caller's gesture. The visible enter animation is owned entirely by
+   * Fires `setIsOpen(true)` (which in turn invokes `onOpenChange(true)` via
+   * `useToggleState`'s transition guard) in the same tick as the caller's
+   * gesture. The visible enter animation is owned entirely by
    * `DropdownContent`'s motion variants (keyed off `isOpen`), so consumers can
    * key sibling UI (e.g. tooltip suppression) on `onOpenChange` without
    * accumulating timing skew.
@@ -185,8 +190,7 @@ export function DropdownRoot<T>({
   const openDropdown = useCallback(() => {
     if (disabled) return;
     setIsOpen(true);
-    onOpenChange?.(true);
-  }, [disabled, onOpenChange]);
+  }, [disabled, setIsOpen]);
 
   /**
    * @brief Synchronously focus search input after dropdown opens
@@ -200,7 +204,8 @@ export function DropdownRoot<T>({
   /**
    * @brief Closes the dropdown and clears search query
    *
-   * Flips `isOpen` to `false` and fires `onOpenChange(false)` synchronously;
+   * Flips `isOpen` to `false` (which fires `onOpenChange(false)` via the
+   * shared `useToggleState` transition guard) synchronously;
    * `DropdownContent` then runs its exit motion via `AnimatePresence` and
    * unmounts when that motion completes. Earlier versions deferred the state
    * change behind `setTimeout(exitDuration)`, leaving the dropdown visibly
@@ -210,8 +215,7 @@ export function DropdownRoot<T>({
     if (!isOpen) return;
     setIsOpen(false);
     setSearchQuery("");
-    onOpenChange?.(false);
-  }, [isOpen, onOpenChange]);
+  }, [isOpen, setIsOpen]);
 
   /**
    * @brief Closes the dropdown — alias of {@link closeDropdown}

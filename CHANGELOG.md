@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Refactored (open-state unification)
+
+- **`useToggleState` hook** — extracted the open/close state machine into a
+  small shared primitive so `DropdownRoot` and `useDropdown` no longer
+  maintain parallel implementations of the same state transitions and
+  `onOpenChange`-only-on-transition rule. Both consumers now route through
+  `useToggleState`; opening, closing, and toggling fire `onOpenChange`
+  exactly once per real transition (no spurious callbacks when the requested
+  state already matches). `setIsOpen` also routes through the transition
+  guard, which lets the `DropdownContextMenu` open shim drop its explicit
+  `onOpenChange(true)` call.
+- 7 new tests for `useToggleState` cover defaultOpen, open/close/toggle,
+  callback firing semantics, no-op on no-transition, setIsOpen parity, and
+  stable callback refs across renders.
+- All 167 prior tests pass without modification — no behavior change for
+  any existing dropdown surface.
+- Total: 174 tests passing.
+- Click-outside detection (mousedown vs pointerdown), keyboard handling,
+  selection / search / animation state, placement, and lifecycle callbacks
+  remain in their respective owners (`useClickOutside` for the component
+  path, inline pointerdown for the headless path; `useMenuKeyboard` shared
+  by both). Unifying further would regress tests that assert specific
+  event types and trigger-keyboard semantics.
+
 ### Added (panel-mode JSX surface)
 
 - **`DropdownPanelMenu`** — sibling to the data-driven `DropdownMenu` that

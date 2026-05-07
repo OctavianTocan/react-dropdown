@@ -289,39 +289,30 @@ function DropdownRootShim({
 			onOpenChange={onOpenChange}
 			data-testid={testId}
 		>
-			<OpenSync isOpen={isOpen} onOpenChange={onOpenChange} />
+			<OpenSync isOpen={isOpen} />
 			{children}
 		</DropdownRoot>
 	);
 }
 
 /**
- * @brief Pulls open state in via {@link useDropdownContext}'s `setIsOpen` and
- * fires `onOpenChange(true)` so observers see opens the same way they see
- * trigger-driven dropdowns.
+ * @brief Pulls open state in via {@link useDropdownContext}'s `setIsOpen`.
  *
  * Runs once when the shim mounts with `isOpen=true` to flip the dropdown's
  * own state without going through `toggleDropdown` (which would require a
- * synthetic click event). Close events propagate naturally via
- * `DropdownRoot.closeDropdown`, which already calls `onOpenChange(false)`.
+ * synthetic click event). Both opens and closes propagate naturally —
+ * `setIsOpen` (now backed by the shared `useToggleState` primitive) fires
+ * `onOpenChange` on every transition, so the parent's `onOpenChange` prop on
+ * `DropdownRoot` sees the open exactly the same way a trigger-driven
+ * dropdown would.
  */
-function OpenSync({
-	isOpen,
-	onOpenChange,
-}: {
-	isOpen: boolean;
-	onOpenChange: (open: boolean) => void;
-}): null {
+function OpenSync({ isOpen }: { isOpen: boolean }): null {
 	const { setIsOpen } = useDropdownContext();
 	useLayoutEffect(() => {
 		if (isOpen) {
 			setIsOpen(true);
-			// `setIsOpen` doesn't run the dropdown's `openDropdown` path that
-			// fires `onOpenChange`, so we publish the open here so observers
-			// see opens identically to trigger-driven dropdowns.
-			onOpenChange(true);
 		}
-	}, [isOpen, setIsOpen, onOpenChange]);
+	}, [isOpen, setIsOpen]);
 	return null;
 }
 
