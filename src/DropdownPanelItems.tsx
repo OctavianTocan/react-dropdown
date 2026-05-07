@@ -30,6 +30,28 @@ import { Slot } from "./Slot";
 import { useDropdownContext } from "./DropdownContext";
 
 /**
+ * Merge a consumer `className` onto our default item className without
+ * dropping the layout primitives (`flex w-full items-center gap-2`,
+ * `rounded-[4px]`, padding, hover background, etc.). Earlier versions
+ * REPLACED the default whenever the consumer passed any className, which
+ * broke layouts that just wanted to add a single utility (e.g.
+ * `justify-between` to push a trailing icon to the right): items lost
+ * `flex`, `items-center`, `gap-2`, padding, and hover states, rendering
+ * the icon + label on separate lines with no surface chrome.
+ *
+ * Tailwind's later-class-wins behavior means consumer overrides still
+ * land — e.g. a consumer passing `rounded-[8px]` or
+ * `bg-foreground/10` lands AFTER the defaults and beats them in the
+ * generated stylesheet. No `clsx`/`tailwind-merge` dependency required.
+ */
+function mergeItemClassName(
+	defaults: string,
+	override: string | undefined,
+): string {
+	return override ? `${defaults} ${override}` : defaults;
+}
+
+/**
  * @brief Event-like object passed to {@link DropdownMenuItemProps.onSelect}.
  *
  * Mirrors the shape Radix's `DropdownMenu.Item.onSelect` callback expects so
@@ -162,7 +184,11 @@ export const DropdownMenuItem = forwardRef<HTMLElement, DropdownMenuItemProps>(
 			"data-inset": inset ? "" : undefined,
 			"data-variant": variant,
 			"data-disabled": disabled ? "" : undefined,
-			className: className ?? DEFAULT_ITEM_CLASSNAME,
+			// Merge instead of replace — the default carries layout primitives
+			// (flex / items-center / gap-2 / rounded / padding / hover) that
+			// consumers expect to keep when they only want to nudge alignment
+			// with e.g. `justify-between`.
+			className: mergeItemClassName(DEFAULT_ITEM_CLASSNAME, className),
 			onClick: handleClick,
 			onKeyDown: handleKeyDown,
 		};

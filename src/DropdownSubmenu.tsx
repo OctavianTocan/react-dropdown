@@ -225,6 +225,28 @@ export function DropdownSubmenuTrigger({
 }
 
 /**
+ * @brief Default enter duration (seconds) for submenu motion.
+ *
+ * Faster than the root dropdown's 0.14 s default — when the user traverses
+ * siblings (Anthropic → OpenAI → Google), each panel needs to appear
+ * before the previous one finishes exiting or two panels are briefly
+ * visible at once. 0.08 s lands inside Linear/Arc territory ("snappy
+ * fly-out") and keeps cursor traversal feeling continuous.
+ *
+ * Override per-content via {@link DropdownSubmenuContentProps.enterDuration}.
+ */
+const DEFAULT_SUBMENU_ENTER_DURATION = 0.08;
+
+/**
+ * @brief Default exit duration (seconds) for submenu motion.
+ *
+ * Even faster than enter (60 ms) so chained-submenu sequences feel
+ * "the previous one is gone before the next one shows" rather than a
+ * brief overlap. See {@link DEFAULT_SUBMENU_ENTER_DURATION} for context.
+ */
+const DEFAULT_SUBMENU_EXIT_DURATION = 0.06;
+
+/**
  * @brief Props for `DropdownSubmenuContent`.
  */
 export interface DropdownSubmenuContentProps {
@@ -236,6 +258,18 @@ export interface DropdownSubmenuContentProps {
   side?: "right" | "left";
   /** Pixel offset from the trigger's edge on the chosen side. Default: 4. */
   sideOffset?: number;
+  /**
+   * Enter motion duration (seconds). Defaults to 0.08 s — faster than the
+   * root dropdown so chained-submenu cursor traversal feels continuous.
+   * Pass `useDropdownContext().enterDuration` when you want submenu motion
+   * to match the root explicitly.
+   */
+  enterDuration?: number;
+  /**
+   * Exit motion duration (seconds). Defaults to 0.06 s. See
+   * {@link enterDuration} for rationale.
+   */
+  exitDuration?: number;
 }
 
 /**
@@ -253,6 +287,8 @@ export function DropdownSubmenuContent({
   className = "popover-styled p-1 min-w-44",
   side = "right",
   sideOffset = 4,
+  enterDuration = DEFAULT_SUBMENU_ENTER_DURATION,
+  exitDuration = DEFAULT_SUBMENU_EXIT_DURATION,
 }: DropdownSubmenuContentProps): React.JSX.Element | null {
   const submenu = useSubmenuContext();
   const root = useDropdownContext();
@@ -321,15 +357,17 @@ export function DropdownSubmenuContent({
     [submenu],
   );
 
-  // Motion variants — match the root's enter/exit timing & easing so the
-  // submenu visually belongs to the same family. Reduced-motion path strips
-  // scale + filter blur + x offset.
+  // Motion variants — submenu owns its own enter/exit timing (faster than
+  // the root dropdown by default) so chained-submenu cursor traversal
+  // doesn't visibly overlap two panels. Easing still inherits from the
+  // root so the panels visually belong to the same family. Reduced-motion
+  // path strips scale + filter blur + x offset.
   const variants = useMemo(() => {
     if (reduceMotion) {
       return {
         initial: { opacity: 0 },
-        animate: { opacity: 1, transition: { duration: root.enterDuration } },
-        exit: { opacity: 0, transition: { duration: root.exitDuration } },
+        animate: { opacity: 1, transition: { duration: enterDuration } },
+        exit: { opacity: 0, transition: { duration: exitDuration } },
       };
     }
     const xOffset = resolvedSide === "right" ? -6 : 6;
@@ -342,7 +380,7 @@ export function DropdownSubmenuContent({
         filter: "blur(0px)",
         boxShadow: ELEVATED_SHADOW,
         transition: {
-          duration: root.enterDuration,
+          duration: enterDuration,
           ease: root.enterEase as [number, number, number, number],
         },
       },
@@ -352,12 +390,12 @@ export function DropdownSubmenuContent({
         x: xOffset,
         filter: "blur(8px)",
         transition: {
-          duration: root.exitDuration,
+          duration: exitDuration,
           ease: root.exitEase as [number, number, number, number],
         },
       },
     };
-  }, [reduceMotion, resolvedSide, root.enterDuration, root.exitDuration, root.enterEase, root.exitEase]);
+  }, [reduceMotion, resolvedSide, enterDuration, exitDuration, root.enterEase, root.exitEase]);
 
   if (typeof document === "undefined") return null;
 

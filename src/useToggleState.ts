@@ -26,7 +26,7 @@
 
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Configuration for {@link useToggleState}. */
 export interface UseToggleStateOptions {
@@ -62,6 +62,19 @@ export interface UseToggleStateReturn {
 /**
  * Tiny shared open/close primitive — see file header for design rationale.
  *
+ * `onOpenChange` is dispatched from a `useEffect` that compares against a
+ * previous-isOpen ref, NOT from inside the `setIsOpenInternal` updater. The
+ * earlier in-updater dispatch fired during the React render phase whenever
+ * StrictMode (or the dev-only purity assertion) re-invoked the updater,
+ * which surfaced as the warning:
+ *
+ *   "Cannot update a component (`AutoReviewSelector`) while rendering a
+ *   different component (`DropdownRoot`)."
+ *
+ * Moving the dispatch to a post-commit effect keeps the "fire only on a
+ * real transition" contract (the prev-ref guard) while letting the parent
+ * component's `setState` happen safely outside render.
+ *
  * @param options Initial state + onOpenChange observer.
  * @returns isOpen + imperative open/close/toggle/setIsOpen, all stable
  *   references that don't recreate on render.
@@ -71,18 +84,32 @@ export function useToggleState(options: UseToggleStateOptions = {}): UseToggleSt
 
 	const [isOpen, setIsOpenInternal] = useState<boolean>(defaultOpen);
 
-	const setIsOpen = useCallback(
-		(next: boolean): void => {
-			// Functional form so onOpenChange-only-on-transition holds even when
-			// the consumer fires multiple setIsOpen(false) calls in a row.
-			setIsOpenInternal((prev) => {
-				if (prev === next) return prev;
-				onOpenChange?.(next);
-				return next;
-			});
-		},
-		[onOpenChange],
-	);
+	// Tracks the last `isOpen` value we already dispatched. Initialized to the
+	// same `defaultOpen` we seeded `useState` with so the post-commit effect
+	// does NOT fire a spurious `onOpenChange(defaultOpen)` on mount — only real
+	// transitions trigger the callback.
+	const prevIsOpenRef = useRef<boolean>(defaultOpen);
+	// Latest `onOpenChange` callback held in a ref so the dispatch effect can
+	// read it without re-running on every prop change. If the consumer passes
+	// a fresh-each-render handler we'd otherwise re-fire on every parent
+	// render, which violates the "transition-only" contract.
+	const onOpenChangeRef = useRef(onOpenChange);
+	useEffect(() => {
+		onOpenChangeRef.current = onOpenChange;
+	}, [onOpenChange]);
+
+	useEffect(() => {
+		if (prevIsOpenRef.current === isOpen) return;
+		prevIsOpenRef.current = isOpen;
+		onOpenChangeRef.current?.(isOpen);
+	}, [isOpen]);
+
+	const setIsOpen = useCallback((next: boolean): void => {
+		// Functional form so the read of `prev` is always current even when
+		// callers fire multiple setIsOpen(...) in a row. The post-commit effect
+		// above gates `onOpenChange` to actual transitions.
+		setIsOpenInternal((prev) => (prev === next ? prev : next));
+	}, []);
 
 	const open = useCallback((): void => {
 		setIsOpen(true);
@@ -93,11 +120,8 @@ export function useToggleState(options: UseToggleStateOptions = {}): UseToggleSt
 	}, [setIsOpen]);
 
 	const toggle = useCallback((): void => {
-		setIsOpenInternal((prev) => {
-			onOpenChange?.(!prev);
-			return !prev;
-		});
-	}, [onOpenChange]);
+		setIsOpenInternal((prev) => !prev);
+	}, []);
 
 	return { isOpen, setIsOpen, open, close, toggle };
 }

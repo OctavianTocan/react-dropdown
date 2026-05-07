@@ -33,7 +33,7 @@ import {
 	createContext,
 	useCallback,
 	useContext,
-	useLayoutEffect,
+	useEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -305,10 +305,20 @@ function DropdownRootShim({
  * `onOpenChange` on every transition, so the parent's `onOpenChange` prop on
  * `DropdownRoot` sees the open exactly the same way a trigger-driven
  * dropdown would.
+ *
+ * Uses a plain `useEffect` (not `useLayoutEffect`) so the very first paint
+ * after the shim mounts shows `isOpen=false` (no panel rendered), and the
+ * transition to `isOpen=true` happens on the next commit. That gives
+ * `AnimatePresence` inside `DropdownContent` a clean "child appears"
+ * sequence, which is what triggers the enter motion. With a layout
+ * effect both states landed in the same paint cycle and Motion sometimes
+ * skipped the enter animation — making the right-click menu pop into
+ * view without the filter-blur / scale / y motion that regular
+ * dropdowns get.
  */
 function OpenSync({ isOpen }: { isOpen: boolean }): null {
 	const { setIsOpen } = useDropdownContext();
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (isOpen) {
 			setIsOpen(true);
 		}
