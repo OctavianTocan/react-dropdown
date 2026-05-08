@@ -28,6 +28,7 @@
 import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { Slot } from "./Slot";
 import { useDropdownContext } from "./DropdownContext";
+import { MENU_ROW_DISABLED_VISUAL_CLASSNAME } from "./menu-row-disabled-visual";
 
 /**
  * Merge a consumer `className` onto our default item className without
@@ -108,9 +109,16 @@ export interface DropdownMenuItemProps
  * `text-align: center`, which inherits into any nested label `<span>` (even
  * one wrapped in `flex-1`). Without the override, short labels visibly drift
  * to the horizontal center of the row instead of sitting next to the icon.
+ *
+ * Disabled rows use native `:disabled` Tailwind variants (not only
+ * `data-disabled`), a persistent `bg-muted` tray, `text-muted-foreground`, and
+ * softer default icons so they read clearly unlike transparent enabled rows.
  */
-const DEFAULT_ITEM_CLASSNAME =
-	"focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm text-left data-inset:pl-9.5 [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-menu-item relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0";
+const DEFAULT_ITEM_CLASSNAME = [
+	"focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm text-left data-inset:pl-9.5 [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-menu-item relative flex w-full cursor-default items-center outline-hidden select-none",
+	MENU_ROW_DISABLED_VISUAL_CLASSNAME,
+	"[&_svg]:pointer-events-none [&_svg]:shrink-0",
+].join(" ");
 
 /**
  * @brief Clickable item row inside a panel-mode dropdown / context menu.

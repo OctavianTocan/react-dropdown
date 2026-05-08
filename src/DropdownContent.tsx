@@ -414,6 +414,15 @@ export function DropdownContent({
       variants={variants}
       data-testid={testId}
       data-placement={activePlacement}
+      // Stable attribute the outside-click detector uses to recognise
+      // portaled content as "inside" the dropdown. With ``usePortal``,
+      // the content is rendered into ``document.body`` and is no longer
+      // a descendant of the dropdown's wrapper ``<div ref={dropdownRef}>``,
+      // so a plain ``dropdownRef.contains(target)`` check thinks every
+      // click on an option is outside the dropdown and closes it before
+      // the option's ``onClick`` can fire. ``useClickOutside`` walks the
+      // event target up to the first element carrying this attribute.
+      data-dropdown-portal-content="true"
     >
       {/* Wrap children in a fresh submenu group so direct-child
           DropdownSubmenus inside this panel coordinate (auto-close peers

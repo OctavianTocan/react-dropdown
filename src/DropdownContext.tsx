@@ -146,9 +146,21 @@ export function useClickOutside(
       if (!dropdownRef.current) return;
 
       const target = event.target as Node;
-      if (!dropdownRef.current.contains(target)) {
-        closeDropdownRef.current();
+      // Same-tree case: target sits under the dropdown's wrapper.
+      if (dropdownRef.current.contains(target)) return;
+      // Portal case: with ``usePortal`` the DropdownContent is rendered
+      // into ``document.body``, so it's NOT a descendant of dropdownRef.
+      // The portaled content carries ``data-dropdown-portal-content``;
+      // walking the target up the tree to find that ancestor lets us
+      // recognise option clicks as "inside" instead of closing the
+      // dropdown before the click reaches the option's onClick.
+      if (
+        target instanceof Element &&
+        target.closest("[data-dropdown-portal-content]")
+      ) {
+        return;
       }
+      closeDropdownRef.current();
     },
     [dropdownRef]
   );

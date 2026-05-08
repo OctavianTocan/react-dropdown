@@ -38,6 +38,8 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useDropdownContext } from "./DropdownContext";
 import { Slot } from "./Slot";
 import { ELEVATED_SHADOW } from "./design-tokens";
+import { MENU_ROW_DISABLED_VISUAL_CLASSNAME } from "./menu-row-disabled-visual";
+import { SubmenuChevronIcon } from "./SubmenuChevronIcon";
 
 /** Hover-open delay (ms) before the submenu appears on pointer-enter. */
 const HOVER_OPEN_DELAY_MS = 100;
@@ -297,10 +299,26 @@ export interface DropdownSubmenuTriggerProps {
   children: ReactNode;
   /** Optional className on the rendered element. */
   className?: string;
+  /**
+   * When `true`, the trigger is non-interactive and uses the same disabled
+   * visuals as {@link DropdownMenuItem}; the submenu does not open.
+   */
+  disabled?: boolean;
+  /**
+   * When `true` (default), appends a trailing chevron after `children` in the
+   * default `<button>` trigger — signals that the row opens a submenu. Ignored
+   * when `asChild` is true (compose your own affordance). Set `false` when the
+   * trigger already supplies a trailing slot (e.g. checkmark vs chevron).
+   */
+  showChevron?: boolean;
 }
 
 /**
  * @brief Menu-item-like button that opens the parent's submenu.
+ *
+ * In the default `<button>` mode, a trailing chevron is appended automatically
+ * unless {@link DropdownSubmenuTriggerProps.showChevron} is `false` — callers
+ * using `asChild` compose their own trailing affordance.
  *
  * Behavior:
  * - **Click / Enter / Space**: toggle open.
@@ -311,11 +329,16 @@ export interface DropdownSubmenuTriggerProps {
  *
  * The panel itself cancels the close-schedule when the cursor enters it,
  * giving us a simple alternative to Radix's safe-triangle logic.
+ *
+ * Pass **`disabled`** to render an unavailable submenu entry (no hover-open,
+ * no keyboard open, same muted-tray styling as a disabled {@link DropdownMenuItem}).
  */
 export function DropdownSubmenuTrigger({
   asChild = false,
   children,
   className,
+  disabled = false,
+  showChevron = true,
 }: DropdownSubmenuTriggerProps): React.JSX.Element {
   const { isOpen, open, close, scheduleOpen, scheduleClose } = useSubmenuContext();
   const localRef = useRef<HTMLElement | null>(null);
@@ -328,29 +351,51 @@ export function DropdownSubmenuTrigger({
     [ctx],
   );
 
+  const handleClick = useCallback(() => {
+    if (disabled) return;
+    if (isOpen) close();
+    else open();
+  }, [disabled, isOpen, open, close]);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (disabled) return;
+      if (event.key === "ArrowRight" || event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+        open();
+      }
+    },
+    [disabled, open],
+  );
+
+  const mergedClassName = mergeSubmenuTriggerClassName(
+    [className, disabled ? MENU_ROW_DISABLED_VISUAL_CLASSNAME : undefined]
+      .filter(Boolean)
+      .join(" ") || undefined,
+  );
+
   const handlers = {
-    onClick: useCallback(() => {
-      if (isOpen) close();
-      else open();
-    }, [isOpen, open, close]),
-    onPointerEnter: scheduleOpen,
-    onPointerLeave: scheduleClose,
-    onKeyDown: useCallback(
-      (event: React.KeyboardEvent) => {
-        if (event.key === "ArrowRight" || event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          open();
-        }
-      },
-      [open],
-    ),
+    onClick: handleClick,
+    onPointerEnter: disabled ? undefined : scheduleOpen,
+    onPointerLeave: disabled ? undefined : scheduleClose,
+    onKeyDown: handleKeyDown,
     "aria-haspopup": "menu" as const,
     "aria-expanded": isOpen,
+    "aria-disabled": disabled,
     "data-state": isOpen ? ("open" as const) : ("closed" as const),
+    "data-disabled": disabled ? "" : undefined,
   };
 
-  const mergedClassName = mergeSubmenuTriggerClassName(className);
+  const trailingChevron =
+    !asChild && showChevron ? (
+      <span
+        aria-hidden
+        className="ml-auto flex shrink-0 items-center justify-center text-muted-foreground"
+      >
+        <SubmenuChevronIcon className="h-3.5 w-3.5" />
+      </span>
+    ) : null;
 
   if (asChild) {
     return (
@@ -363,10 +408,12 @@ export function DropdownSubmenuTrigger({
     <button
       type="button"
       ref={setRef as React.Ref<HTMLButtonElement>}
+      disabled={disabled}
       className={mergedClassName}
       {...handlers}
     >
       {children}
+      {trailingChevron}
     </button>
   );
 }
