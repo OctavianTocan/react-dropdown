@@ -9,13 +9,13 @@
  * API on {@link DropdownMenu}.
  *
  * Components:
- * - {@link DropdownMenuItem} — clickable row. `onSelect(event)` fires on click /
+ * - {@link DropdownMenuItem}, clickable row. `onSelect(event)` fires on click /
  *   Enter / Space; calling `event.preventDefault()` opts out of the default
  *   "close the parent dropdown after selection" behavior. `asChild` lets the
  *   consumer wrap the item around an `<a href>` or other custom element.
- * - {@link DropdownMenuSeparator} — visual divider between groups of items.
- * - {@link DropdownMenuLabel} — non-interactive section header.
- * - {@link DropdownMenuShortcut} — right-aligned keyboard hint label.
+ * - {@link DropdownMenuSeparator}, visual divider between groups of items.
+ * - {@link DropdownMenuLabel}, non-interactive section header.
+ * - {@link DropdownMenuShortcut}, right-aligned keyboard hint label.
  *
  * The items are intentionally small and styling-light so callers can pass
  * `className` to match their design system. The defaults aim for parity with
@@ -25,7 +25,8 @@
 
 "use client";
 
-import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
+import type * as React from "react";
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { Slot } from "./Slot";
 import { useDropdownContext } from "./DropdownContext";
 import { MENU_ROW_DISABLED_VISUAL_CLASSNAME } from "./menu-row-disabled-visual";
@@ -41,7 +42,7 @@ import { MENU_ROW_DISABLED_VISUAL_CLASSNAME } from "./menu-row-disabled-visual";
  * the icon + label on separate lines with no surface chrome.
  *
  * Tailwind's later-class-wins behavior means consumer overrides still
- * land — e.g. a consumer passing `rounded-[8px]` or
+ * land, e.g. a consumer passing `rounded-[8px]` or
  * `bg-foreground/10` lands AFTER the defaults and beats them in the
  * generated stylesheet. No `clsx`/`tailwind-merge` dependency required.
  */
@@ -62,7 +63,7 @@ function mergeItemClassName(
 export interface DropdownMenuItemSelectEvent {
 	/** When true, the parent dropdown does NOT close after selection. */
 	defaultPrevented: boolean;
-	/** Mark the event as handled — suppresses the default close-on-select. */
+	/** Mark the event as handled, suppresses the default close-on-select. */
 	preventDefault: () => void;
 }
 
@@ -74,9 +75,11 @@ export interface DropdownMenuItemSelectEvent {
  */
 export interface DropdownMenuItemProps
 	extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onSelect"> {
+	/** React 19 ref prop forwarded to the rendered item element. */
+	ref?: React.Ref<HTMLElement>;
 	/**
 	 * When `true`, the item delegates its rendering to its single child via
-	 * {@link Slot} — useful for wrapping the row around a custom element such as
+	 * {@link Slot}, useful for wrapping the row around a custom element such as
 	 * an `<a href>` link or a `<RouterLink>`.
 	 */
 	asChild?: boolean;
@@ -124,7 +127,7 @@ const DEFAULT_ITEM_CLASSNAME = [
  * @brief Clickable item row inside a panel-mode dropdown / context menu.
  *
  * Calls `onSelect(event)` on activation. By default the parent dropdown
- * closes after selection — call `event.preventDefault()` to keep it open
+ * closes after selection, call `event.preventDefault()` to keep it open
  * (used by the prompt-input attachment menu, which opens a file picker on
  * select but keeps the menu in place for the user to add another action).
  *
@@ -143,22 +146,19 @@ const DEFAULT_ITEM_CLASSNAME = [
  * </DropdownMenuItem>
  * ```
  */
-export const DropdownMenuItem = forwardRef<HTMLElement, DropdownMenuItemProps>(
-	function DropdownMenuItem(
-		{
-			asChild = false,
-			inset = false,
-			variant = "default",
-			disabled = false,
-			className,
-			children,
-			onClick,
-			onKeyDown,
-			onSelect,
-			...rest
-		},
-		forwardedRef,
-	) {
+export function DropdownMenuItem({
+	asChild = false,
+	inset = false,
+	variant = "default",
+	disabled = false,
+	className,
+	children,
+	onClick,
+	onKeyDown,
+	onSelect,
+	ref: forwardedRef,
+	...rest
+}: DropdownMenuItemProps): React.JSX.Element {
 		const { closeDropdown } = useDropdownContext();
 
 		const fireSelect = (): void => {
@@ -197,7 +197,7 @@ export const DropdownMenuItem = forwardRef<HTMLElement, DropdownMenuItemProps>(
 			"data-inset": inset ? "" : undefined,
 			"data-variant": variant,
 			"data-disabled": disabled ? "" : undefined,
-			// Merge instead of replace — the default carries layout primitives
+			// Merge instead of replace, the default carries layout primitives
 			// (flex / items-center / gap-2 / rounded / padding / hover) that
 			// consumers expect to keep when they only want to nudge alignment
 			// with e.g. `justify-between`.
@@ -225,8 +225,7 @@ export const DropdownMenuItem = forwardRef<HTMLElement, DropdownMenuItemProps>(
 				{children}
 			</button>
 		);
-	},
-);
+}
 
 /**
  * @brief Props for {@link DropdownMenuSeparator}.
@@ -237,7 +236,7 @@ export type DropdownMenuSeparatorProps = HTMLAttributes<HTMLDivElement>;
  * @brief Visual divider between groups of menu items.
  *
  * Renders a 1-px horizontal line spanning the panel's full inner width.
- * Pure presentational element — has no role.
+ * Pure presentational element, has no role.
  */
 export function DropdownMenuSeparator({
 	className,
@@ -268,7 +267,7 @@ export interface DropdownMenuLabelProps extends HTMLAttributes<HTMLDivElement> {
  * @brief Non-interactive section header inside a panel-mode menu.
  *
  * Use to label a group of related items. Renders as a plain `<div>` (not a
- * `role="heading"`) — screen readers should treat it as visual flair while the
+ * `role="heading"`), screen readers should treat it as visual flair while the
  * items themselves carry the menu semantics.
  */
 export function DropdownMenuLabel({
@@ -291,7 +290,7 @@ export function DropdownMenuLabel({
 /**
  * @brief Right-aligned keyboard shortcut hint inside an item.
  *
- * Pure presentational. Place inside a {@link DropdownMenuItem} — the ml-auto
+ * Pure presentational. Place inside a {@link DropdownMenuItem}, the ml-auto
  * default pushes it to the right edge of the row.
  */
 export function DropdownMenuShortcut({

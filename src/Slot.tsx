@@ -14,8 +14,9 @@
 
 "use client";
 
-import { Children, cloneElement, isValidElement, forwardRef } from "react";
+import { Children, cloneElement, isValidElement } from "react";
 import type {
+  JSX,
   ReactElement,
   ReactNode,
   Ref,
@@ -28,13 +29,15 @@ import type {
  *
  * `Slot` accepts exactly one valid React element as its child. Anything else
  * (zero children, multiple children, a string, a fragment) returns `null`
- * with a dev-time warning rather than throwing — `asChild` consumers tend
+ * with a dev-time warning rather than throwing, `asChild` consumers tend
  * to drop the prop conditionally and the compiler can't always catch a
  * stray text node.
  */
 export type SlotProps = HTMLAttributes<HTMLElement> & {
   /** Single React element to merge props into. */
   children?: ReactNode;
+  /** React 19 ref prop composed onto the slotted child. */
+  ref?: Ref<HTMLElement>;
 };
 
 /**
@@ -59,7 +62,7 @@ function composeRefs<T>(...refs: Array<Ref<T> | undefined>): Ref<T> {
         ref(node);
       } else if (ref != null) {
         // React's MutableRefObject .current is read-only by type, but we own
-        // the assignment — this is the standard ref-composition escape hatch.
+        // the assignment, this is the standard ref-composition escape hatch.
         (ref as { current: T | null }).current = node;
       }
     }
@@ -67,7 +70,7 @@ function composeRefs<T>(...refs: Array<Ref<T> | undefined>): Ref<T> {
 }
 
 /**
- * @brief Composes two event handlers — the Slot's handler runs first, and
+ * @brief Composes two event handlers, the Slot's handler runs first, and
  * the child's handler runs after unless the Slot's handler called
  * `event.preventDefault()` (Radix-style ordering).
  */
@@ -85,7 +88,7 @@ function composeEventHandlers<E extends { defaultPrevented?: boolean }>(
 }
 
 /**
- * @brief Slot — merges its props onto its single child element.
+ * @brief Slot, merges its props onto its single child element.
  *
  * Forwards refs so the consumer's ref attaches to the same element that
  * receives the merged props. Handles className concatenation and event
@@ -99,10 +102,11 @@ function composeEventHandlers<E extends { defaultPrevented?: boolean }>(
  * // Renders: <button onClick={openMenu} aria-haspopup="menu">Open</button>
  * ```
  */
-export const Slot = forwardRef<HTMLElement, SlotProps>(function Slot(
-  { children, ...slotProps },
-  forwardedRef,
-) {
+export function Slot({
+  children,
+  ref: forwardedRef,
+  ...slotProps
+}: SlotProps): JSX.Element | null {
   const childArray = Children.toArray(children);
   if (childArray.length !== 1 || !isValidElement(childArray[0])) {
     if (process.env.NODE_ENV !== "production") {
@@ -141,4 +145,4 @@ export const Slot = forwardRef<HTMLElement, SlotProps>(function Slot(
   };
 
   return cloneElement(child, mergedProps);
-});
+}

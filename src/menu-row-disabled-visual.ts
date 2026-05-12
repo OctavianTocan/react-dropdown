@@ -1,6 +1,6 @@
 /**
  * Tailwind utilities for disabled dropdown rows (`DropdownMenuItem`,
- * `DropdownSubmenuTrigger`). Uses `disabled:*` variants — only apply when the host
+ * `DropdownSubmenuTrigger`). Uses `disabled:*` variants, only apply when the host
  * element has the `disabled` attribute (no visual change on enabled controls).
  *
  * @packageDocumentation

@@ -6,8 +6,8 @@
  * Both consumers previously kept their own `useState(false)` plus a triplet
  * of `open` / `close` / `toggle` callbacks, each independently implementing
  * the rule "fire `onOpenChange` only on an actual state transition."
- * Centralizing the rule here means every dropdown surface — components,
- * headless hook, panel-mode, context-menu — funnels through a single source
+ * Centralizing the rule here means every dropdown surface, components,
+ * headless hook, panel-mode, context-menu, funnels through a single source
  * of truth for open-state.
  *
  * What's intentionally NOT in this hook (per advisor's scope-control review):
@@ -20,7 +20,7 @@
  * - **Selection / search / animation state / placement.** Component-only;
  *   these don't make sense in a generic toggle primitive.
  *
- * The hook is deliberately tiny — adding more here re-introduces the
+ * The hook is deliberately tiny, adding more here re-introduces the
  * coupling that motivated the audit.
  */
 
@@ -34,7 +34,7 @@ export interface UseToggleStateOptions {
 	defaultOpen?: boolean;
 	/**
 	 * Callback fired when the toggle transitions between open and closed.
-	 * Critical: this fires only on an actual transition — flipping
+	 * Critical: this fires only on an actual transition, flipping
 	 * `setIsOpen(true)` while already open is a no-op.
 	 */
 	onOpenChange?: (open: boolean) => void;
@@ -60,7 +60,7 @@ export interface UseToggleStateReturn {
 }
 
 /**
- * Tiny shared open/close primitive — see file header for design rationale.
+ * Tiny shared open/close primitive, see file header for design rationale.
  *
  * `onOpenChange` is dispatched from a `useEffect` that compares against a
  * previous-isOpen ref, NOT from inside the `setIsOpenInternal` updater. The
@@ -86,7 +86,7 @@ export function useToggleState(options: UseToggleStateOptions = {}): UseToggleSt
 
 	// Tracks the last `isOpen` value we already dispatched. Initialized to the
 	// same `defaultOpen` we seeded `useState` with so the post-commit effect
-	// does NOT fire a spurious `onOpenChange(defaultOpen)` on mount — only real
+	// does NOT fire a spurious `onOpenChange(defaultOpen)` on mount, only real
 	// transitions trigger the callback.
 	const prevIsOpenRef = useRef<boolean>(defaultOpen);
 	// Latest `onOpenChange` callback held in a ref so the dispatch effect can

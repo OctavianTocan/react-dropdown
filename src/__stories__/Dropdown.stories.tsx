@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { DropdownRoot, DropdownTrigger, DropdownContent, DropdownSearch, DropdownList } from "../index";
+import { DropdownRoot } from "../DropdownRoot";
+import { DropdownTrigger } from "../DropdownTrigger";
+import { DropdownContent } from "../DropdownContent";
+import { DropdownSearch } from "../DropdownSearch";
+import { DropdownList } from "../DropdownList";
 import { simpleItems } from "../__storybook__/mock-data";
 import { createDropdownStory, dropdownRootArgTypes } from "../__storybook__/story-helpers";
 
@@ -90,7 +94,7 @@ export const TopPlacement: Story = {
   decorators: [
     (Story) => (
       <div className="flex flex-col items-center gap-3">
-        <p className="text-sm text-gray-500">Dropdown renders above to avoid clipping near sticky footers.</p>
+        <p className="text-sm text-zinc-500">Dropdown renders above to avoid clipping near sticky footers.</p>
         <Story />
       </div>
     ),
@@ -135,7 +139,7 @@ export const CustomComposition: Story = {
           data-testid="custom-dropdown-trigger"
         />
         <DropdownContent data-testid="custom-dropdown-content">
-          <div className="px-3 py-2 bg-blue-50 border-b border-blue-100 text-sm text-blue-800">
+          <div className="px-3 py-2 bg-sky-50 border-b border-blue-100 text-sm text-sky-800">
             Available Options ({filteredItems.length})
           </div>
           <DropdownSearch
@@ -153,7 +157,7 @@ export const CustomComposition: Story = {
             getItemDisplay={(item: string) => item}
             data-testid="custom-dropdown-list"
           />
-          <div className="px-3 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
+          <div className="px-3 py-2 bg-zinc-50 border-t border-zinc-200 text-xs text-zinc-600">
             Need more options? Contact your admin
           </div>
         </DropdownContent>

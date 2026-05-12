@@ -2,9 +2,10 @@ import React from "react";
 
 import type { DropdownContextValue } from "../types";
 
-// StoryContext type stub for when @storybook/react is not installed
-type StoryContext<TArgs = unknown> = { args: TArgs };
-import { DropdownRoot, DropdownTrigger, DropdownSearchable, DropdownSimple } from "../index";
+import { DropdownRoot } from "../DropdownRoot";
+import { DropdownTrigger } from "../DropdownTrigger";
+import { DropdownSearchable } from "../DropdownSearchable";
+import { DropdownSimple } from "../DropdownSimple";
 
 /**
  * Helper function to create a controlled dropdown template for Storybook
@@ -23,7 +24,7 @@ export function createDropdownStory<T = string>(config: {
     description?: string;
     icon?: string;
   };
-  filterItems?: (items: T[], query: string) => T[];
+  filterItems?: (items: readonly T[], query: string) => T[];
 }) {
   const {
     defaultItems = [],
@@ -154,18 +155,6 @@ export function createMockContext<T = unknown>(
     alignOffset: 0,
     dropdownPlacement: "bottom" as const,
     ...overrides,
-  };
-}
-
-/**
- * Common decorator for dropdown stories that need context
- */
-export function withDropdownContext() {
-  return function StoryDecorator<StoryArgs extends Record<string, unknown>>(
-    Story: React.ComponentType<StoryArgs>,
-    context: StoryContext<StoryArgs>
-  ) {
-    return <Story {...context.args} />;
   };
 }
 

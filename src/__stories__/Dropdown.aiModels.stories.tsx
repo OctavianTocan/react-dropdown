@@ -151,9 +151,9 @@ export const AnalyticsUsage: Story = {
   decorators: [
     (Story) => (
       <div className="space-y-4">
-        <div className="p-4 bg-gray-50 rounded-lg">
+        <div className="p-4 bg-zinc-50 rounded-lg">
           <p className="text-sm font-medium mb-2">Analytics Context</p>
-          <p className="text-xs text-gray-600">Select a model to view usage patterns, API costs, and response times.</p>
+          <p className="text-xs text-zinc-600">Select a model to view usage patterns, API costs, and response times.</p>
         </div>
         <Story />
       </div>

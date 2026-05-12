@@ -40,7 +40,7 @@ export const DropdownSearch = ({
   };
 
   return (
-    <div className={`px-2 py-1 border-b border-gray-200 shrink-0 ${className}`}>
+    <div className={`px-2 py-1 border-b border-zinc-200 shrink-0 ${className}`}>
       <input
         ref={inputRef}
         type="text"
@@ -49,7 +49,7 @@ export const DropdownSearch = ({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#0B4F75] focus-visible:border-transparent"
+        className="w-full px-2.5 py-1.5 text-sm border border-zinc-300 rounded focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#0B4F75] focus-visible:border-transparent"
         tabIndex={-1}
         data-testid={testId}
         aria-label="Search options"

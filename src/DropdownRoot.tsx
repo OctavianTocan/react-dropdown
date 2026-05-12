@@ -40,7 +40,7 @@ function computePlacement(triggerRect: DOMRect | null, placement: "auto" | "top"
  * The hint flips to `"entering"`/`"exiting"` when `isOpen` changes and resolves
  * to `"idle"` once the corresponding motion duration has elapsed. Consumers can
  * subscribe via `useDropdownContext()` for transition-tied side effects, but
- * `setIsOpen` and `onOpenChange` must NOT be gated on it — earlier versions of
+ * `setIsOpen` and `onOpenChange` must NOT be gated on it, earlier versions of
  * this component scheduled the open/close itself behind a `setTimeout` keyed
  * to `exitDuration`, which made the dropdown sit visually open for ~150 ms
  * before any pixel changed and forced consumer guards (e.g. `useTooltipDropdown`)
@@ -130,7 +130,7 @@ export function DropdownRoot<T>({
   // Support deprecated dropdownPlacement prop
   const effectivePlacement = dropdownPlacement || placement;
 
-  // Open-state delegated to the shared `useToggleState` primitive — the
+  // Open-state delegated to the shared `useToggleState` primitive, the
   // single source of truth across DropdownRoot + useDropdown + the
   // panel/context-menu shells. The hook handles the
   // "fire onOpenChange only on transition" rule.
@@ -218,7 +218,7 @@ export function DropdownRoot<T>({
   }, [isOpen, setIsOpen]);
 
   /**
-   * @brief Closes the dropdown — alias of {@link closeDropdown}
+   * @brief Closes the dropdown, alias of {@link closeDropdown}
    *
    * Retained for backward compatibility with consumers that referenced
    * `closeImmediate`. The previous "skip exit animation" behavior is no
@@ -266,7 +266,7 @@ export function DropdownRoot<T>({
   // Setup click outside detection
   useClickOutside(dropdownRef as React.RefObject<HTMLElement>, closeDropdown, isOpen);
 
-  // Animation state hint — derived, never blocks setIsOpen/onOpenChange.
+  // Animation state hint, derived, never blocks setIsOpen/onOpenChange.
   const animationState = useAnimationStateTracker(isOpen, enterDuration, exitDuration);
 
   // Context value to provide to children

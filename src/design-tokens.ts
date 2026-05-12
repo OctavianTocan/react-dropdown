@@ -27,9 +27,3 @@ const FALLBACK_ELEVATED_SHADOW =
  * light card surface).
  */
 export const ELEVATED_SHADOW = `var(--dropdown-shadow, ${FALLBACK_ELEVATED_SHADOW})`;
-
-/**
- * Exit animation duration in milliseconds.
- * Used for fade-out animations when dropdown closes.
- */
-export const EXIT_ANIMATION_DURATION_MS = 150;

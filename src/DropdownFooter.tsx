@@ -24,7 +24,7 @@ export function DropdownFooter({
   "data-testid": testId = "dropdown-footer",
 }: DropdownFooterProps) {
   return (
-    <div className={`flex-shrink-0 ${separator ? "border-t border-gray-200" : ""} ${className}`} data-testid={testId}>
+    <div className={`flex-shrink-0 ${separator ? "border-t border-zinc-200" : ""} ${className}`} data-testid={testId}>
       {children}
     </div>
   );

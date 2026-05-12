@@ -4,10 +4,40 @@
  */
 
 import { vi } from "vitest";
-import Dropdown from "../index";
+import { DropdownContent } from "../DropdownContent";
+import { DropdownProvider, useClickOutside, useDropdownContext, useKeyboardNavigation } from "../DropdownContext";
+import { DropdownList } from "../DropdownList";
+import { DropdownRoot } from "../DropdownRoot";
+import { DropdownSearch } from "../DropdownSearch";
+import { DropdownSearchable } from "../DropdownSearchable";
+import { DropdownSimple } from "../DropdownSimple";
+import { DropdownTrigger } from "../DropdownTrigger";
 import type { BaseDropdownProps, DropdownRootProps, DropdownTriggerProps, DropdownContextValue } from "../types";
 import { mockItems, getMockItemKey, getMockItemDisplay } from "../test-utils/mock-data";
-import * as dropdownModule from "../index";
+
+const Dropdown = {
+  Root: DropdownRoot,
+  Trigger: DropdownTrigger,
+  Content: DropdownContent,
+  Search: DropdownSearch,
+  List: DropdownList,
+  Searchable: DropdownSearchable,
+  Simple: DropdownSimple,
+};
+
+const dropdownModule = {
+  DropdownRoot,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownSearch,
+  DropdownList,
+  DropdownSearchable,
+  DropdownSimple,
+  DropdownProvider,
+  useDropdownContext,
+  useKeyboardNavigation,
+  useClickOutside,
+};
 
 describe("Dropdown Module Exports", () => {
   describe("Default Export (Compound Component)", () => {
@@ -174,8 +204,14 @@ describe("Dropdown Module Exports", () => {
         animationState: "idle",
         computedPlacement: "bottom",
         offset: 8,
+        align: "end",
+        alignOffset: 0,
         enterDuration: 0.2,
         exitDuration: 0.15,
+        enterEase: [0.16, 1, 0.3, 1],
+        exitEase: [0.16, 1, 0.3, 1],
+        respectReducedMotion: true,
+        collisionDetection: true,
       };
 
       expect(contextValue.items).toEqual(mockItems);

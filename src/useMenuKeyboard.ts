@@ -3,7 +3,7 @@
  * @brief Keyboard interaction hook for action-menu dropdowns
  *
  * Adds roving tabindex, type-ahead jumping, and Home/End traversal on top of
- * the dropdown's basic Arrow / Enter / Escape handling — the keyboard surface
+ * the dropdown's basic Arrow / Enter / Escape handling, the keyboard surface
  * Radix's `DropdownMenu` provides out of the box.
  */
 
@@ -21,7 +21,7 @@ export interface MenuKeyboardApi {
   /**
    * Handler to attach to the menu container's `onKeyDown`. Manages
    * ArrowUp/Down (with wrap), Home/End, Enter (activate), Escape (close), and
-   * alphanumeric type-ahead. Returns nothing — the implementation calls
+   * alphanumeric type-ahead. Returns nothing, the implementation calls
    * `event.preventDefault()` on keys it consumes.
    */
   handleKeyDown: (event: React.KeyboardEvent) => void;
@@ -97,7 +97,7 @@ function findEdgeEnabled<T>(
 export interface UseMenuKeyboardOptions<T> {
   /** Items in the menu, in display order. */
   items: readonly T[];
-  /** Whether the menu is currently open — controls auto-focus on the first item. */
+  /** Whether the menu is currently open, controls auto-focus on the first item. */
   isOpen: boolean;
   /** Resolves the display label used for type-ahead matching. */
   getItemDisplay: (item: T) => string;
@@ -116,15 +116,15 @@ export interface UseMenuKeyboardOptions<T> {
  * onto an action-style menu. Mirrors the keyboard surface that Radix's
  * `DropdownMenu` provides:
  *
- * - **ArrowDown / ArrowUp** — move focus to the next/previous enabled item,
+ * - **ArrowDown / ArrowUp**, move focus to the next/previous enabled item,
  *   wrapping at the ends.
- * - **Home / End** — jump to the first / last enabled item.
- * - **Enter / Space** — activate the focused item.
- * - **Escape** — close the menu.
- * - **Alphanumeric** — append to a 500 ms type-ahead buffer and jump focus to
+ * - **Home / End**, jump to the first / last enabled item.
+ * - **Enter / Space**, activate the focused item.
+ * - **Escape**, close the menu.
+ * - **Alphanumeric**, append to a 500 ms type-ahead buffer and jump focus to
  *   the first item whose display text starts with the buffer (case-insensitive).
  *
- * The hook does NOT call `.focus()` on items itself — consumers that render
+ * The hook does NOT call `.focus()` on items itself, consumers that render
  * one focusable element per item (e.g. `<button>` action rows) should give
  * each item a `data-key` attribute keyed off the item's stable id and a
  * `tabIndex` derived from {@link MenuKeyboardApi.getItemTabIndex}, then call
@@ -202,7 +202,7 @@ export function useMenuKeyboard<T>(options: UseMenuKeyboardOptions<T>): MenuKeyb
         }
       }
 
-      // Alphanumeric type-ahead — anything single-char and printable updates
+      // Alphanumeric type-ahead, anything single-char and printable updates
       // the buffer and jumps focus to the next matching item.
       if (event.key.length === 1 && event.key.match(/[\w]/)) {
         const nextBuffer = (typeaheadBufferRef.current + event.key).toLowerCase();

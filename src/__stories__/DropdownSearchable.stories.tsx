@@ -137,7 +137,7 @@ export const EmptyDataset: Story = {
  */
 export const CustomFilter: StoryObj = {
   render: function CustomFilterStory() {
-    const customFilter = (items: Language[], query: string) => {
+    const customFilter = (items: readonly Language[], query: string) => {
       const lowerQuery = query.toLowerCase();
       return items.filter(
         (item) =>

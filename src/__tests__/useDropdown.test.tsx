@@ -30,7 +30,7 @@ const getItemDisabled = (item: Item): boolean => Boolean(item.disabled);
 /**
  * Build a synthetic React.MouseEvent that supports the read-after-write
  * `defaultPrevented` semantics we rely on in prop merging. Casting through
- * unknown is the safest narrow path — React's full event class can't be
+ * unknown is the safest narrow path, React's full event class can't be
  * constructed from plain code outside of the synthetic-event pool.
  */
 function makeMouseEvent(): React.MouseEvent<HTMLElement> {

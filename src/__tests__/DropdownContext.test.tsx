@@ -41,8 +41,14 @@ const createMockContext = (): DropdownContextValue<MockItem> => ({
   animationState: "idle",
   computedPlacement: "bottom",
   offset: 8,
+  align: "end",
+  alignOffset: 0,
   enterDuration: 0.2,
   exitDuration: 0.15,
+  enterEase: [0.16, 1, 0.3, 1],
+  exitEase: [0.16, 1, 0.3, 1],
+  respectReducedMotion: true,
+  collisionDetection: true,
 });
 
 //---------------------------------------------------------------------------------------------

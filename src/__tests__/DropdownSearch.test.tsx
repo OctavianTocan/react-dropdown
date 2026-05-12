@@ -6,7 +6,8 @@
 import { vi } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "../test-utils/test-helpers";
-import { DropdownSearch, DropdownProvider } from "../index";
+import { DropdownSearch } from "../DropdownSearch";
+import { DropdownProvider } from "../DropdownContext";
 import { createMockDropdownContext } from "../test-utils/test-helpers";
 
 describe("DropdownSearch", () => {

@@ -9,7 +9,7 @@
  *
  * Contract
  * --------
- * - The hook is pure — no portal, no animation, no DOM mutation outside of
+ * - The hook is pure, no portal, no animation, no DOM mutation outside of
  *   the click-outside listener it subscribes to while open. Pair it with
  *   your own JSX (and optionally a portal helper) when you need a dropdown
  *   that doesn't fit the bundled component shells.
@@ -49,7 +49,7 @@
  *
  * Design rationale
  * ----------------
- * - Hook is **additive** to the existing component API — it does NOT drive
+ * - Hook is **additive** to the existing component API, it does NOT drive
  *   `DropdownRoot`/`DropdownContent`/`DropdownTrigger`. Unifying the two APIs
  *   on a single hook is a separate refactor (deferred) so the 130+ existing
  *   tests stay frozen during this iteration.
@@ -137,20 +137,20 @@ export interface UseDropdownOptions<T> {
  */
 export interface GetTriggerPropsArg
   extends Omit<HTMLAttributes<HTMLElement>, "ref" | "onClick" | "onKeyDown"> {
-  /** Optional consumer ref — composed with the hook's internal trigger ref. */
+  /** Optional consumer ref, composed with the hook's internal trigger ref. */
   ref?: Ref<HTMLElement>;
-  /** Consumer click handler — runs BEFORE the hook's open/close toggle. */
+  /** Consumer click handler, runs BEFORE the hook's open/close toggle. */
   onClick?: (event: ReactMouseEvent<HTMLElement>) => void;
-  /** Consumer keydown handler — runs BEFORE the hook's keyboard logic. */
+  /** Consumer keydown handler, runs BEFORE the hook's keyboard logic. */
   onKeyDown?: (event: ReactKeyboardEvent<HTMLElement>) => void;
 }
 
 /** Argument accepted by {@link UseDropdownReturn.getContentProps}. */
 export interface GetContentPropsArg
   extends Omit<HTMLAttributes<HTMLElement>, "ref" | "onKeyDown"> {
-  /** Optional consumer ref — composed with the hook's internal content ref. */
+  /** Optional consumer ref, composed with the hook's internal content ref. */
   ref?: Ref<HTMLElement>;
-  /** Consumer keydown handler — runs BEFORE the hook's keyboard logic. */
+  /** Consumer keydown handler, runs BEFORE the hook's keyboard logic. */
   onKeyDown?: (event: ReactKeyboardEvent<HTMLElement>) => void;
 }
 
@@ -166,9 +166,9 @@ export interface GetItemPropsArg
   onSelect?: () => void;
   /** Optional override for the per-item disabled state. */
   disabled?: boolean;
-  /** Consumer click handler — runs BEFORE `onSelect`. */
+  /** Consumer click handler, runs BEFORE `onSelect`. */
   onClick?: (event: ReactMouseEvent<HTMLElement>) => void;
-  /** Consumer mouseenter handler — runs BEFORE the hook's focus sync. */
+  /** Consumer mouseenter handler, runs BEFORE the hook's focus sync. */
   onMouseEnter?: (event: ReactMouseEvent<HTMLElement>) => void;
 }
 
@@ -187,7 +187,7 @@ export interface UseDropdownReturn<T> {
    * Drives `aria-activedescendant` on the content element.
    */
   focusedIndex: number;
-  /** Imperatively change the focused index — e.g. on hover or scroll. */
+  /** Imperatively change the focused index, e.g. on hover or scroll. */
   setFocusedIndex: (index: number) => void;
   /**
    * Returns props for the trigger element. Spread onto the consumer's
@@ -298,7 +298,7 @@ export function useDropdown<T>(options: UseDropdownOptions<T>): UseDropdownRetur
   // content. Subscribed only while open so closed dropdowns don't pay the
   // cost of a global listener. `pointerdown` is intentional here (and
   // distinct from the component-driven `useClickOutside` which uses
-  // `mousedown`/`touchstart`) — the headless API is newer and pointer events
+  // `mousedown`/`touchstart`), the headless API is newer and pointer events
   // unify mouse + touch + pen with no per-platform branching.
   useEffect(() => {
     if (!isOpen) return;
@@ -336,7 +336,7 @@ export function useDropdown<T>(options: UseDropdownOptions<T>): UseDropdownRetur
           userOnKeyDown?.(event);
           if (event.defaultPrevented) return;
           // The menu opens on ArrowDown / ArrowUp / Enter / Space when focus
-          // sits on the trigger — same model as Radix's DropdownMenuTrigger.
+          // sits on the trigger, same model as Radix's DropdownMenuTrigger.
           if (
             event.key === "ArrowDown" ||
             event.key === "ArrowUp" ||

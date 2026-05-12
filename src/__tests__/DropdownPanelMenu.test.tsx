@@ -15,13 +15,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {
-	DropdownPanelMenu,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuLabel,
-	DropdownMenuShortcut,
-} from "../index";
+import { DropdownPanelMenu } from "../DropdownPanelMenu";
+import { DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuShortcut } from "../DropdownPanelItems";
 
 describe("DropdownPanelMenu", () => {
 	it("renders the trigger and hides the panel by default", () => {
@@ -65,7 +60,7 @@ describe("DropdownPanelMenu", () => {
 		await user.click(item);
 
 		expect(onSelect).toHaveBeenCalledTimes(1);
-		// After selection, the panel closes — the item is removed from the DOM
+		// After selection, the panel closes, the item is removed from the DOM
 		// once the AnimatePresence exit motion resolves (≈100 ms).
 		await waitFor(() => {
 			expect(screen.queryByRole("menuitem", { name: "Edit" })).not.toBeInTheDocument();

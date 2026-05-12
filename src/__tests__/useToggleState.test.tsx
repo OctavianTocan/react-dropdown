@@ -3,8 +3,8 @@
  * @brief Behavior tests for the shared open/close primitive that backs both
  *        `DropdownRoot` and `useDropdown`.
  *
- * The contract this hook upholds — fire `onOpenChange` only on a real
- * transition — is load-bearing across every dropdown surface in the package.
+ * The contract this hook upholds, fire `onOpenChange` only on a real
+ * transition, is load-bearing across every dropdown surface in the package.
  * If this hook drifts, both component-driven and headless dropdowns
  * regress simultaneously.
  */

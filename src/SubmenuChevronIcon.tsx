@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 
 /**
- * Trailing chevron for {@link DropdownSubmenuTrigger} — matches the common
+ * Trailing chevron for {@link DropdownSubmenuTrigger}, matches the common
  * “this row opens a submenu” affordance (e.g. macOS context menus, Radix
  * `DropdownMenuSubTrigger`).
  */

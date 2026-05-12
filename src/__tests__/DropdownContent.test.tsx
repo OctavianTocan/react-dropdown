@@ -5,7 +5,8 @@
 
 import React from "react";
 import { render, screen } from "../test-utils/test-helpers";
-import { DropdownContent, DropdownProvider } from "../index";
+import { DropdownContent } from "../DropdownContent";
+import { DropdownProvider } from "../DropdownContext";
 import { createMockDropdownContext } from "../test-utils/test-helpers";
 
 describe("DropdownContent", () => {

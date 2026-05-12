@@ -24,7 +24,7 @@ const VIEWPORT_INSET = 8;
  * @brief Pure dropdown container for composing dropdown contents
  *
  * Drives entry/exit motion directly off the context's `isOpen` state via
- * `AnimatePresence` — no internal `shouldRender` double-buffering — so consumer
+ * `AnimatePresence`, no internal `shouldRender` double-buffering, so consumer
  * `onOpenChange` callbacks fire on the same tick as the visible motion starts.
  *
  * Behavior summary (Radix-equivalent surface):
@@ -51,7 +51,7 @@ export function DropdownContent({
   children,
   // Default provides zero-config visual styling; pass a custom className
   // to match your design system's surface tokens (e.g. bg-popover border-border).
-  className = "bg-white border border-gray-200 rounded-lg",
+  className = "bg-white border border-zinc-200 rounded-lg",
   disableAnimation = false,
   portal = false,
   portalContainer,
@@ -228,7 +228,7 @@ export function DropdownContent({
    * Re-evaluate portal position on window resize and ancestor scroll while
    * the dropdown is open. Throttled via `requestAnimationFrame` so a noisy
    * scroll event doesn't trigger a layout-thrash storm. Runs only when the
-   * portal is in use — non-portaled dropdowns inherit their position from
+   * portal is in use, non-portaled dropdowns inherit their position from
    * the layout flow and don't need repositioning.
    */
   useEffect(() => {
@@ -338,7 +338,7 @@ export function DropdownContent({
     }
     // Standard variants: opacity + scale + y + filter:blur. The filter blur
     // creates the "coming into focus" feel modern overlay systems use (Linear,
-    // Vercel, Arc) — element starts blurry and out-of-place, focuses in.
+    // Vercel, Arc), element starts blurry and out-of-place, focuses in.
     // 8px is the sweet spot: enough to read as motion, not so much the menu
     // items become unreadable mid-transition. Reduced-motion path above
     // strips this for users who don't want the effect.
@@ -373,7 +373,7 @@ export function DropdownContent({
     };
   }, [activePlacement, enterDuration, exitDuration, enterEase, exitEase, reduceMotion]);
 
-  // Backdrop variants — fade quickly, never longer than the content motion.
+  // Backdrop variants, fade quickly, never longer than the content motion.
   const backdropVariants = useMemo(
     () => ({
       initial: { opacity: 0 },

@@ -103,7 +103,7 @@ const groupItemsBySection = <T,>(
  * @param props.getItemDescription Optional function to get description text
  * @param props.getItemIcon Optional function to get icon element
  * @param props.getItemSection Optional function to get section metadata
- * @param props.getItemSeparator Optional `(item, index) => boolean` — return true to render a divider ABOVE this item
+ * @param props.getItemSeparator Optional `(item, index) => boolean`, return true to render a divider ABOVE this item
  * @param props.getItemDisabled Optional function to determine if item is disabled
  * @param props.getItemClassName Optional function to get custom className
  * @param props.staggered Whether to use staggered animations for list items
@@ -203,7 +203,7 @@ export function DropdownList<T>({
    * BEFORE an item
    * @description Resolves getItemSeparator from props or context. Called with
    * `(item, index)` and should return true if a divider should appear ABOVE
-   * the item — useful for marking the start of an "advanced" or "destructive"
+   * the item, useful for marking the start of an "advanced" or "destructive"
    * group at the bottom of a menu. The renderer suppresses the divider when
    * it would land at the very top of the list (or the top of a section).
    */
@@ -272,19 +272,19 @@ export function DropdownList<T>({
       <li
         key={`section-${section.meta.key}`}
         role="presentation"
-        className="px-3 py-2 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500"
+        className="px-3 py-2 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-500"
       >
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             {section.meta.icon && (
-              <span className="text-base text-gray-500" aria-hidden>
+              <span className="text-base text-zinc-500" aria-hidden>
                 {section.meta.icon}
               </span>
             )}
             <span>{section.meta.label}</span>
           </div>
           {section.meta.description && (
-            <span className="text-[11px] font-normal normal-case text-gray-400">{section.meta.description}</span>
+            <span className="text-[11px] font-normal normal-case text-zinc-400">{section.meta.description}</span>
           )}
         </div>
       </li>
@@ -408,7 +408,7 @@ export function DropdownList<T>({
    * @description Shows a "No results found" message when hasResults is false.
    */
   if (!hasResults) {
-    return <div className={`p-4 text-center text-sm text-gray-500 ${className}`}>No results found</div>;
+    return <div className={`p-4 text-center text-sm text-zinc-500 ${className}`}>No results found</div>;
   }
 
   const renderedItems: ReactNode[] = [];
@@ -418,7 +418,7 @@ export function DropdownList<T>({
    * @brief Renders a divider list item using design-system tokens
    * @description Themed via Tailwind's `bg-border` so it adapts to dark mode
    * and design-system overrides. Marked `aria-hidden` because separators are
-   * decorative — the `role="separator"` already announces the boundary to
+   * decorative, the `role="separator"` already announces the boundary to
    * screen readers.
    * @param key Unique React key for the separator
    * @returns A list element rendering a 1-px horizontal rule
@@ -437,7 +437,7 @@ export function DropdownList<T>({
    * accessor flags true
    *
    * Placement is "before" so consumers can think in terms of "draw a divider
-   * above this item" — the typical case is grouping advanced/destructive
+   * above this item", the typical case is grouping advanced/destructive
    * actions at the bottom of a menu. The first item gets no separator above
    * it even if marked, since a divider at the very top of the menu is rarely
    * what the consumer means.
@@ -457,7 +457,7 @@ export function DropdownList<T>({
 
   /**
    * @brief Renders sectioned items with separators emitted BEFORE the marked
-   * item — same semantics as the ungrouped loop above, applied within each
+   * item, same semantics as the ungrouped loop above, applied within each
    * section's bucket
    */
   groupedItems.sections.forEach((section) => {
@@ -546,7 +546,7 @@ function DropdownOption<T>({
   };
 
   const baseClasses = "px-3 py-1.5 text-sm transition-colors";
-  const selectedClasses = isSelected ? "bg-blue-50 text-blue-600 font-medium" : "";
+  const selectedClasses = isSelected ? "bg-sky-50 text-sky-600 font-medium" : "";
   const hasCustomHover = className.includes("hover:");
   const disabledClasses = isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer";
   // Remove hover classes from className since we'll handle hover via inline styles
@@ -572,7 +572,7 @@ function DropdownOption<T>({
       <div className="flex items-center gap-2">
         <div className="flex flex-col flex-1">
           <span>{displayText}</span>
-          {description && <span className="text-xs font-normal text-gray-500">{description}</span>}
+          {description && <span className="text-xs font-normal text-zinc-500">{description}</span>}
         </div>
         {icon && (
           <span className="text-base" aria-hidden>

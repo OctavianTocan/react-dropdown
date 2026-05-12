@@ -33,7 +33,7 @@ export interface DropdownMenuProps<T>
    * When `true`, the `trigger` element is rendered directly with the
    * dropdown's behavior props merged onto it (Radix-style slot pattern).
    * The single child of `trigger` becomes the actual trigger element —
-   * no wrapping `<div>` — so inline-flex layouts and ARIA semantics on the
+   * no wrapping `<div>`, so inline-flex layouts and ARIA semantics on the
    * consumer's element are preserved.
    *
    * When `false` (default), the trigger is wrapped in a `<div>` that
@@ -79,8 +79,15 @@ export interface DropdownMenuProps<T>
  * `<div>`). Otherwise, falls back to a `<div>` wrapper for legacy callers
  * that compose multiple host elements as the trigger.
  */
-const MenuTrigger = React.forwardRef<HTMLElement, { children: ReactNode; asChild?: boolean }>(
-  ({ children, asChild = false }, ref) => {
+function MenuTrigger({
+  children,
+  asChild = false,
+  ref,
+}: {
+  children: ReactNode;
+  asChild?: boolean;
+  ref?: React.Ref<HTMLElement>;
+}): React.JSX.Element {
     const { isOpen, toggleDropdown } = useDropdownContext();
     const sharedProps = {
       onClick: toggleDropdown,
@@ -101,14 +108,12 @@ const MenuTrigger = React.forwardRef<HTMLElement, { children: ReactNode; asChild
         {children}
       </div>
     );
-  }
-);
-MenuTrigger.displayName = 'MenuTrigger';
+}
 
 /**
  * @brief Forwarded subset of `DropdownList` props needed by the keyboard surface
  *
- * Avoids re-listing the entire `DropdownListProps<T>` shape — anything not
+ * Avoids re-listing the entire `DropdownListProps<T>` shape, anything not
  * touched by keyboard wiring is forwarded to `DropdownList` unchanged.
  */
 type MenuKeyboardSurfaceProps<T> = Pick<
@@ -140,7 +145,7 @@ type MenuKeyboardSurfaceProps<T> = Pick<
  * - Reports the active item back to `DropdownList` via `focusedIndex` so
  *   `<li data-focused>` can be styled by consumers
  *
- * Consumers don't see this component directly — `DropdownMenu` uses it as the
+ * Consumers don't see this component directly, `DropdownMenu` uses it as the
  * default body. Custom compositions (using the lower-level `Dropdown.Root` +
  * `Dropdown.Content` + `Dropdown.List`) can opt in by calling `useMenuKeyboard`
  * themselves and wiring the returned `focusedIndex` into `Dropdown.List`.
@@ -185,7 +190,7 @@ function MenuKeyboardSurface<T>({
       tabIndex={-1}
       onKeyDown={handleKeyDown}
       aria-activedescendant={activeDescendantId}
-      // Outline removed — focus is on the surface element but the visible
+      // Outline removed, focus is on the surface element but the visible
       // affordance is the focused row's `data-focused` styling, not a ring on
       // the panel container itself.
       className="outline-none"
@@ -225,7 +230,7 @@ function MenuKeyboardSurface<T>({
  * const items: MenuItem[] = [
  *   { id: '1', label: 'Edit', icon: <Edit />, onClick: handleEdit },
  *   { id: '2', label: 'Duplicate', icon: <Copy />, onClick: handleDuplicate },
- *   // Delete is destructive — separator above visually groups it apart.
+ *   // Delete is destructive, separator above visually groups it apart.
  *   { id: '3', label: 'Delete', icon: <Trash />, onClick: handleDelete, separatorBefore: true },
  * ];
  *
@@ -238,7 +243,7 @@ function MenuKeyboardSurface<T>({
  *   getItemIcon={(item) => item.icon}
  *   getItemSeparator={(item) => item.separatorBefore ?? false}
  *   getItemDisabled={(item) => item.disabled ?? false}
- *   contentClassName="right-0! top-full! mt-2! bg-white border border-gray-200 rounded-2xl shadow-lg p-2 gap-1.5 z-50 min-w-[200px]"
+ *   contentClassName="right-0! top-full! mt-2! bg-white border border-zinc-200 rounded-2xl shadow-lg p-2 gap-1.5 z-50 min-w-[200px]"
  * />
  * ```
  */

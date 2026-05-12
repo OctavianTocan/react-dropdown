@@ -17,12 +17,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {
-	DropdownContextMenu,
-	DropdownContextMenuTrigger,
-	DropdownContextMenuContent,
-	DropdownMenuItem,
-} from "../index";
+import { DropdownContextMenu, DropdownContextMenuTrigger, DropdownContextMenuContent } from "../DropdownContextMenu";
+import { DropdownMenuItem } from "../DropdownPanelItems";
 
 describe("DropdownContextMenu", () => {
 	it("opens the panel on right-click and renders items", async () => {

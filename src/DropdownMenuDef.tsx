@@ -104,7 +104,7 @@ function ActionRow({
  * @param items Child items to render
  * @param openSubmenuId Currently expanded submenu id at this level, or null
  * @param onToggleSubmenu Toggles a submenu open/closed at this level
- * @param onActionDone Closes the entire dropdown chain — fired on action click
+ * @param onActionDone Closes the entire dropdown chain, fired on action click
  * @returns Array of rendered nodes
  */
 function renderItems(
@@ -154,7 +154,7 @@ function renderItems(
 /**
  * @brief Inline-accordion submenu row for `DropdownMenuDef`
  *
- * Each row owns the accordion state for ITS OWN children — so submenus can
+ * Each row owns the accordion state for ITS OWN children, so submenus can
  * nest arbitrarily deep with each level toggling independently. Only one
  * direct child submenu can be expanded at a time within the same parent (the
  * familiar accordion behavior).
@@ -179,7 +179,7 @@ function SubmenuRow({
   // Independent accordion state for THIS row's children, so nested submenus
   // toggle without colliding with the parent's selection.
   const [openChildSubmenuId, setOpenChildSubmenuId] = useState<string | null>(null);
-  // Reset nested expansion when this row collapses — reopening always starts
+  // Reset nested expansion when this row collapses, reopening always starts
   // with all of its children collapsed.
   useEffect(() => {
     if (!isOpen) setOpenChildSubmenuId(null);

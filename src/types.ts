@@ -13,9 +13,9 @@ export type DropdownPlacement = "bottom" | "top" | "auto";
 /**
  * @brief Horizontal alignment of the dropdown content to the trigger.
  *
- * - `'start'` — left edge of content aligned to left edge of anchor
- * - `'center'` — content horizontally centered over the anchor
- * - `'end'` — right edge of content aligned to right edge of anchor (default;
+ * - `'start'`, left edge of content aligned to left edge of anchor
+ * - `'center'`, content horizontally centered over the anchor
+ * - `'end'`, right edge of content aligned to right edge of anchor (default;
  *   matches the historical behavior before the prop existed)
  */
 export type DropdownAlign = "start" | "center" | "end";
@@ -197,7 +197,7 @@ export interface DropdownRootProps<T> extends BaseDropdownProps {
    */
   getItemSection?: (item: T) => DropdownSectionMeta | null | undefined;
   /**
-   * Optional `(item, index) => boolean` — return true to render a divider ABOVE
+   * Optional `(item, index) => boolean`, return true to render a divider ABOVE
    * this item. Suppressed when the item would land at the top of the list (or
    * the top of its section), since a divider with nothing above it is rarely
    * what the consumer means.
@@ -343,7 +343,7 @@ export interface DropdownListProps<T> extends BaseDropdownProps {
   /** Optional function for grouping items into section headers */
   getItemSection?: (item: T) => DropdownSectionMeta | null | undefined;
   /**
-   * Optional `(item, index) => boolean` — return true to render a divider ABOVE
+   * Optional `(item, index) => boolean`, return true to render a divider ABOVE
    * this item. Suppressed when the item would land at the top of the list (or
    * the top of its section), since a divider with nothing above it is rarely
    * what the consumer means.
@@ -371,7 +371,7 @@ export interface DropdownListProps<T> extends BaseDropdownProps {
    */
   focusedIndex?: number;
   /**
-   * Optional accessor returning a stable HTML id for each item — required for
+   * Optional accessor returning a stable HTML id for each item, required for
    * the parent's `aria-activedescendant` reference to resolve to a real DOM
    * element. Defaults to a derived `dropdown-item-${getItemKey(item)}`.
    */
@@ -481,7 +481,7 @@ export interface DropdownContextValue<T> {
   /** Optional function to group items by section metadata */
   getItemSection?: (item: T) => DropdownSectionMeta | null | undefined;
   /**
-   * Optional `(item, index) => boolean` — return true to render a divider ABOVE
+   * Optional `(item, index) => boolean`, return true to render a divider ABOVE
    * this item. Suppressed when the item would land at the top of the list (or
    * the top of its section), since a divider with nothing above it is rarely
    * what the consumer means.
@@ -528,10 +528,10 @@ export interface DropdownContextValue<T> {
  * Discriminated union for heterogeneous menu items used by {@link DropdownMenuDef}.
  *
  * Each variant maps to a distinct rendered element:
- * - `'label'`     — non-interactive section header text
- * - `'action'`    — clickable button that invokes `onClick` and closes the menu
- * - `'submenu'`   — inline accordion that expands to reveal nested children
- * - `'separator'` — thin horizontal rule between groups of items
+ * - `'label'`    , non-interactive section header text
+ * - `'action'`   , clickable button that invokes `onClick` and closes the menu
+ * - `'submenu'`  , inline accordion that expands to reveal nested children
+ * - `'separator'`, thin horizontal rule between groups of items
  */
 export type MenuItemDef =
   | { type: 'label'; text: string }
@@ -553,7 +553,7 @@ export type MenuItemDef =
       /** Optional icon rendered to the left of the label. */
       icon?: ReactNode;
       /**
-       * Nested items rendered as an inline accordion. Arbitrary depth — each
+       * Nested items rendered as an inline accordion. Arbitrary depth, each
        * `SubmenuRow` owns its own accordion state for its direct children, so
        * a 4-level menu toggles cleanly without level-1 state being shared
        * with level-3 state.

@@ -6,7 +6,8 @@
 import { vi } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "../test-utils/test-helpers";
-import { DropdownList, DropdownProvider } from "../index";
+import { DropdownList } from "../DropdownList";
+import { DropdownProvider } from "../DropdownContext";
 import { createMockDropdownContext } from "../test-utils/test-helpers";
 import { mockItems, getMockItemKey, getMockItemDisplay } from "../test-utils/mock-data";
 
@@ -70,7 +71,7 @@ describe("DropdownList", () => {
 
       const firstItem = screen.getByText("Item One").closest('[role="option"]');
       expect(firstItem).not.toBeNull();
-      expect(firstItem).toHaveClass("bg-blue-50");
+      expect(firstItem).toHaveClass("bg-sky-50");
     });
   });
 

@@ -1,6 +1,6 @@
 /**
  * @file useMenuKeyboard.test.tsx
- * @brief Behavior tests for `useMenuKeyboard` — roving focus, type-ahead, edge traversal.
+ * @brief Behavior tests for `useMenuKeyboard`, roving focus, type-ahead, edge traversal.
  */
 
 import { renderHook, act } from "@testing-library/react";
@@ -107,7 +107,7 @@ describe("useMenuKeyboard", () => {
       act(() => result.current.handleKeyDown(makeKeyEvent("End")));
       expect(result.current.focusedIndex).toBe(3); // Date
       act(() => result.current.handleKeyDown(makeKeyEvent("ArrowDown")));
-      expect(result.current.focusedIndex).toBe(0); // Apple — wrap to start
+      expect(result.current.focusedIndex).toBe(0); // Apple, wrap to start
     });
   });
 

@@ -5,7 +5,7 @@
 
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, use, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { DropdownContextValue } from "./types";
 
@@ -20,7 +20,7 @@ const DropdownContext = createContext<DropdownContextValue<unknown> | null>(null
  * @returns Dropdown context value
  */
 export function useDropdownContext<T>() {
-  const context = useContext(DropdownContext) as DropdownContextValue<T> | null;
+  const context = use(DropdownContext) as DropdownContextValue<T> | null;
 
   if (!context) {
     throw new Error(

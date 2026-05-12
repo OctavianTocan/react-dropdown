@@ -3,13 +3,13 @@
  * @brief Right-click context-menu primitive built on top of {@link DropdownRoot}.
  *
  * Family of three components:
- * - {@link DropdownContextMenu} — provider; stores cursor coordinates from the
+ * - {@link DropdownContextMenu}, provider; stores cursor coordinates from the
  *   right-click and exposes them to a virtual anchor element so the existing
  *   {@link DropdownContent} positioning + collision-flip logic positions the
  *   panel at the cursor.
- * - {@link DropdownContextMenuTrigger} — captures `oncontextmenu` on its child,
+ * - {@link DropdownContextMenuTrigger}, captures `oncontextmenu` on its child,
  *   prevents the browser's native menu, and opens the panel at the click point.
- * - {@link DropdownContextMenuContent} — portaled panel that hosts the JSX
+ * - {@link DropdownContextMenuContent}, portaled panel that hosts the JSX
  *   children (use {@link DropdownMenuItem} / {@link DropdownMenuLabel} / etc.).
  *   Reuses the same motion timing the root dropdown uses, so visual continuity
  *   is automatic.
@@ -19,7 +19,7 @@
  * arbitrary element vs. left-click on a button), and the positioning anchor is
  * a virtual point rather than the trigger's bounding rect. Sharing infrastructure
  * with {@link DropdownRoot} means submenus, items, motion, and click-outside all
- * work identically — only the trigger event surface and the anchor are new.
+ * work identically, only the trigger event surface and the anchor are new.
  *
  * The panel-mode {@link DropdownMenuItem} works inside {@link DropdownContextMenuContent}
  * unchanged because both roots provide the same {@link DropdownContextValue} shape;
@@ -29,23 +29,14 @@
 
 "use client";
 
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-	type ReactNode,
-} from "react";
+import { createContext, useCallback, use, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { DropdownRoot } from "./DropdownRoot";
 import { DropdownContent } from "./DropdownContent";
 import { useDropdownContext } from "./DropdownContext";
 import { Slot } from "./Slot";
 
 /**
- * @brief Internal context shape — exposes cursor coordinates and an open
+ * @brief Internal context shape, exposes cursor coordinates and an open
  * trigger to the trigger child.
  */
 interface ContextMenuContextValue {
@@ -65,7 +56,7 @@ interface ContextMenuContextValue {
 const ContextMenuContext = createContext<ContextMenuContextValue | null>(null);
 
 function useContextMenuContext(): ContextMenuContextValue {
-	const ctx = useContext(ContextMenuContext);
+	const ctx = use(ContextMenuContext);
 	if (!ctx) {
 		throw new Error(
 			"DropdownContextMenuTrigger / DropdownContextMenuContent must be rendered inside <DropdownContextMenu>.",
@@ -110,7 +101,7 @@ export function DropdownContextMenu({
 }: DropdownContextMenuProps): React.JSX.Element {
 	const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
 	// The anchor element is rendered as a fixed-position 1×1 div at the cursor
-	// coordinates — DropdownContent's `anchorRef` positioning treats it as the
+	// coordinates, DropdownContent's `anchorRef` positioning treats it as the
 	// trigger's bounding rect, so the panel lands at the cursor with full
 	// collision-flip support for free.
 	const anchorRef = useRef<HTMLDivElement | null>(null);
@@ -153,7 +144,7 @@ export function DropdownContextMenu({
  *
  * Renders the virtual anchor at the cursor position (so the existing
  * positioning math works), then delegates everything else to `DropdownRoot`.
- * Uses `selectedItem`/`items=[]` because the data path is unused — items are
+ * Uses `selectedItem`/`items=[]` because the data path is unused, items are
  * rendered as JSX children of {@link DropdownContextMenuContent}.
  *
  * The anchor is rendered with `pointer-events-none` so it can't capture
@@ -210,7 +201,7 @@ function ContextMenuOpener({
 			/>
 			{/*
 			 * NB: we don't `key` the DropdownRoot on position. Keying on coords
-			 * would force a remount on every open — but the remount destroys the
+			 * would force a remount on every open, but the remount destroys the
 			 * portaled panel synchronously, which races with React's click event
 			 * dispatch. Concretely: clicking a menuitem fires `mousedown`, which
 			 * triggers `useClickOutside` to call `closeDropdown` (because the
@@ -241,7 +232,7 @@ function ContextMenuOpener({
 
 /**
  * Empty items array reused across mounts. The data path is unused for the
- * context menu — JSX children carry the items.
+ * context menu, JSX children carry the items.
  */
 const EMPTY_ITEMS: readonly never[] = [];
 const noop = (): void => {};
@@ -312,7 +303,7 @@ function DropdownRootShim({
  * `AnimatePresence` inside `DropdownContent` a clean "child appears"
  * sequence, which is what triggers the enter motion. With a layout
  * effect both states landed in the same paint cycle and Motion sometimes
- * skipped the enter animation — making the right-click menu pop into
+ * skipped the enter animation, making the right-click menu pop into
  * view without the filter-blur / scale / y motion that regular
  * dropdowns get.
  */
@@ -369,7 +360,7 @@ export function DropdownContextMenuTrigger({
 		(event: React.MouseEvent): void => {
 			if (disabled) return;
 			event.preventDefault();
-			// Capture from the page's coordinate system — DropdownContent positions
+			// Capture from the page's coordinate system, DropdownContent positions
 			// the panel using `position: fixed` against the viewport, so clientX/Y
 			// map 1:1 onto the panel's top-left.
 			openAt(event.clientX, event.clientY);
@@ -393,7 +384,7 @@ export function DropdownContextMenuTrigger({
  * @brief Props for {@link DropdownContextMenuContent}.
  */
 export interface DropdownContextMenuContentProps {
-	/** Panel children — typically {@link DropdownMenuItem}, separators, labels. */
+	/** Panel children, typically {@link DropdownMenuItem}, separators, labels. */
 	children: ReactNode;
 	/** Optional className applied to the panel surface. */
 	className?: string;

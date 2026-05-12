@@ -1,6 +1,6 @@
 /**
  * @file DropdownPanelMenu.tsx
- * @brief JSX-children dropdown menu — composes arbitrary item trees as children.
+ * @brief JSX-children dropdown menu, composes arbitrary item trees as children.
  *
  * Sibling to {@link DropdownMenu} (data-driven) for consumers that need a
  * Radix-`DropdownMenu`-style API: render `<DropdownMenuItem>` / `<DropdownMenuLabel>`
@@ -9,7 +9,7 @@
  *
  * Why a sibling component instead of overloading `DropdownMenu`:
  * - Keeps the existing 152-test surface byte-for-byte unchanged.
- * - Makes the API surface honest — there's no "if items is empty, render
+ * - Makes the API surface honest, there's no "if items is empty, render
  *   children instead" branching that consumers have to understand.
  * - Internal: just wraps `DropdownRoot` with a no-op item array + no-op
  *   onSelect, then renders `<DropdownContent>{children}</DropdownContent>`.
@@ -19,7 +19,7 @@
  * Both modes share the same {@link DropdownRoot} context, which means the
  * polymorphic `MenuComponentsContext` in `frontend/components/ui/menu-context.tsx`
  * can render the same item tree inside either a {@link DropdownPanelMenu} or
- * a {@link DropdownContextMenu} — the panel items only depend on the context's
+ * a {@link DropdownContextMenu}, the panel items only depend on the context's
  * `closeDropdown` and don't care which kind of root is upstream.
  */
 
@@ -69,7 +69,7 @@ export interface DropdownPanelMenuProps {
 	usePortal?: boolean;
 	/** Disables the trigger entirely. */
 	disabled?: boolean;
-	/** Fires whenever the open state changes — true on open, false on close. */
+	/** Fires whenever the open state changes, true on open, false on close. */
 	onOpenChange?: (isOpen: boolean) => void;
 	/** Optional test id for the root wrapper. */
 	"data-testid"?: string;
@@ -118,7 +118,7 @@ function PanelMenuTrigger({
 
 // Empty items array shared across all `DropdownPanelMenu` mounts. The reference
 // stays stable so `useMemo` deps inside `DropdownRoot` don't churn when the
-// consumer re-renders; the array itself is unused — JSX children carry the menu
+// consumer re-renders; the array itself is unused, JSX children carry the menu
 // content, not the data path.
 const EMPTY_ITEMS: readonly never[] = [];
 
@@ -132,7 +132,7 @@ const noopGetItemKey = (_item: never): string => "";
 const noopGetItemDisplay = (_item: never): string => "";
 
 /**
- * @brief JSX-children dropdown menu — Radix-`DropdownMenu` parity surface.
+ * @brief JSX-children dropdown menu, Radix-`DropdownMenu` parity surface.
  *
  * Renders an arbitrary tree of {@link DropdownMenuItem} / {@link DropdownMenuLabel}
  * / {@link DropdownMenuSeparator} / etc. as panel children. Hover, click, and

@@ -24,7 +24,7 @@ export function DropdownHeader({
   "data-testid": testId = "dropdown-header",
 }: DropdownHeaderProps) {
   return (
-    <div className={`flex-shrink-0 ${separator ? "border-b border-gray-200" : ""} ${className}`} data-testid={testId}>
+    <div className={`flex-shrink-0 ${separator ? "border-b border-zinc-200" : ""} ${className}`} data-testid={testId}>
       {children}
     </div>
   );

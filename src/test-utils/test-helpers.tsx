@@ -132,18 +132,6 @@ export const createMockDropdownContext = <T,>(
   };
 };
 
-// --- MISCELLANEOUS TEST HELPERS --- //
-// WHY: Utility helpers keep tests expressive without repetition.
-import { vi } from "vitest";
-
-export const createMockFunction = () => {
-  return vi.fn() as ReturnType<typeof vi.fn>;
-};
-
-export const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
-
-export const getTestId = (id: string) => `[data-testid="${id}"]`;
-
 // --- RE-EXPORTS --- //
 // WHY: Allow tests to import everything from a single helper entry point.
 export * from "@testing-library/react";

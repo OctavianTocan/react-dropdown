@@ -114,7 +114,7 @@ export type {
   DropdownMenuLabelProps,
 } from "./DropdownPanelItems";
 
-// JSX-children dropdown panel — Radix-`DropdownMenu` parity surface for
+// JSX-children dropdown panel, Radix-`DropdownMenu` parity surface for
 // consumers that need to render arbitrary item trees as children.
 export { DropdownPanelMenu } from "./DropdownPanelMenu";
 export type { DropdownPanelMenuProps } from "./DropdownPanelMenu";

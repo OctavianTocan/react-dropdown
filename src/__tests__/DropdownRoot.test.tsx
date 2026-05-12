@@ -6,7 +6,13 @@
 import { vi } from "vitest";
 import React from "react";
 import { renderDropdown, screen, fireEvent, waitFor } from "../test-utils/test-helpers";
-import { mockItems, getMockItemKey, getMockItemDisplay, createMockOnSelect } from "../test-utils/mock-data";
+import {
+  mockItems,
+  getMockItemKey,
+  getMockItemDisplay,
+  createMockOnSelect,
+  type MockItem,
+} from "../test-utils/mock-data";
 
 describe("DropdownRoot", () => {
   describe("Rendering", () => {
@@ -236,7 +242,7 @@ describe("DropdownRoot", () => {
     });
 
     it("uses custom filterItems function when provided", async () => {
-      const customFilter = vi.fn((items: typeof mockItems, query: string) => {
+      const customFilter = vi.fn((items: readonly MockItem[], query: string) => {
         return items.filter((item) => getMockItemDisplay(item).toUpperCase().includes(query.toUpperCase()));
       });
 
@@ -387,7 +393,7 @@ describe("DropdownRoot", () => {
   describe("Filter Behavior", () => {
     it("memoizes filtered items to prevent unnecessary recalculations", () => {
       const onSelect = createMockOnSelect();
-      const filterItems = vi.fn((items: typeof mockItems, query: string) => {
+      const filterItems = vi.fn((items: readonly MockItem[], query: string) => {
         return items.filter((item) => getMockItemDisplay(item).toLowerCase().includes(query.toLowerCase()));
       });
 

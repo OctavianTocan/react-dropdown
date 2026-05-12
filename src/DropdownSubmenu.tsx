@@ -5,33 +5,25 @@
  * Three-component composition that opens a portaled side panel relative to a
  * parent menu item:
  *
- * - `DropdownSubmenu` — context provider; owns the submenu's open state and
+ * - `DropdownSubmenu`, context provider; owns the submenu's open state and
  *   anchor ref.
- * - `DropdownSubmenuTrigger` — the parent menu's item that opens the
+ * - `DropdownSubmenuTrigger`, the parent menu's item that opens the
  *   submenu. Mirrors `MenuTrigger`'s `asChild` pattern. Includes hover-open,
  *   click-toggle, ArrowRight-open keyboard shortcut.
- * - `DropdownSubmenuContent` — the portaled flyout panel. Reuses the parent
+ * - `DropdownSubmenuContent`, the portaled flyout panel. Reuses the parent
  *   `DropdownContent` motion variants for visual continuity (filter blur,
  *   scale + y motion, ease-in-quint exit) while owning its own anchor ref
  *   so collision-flipping is local to the submenu's space.
  *
  * Nested submenus work because each `DropdownSubmenu` creates its own
- * context — the chain is just nested providers. Click-outside on the root
+ * context, the chain is just nested providers. Click-outside on the root
  * closes everything; Escape inside a sub closes that sub level and returns
  * focus to the parent's trigger.
  */
 
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, use, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
@@ -43,7 +35,7 @@ import { SubmenuChevronIcon } from "./SubmenuChevronIcon";
 
 /** Hover-open delay (ms) before the submenu appears on pointer-enter. */
 const HOVER_OPEN_DELAY_MS = 100;
-/** Hover-close delay (ms) — gives the user time to drift toward the panel. */
+/** Hover-close delay (ms), gives the user time to drift toward the panel. */
 const HOVER_CLOSE_DELAY_MS = 200;
 /** Inset (px) from the viewport edge when collision-flipping side. */
 const VIEWPORT_INSET = 8;
@@ -53,7 +45,7 @@ const VIEWPORT_INSET = 8;
  *
  * Without coordination, cycling the cursor between sibling triggers
  * (Status → Labels → More) leaves the previous submenu visible while the
- * next one opens — the trigger's hover-close is delayed by
+ * next one opens, the trigger's hover-close is delayed by
  * {@link HOVER_CLOSE_DELAY_MS}, but the next trigger's hover-open fires
  * after only {@link HOVER_OPEN_DELAY_MS}, so both panels are visible for
  * ~100 ms plus animation tail. The visible artefact: panels stack on top
@@ -65,7 +57,7 @@ const VIEWPORT_INSET = 8;
  * immediately.
  *
  * Each {@link DropdownSubmenu} also provides a fresh group to its
- * children — nested submenus only coordinate within their own depth, so
+ * children, nested submenus only coordinate within their own depth, so
  * opening a sub-sub doesn't accidentally close the sibling sub.
  */
 interface SubmenuGroupValue {
@@ -93,11 +85,11 @@ const SubmenuGroupContext = createContext<SubmenuGroupValue>(NOOP_SUBMENU_GROUP)
  * @brief Hook returning the parent submenu-group coordinator.
  *
  * Returns a no-op group when used outside a provider so consumers don't
- * need to wrap their tree explicitly — the coordination just becomes
+ * need to wrap their tree explicitly, the coordination just becomes
  * inactive for that subtree.
  */
 function useSubmenuGroup(): SubmenuGroupValue {
-  return useContext(SubmenuGroupContext);
+  return use(SubmenuGroupContext);
 }
 
 /**
@@ -157,7 +149,7 @@ interface SubmenuContextValue {
 const SubmenuContext = createContext<SubmenuContextValue | null>(null);
 
 function useSubmenuContext(): SubmenuContextValue {
-  const ctx = useContext(SubmenuContext);
+  const ctx = use(SubmenuContext);
   if (!ctx) {
     throw new Error(
       "DropdownSubmenuTrigger / DropdownSubmenuContent must be rendered inside <DropdownSubmenu>.",
@@ -167,20 +159,20 @@ function useSubmenuContext(): SubmenuContextValue {
 }
 
 /**
- * @brief Submenu state container — wraps a trigger + content pair.
+ * @brief Submenu state container, wraps a trigger + content pair.
  *
  * Renders no DOM of its own; just provides the submenu context.
  */
 export function DropdownSubmenu({ children }: { children: ReactNode }): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLElement | null>(null);
-  // Single shared timer ref — schedule overrides cancel cleanly. Critical
+  // Single shared timer ref, schedule overrides cancel cleanly. Critical
   // under spam: if the user moves the cursor on/off the trigger rapidly,
   // each transition resets the pending action so the visible state matches
   // the most recent intent.
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Peer coordinator from the closest ancestor panel — used to evict
+  // Peer coordinator from the closest ancestor panel, used to evict
   // sibling submenus when this one opens so cycling between Status →
   // Labels → More no longer briefly stacks two flyouts on top of each
   // other.
@@ -197,7 +189,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
   // register/closeOthers without forcing every sibling to retain a
   // reference to a fresh function each render.
   const closeRef = useRef<() => void>(() => {
-    // assigned below — stable identity is what matters for the registry.
+    // assigned below, stable identity is what matters for the registry.
   });
 
   const open = useCallback((): void => {
@@ -219,7 +211,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
   const scheduleOpen = useCallback((): void => {
     cancelScheduled();
     timerRef.current = setTimeout(() => {
-      // Same eviction at the actual flip point — handles the case where
+      // Same eviction at the actual flip point, handles the case where
       // the user scrubs hover triggers fast enough that several timers
       // were scheduled and the latest one is the survivor.
       parentGroup.closeOthers(closeRef.current);
@@ -238,7 +230,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
 
   // Register this submenu's `close` with the parent group on mount.
   // Identity comes from the closeRef so the registry entry stays stable
-  // across re-renders — reference equality is what `closeOthers(self)`
+  // across re-renders, reference equality is what `closeOthers(self)`
   // depends on to skip the active submenu.
   useEffect(() => {
     return parentGroup.register(closeRef.current);
@@ -257,7 +249,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
 
   return (
     <SubmenuContext.Provider value={value}>
-      {/* Fresh group for nested submenus — descendants only coordinate
+      {/* Fresh group for nested submenus, descendants only coordinate
           with their own siblings, not with this submenu's peers. */}
       <DropdownSubmenuGroupProvider>{children}</DropdownSubmenuGroupProvider>
     </SubmenuContext.Provider>
@@ -270,7 +262,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
  * Mirrors {@link DropdownMenuItem}'s default class so a bare `<MenuSubTrigger>`
  * renders with the same flex row layout (icon ◯ label ◯ trailing) as a sibling
  * `<MenuItem>`. Without this, consumers that didn't pass a `className` got an
- * unstyled `<button>` whose icon + label collapsed into block flow — labels
+ * unstyled `<button>` whose icon + label collapsed into block flow, labels
  * floated into the middle of the panel detached from their icons (ai-nexus
  * sidebar conversation right-click menu, image #37).
  *
@@ -306,7 +298,7 @@ export interface DropdownSubmenuTriggerProps {
   disabled?: boolean;
   /**
    * When `true` (default), appends a trailing chevron after `children` in the
-   * default `<button>` trigger — signals that the row opens a submenu. Ignored
+   * default `<button>` trigger, signals that the row opens a submenu. Ignored
    * when `asChild` is true (compose your own affordance). Set `false` when the
    * trigger already supplies a trailing slot (e.g. checkmark vs chevron).
    */
@@ -317,14 +309,14 @@ export interface DropdownSubmenuTriggerProps {
  * @brief Menu-item-like button that opens the parent's submenu.
  *
  * In the default `<button>` mode, a trailing chevron is appended automatically
- * unless {@link DropdownSubmenuTriggerProps.showChevron} is `false` — callers
+ * unless {@link DropdownSubmenuTriggerProps.showChevron} is `false`, callers
  * using `asChild` compose their own trailing affordance.
  *
  * Behavior:
  * - **Click / Enter / Space**: toggle open.
- * - **ArrowRight**: open (Radix convention — submenus open right by default).
+ * - **ArrowRight**: open (Radix convention, submenus open right by default).
  * - **PointerEnter**: schedule open after `HOVER_OPEN_DELAY_MS`.
- * - **PointerLeave**: schedule close after `HOVER_CLOSE_DELAY_MS` — long
+ * - **PointerLeave**: schedule close after `HOVER_CLOSE_DELAY_MS`, long
  *   enough for the user to drift onto the submenu panel without losing it.
  *
  * The panel itself cancels the close-schedule when the cursor enters it,
@@ -393,7 +385,7 @@ export function DropdownSubmenuTrigger({
         aria-hidden
         className="ml-auto flex shrink-0 items-center justify-center text-muted-foreground"
       >
-        <SubmenuChevronIcon className="h-3.5 w-3.5" />
+        <SubmenuChevronIcon className="size-3.5" />
       </span>
     ) : null;
 
@@ -421,7 +413,7 @@ export function DropdownSubmenuTrigger({
 /**
  * @brief Default enter duration (seconds) for submenu motion.
  *
- * Faster than the root dropdown's 0.14 s default — when the user traverses
+ * Faster than the root dropdown's 0.14 s default, when the user traverses
  * siblings (Anthropic → OpenAI → Google), each panel needs to appear
  * before the previous one finishes exiting or two panels are briefly
  * visible at once. 0.08 s lands inside Linear/Arc territory ("snappy
@@ -453,7 +445,7 @@ export interface DropdownSubmenuContentProps {
   /** Pixel offset from the trigger's edge on the chosen side. Default: 4. */
   sideOffset?: number;
   /**
-   * Enter motion duration (seconds). Defaults to 0.08 s — faster than the
+   * Enter motion duration (seconds). Defaults to 0.08 s, faster than the
    * root dropdown so chained-submenu cursor traversal feels continuous.
    * Pass `useDropdownContext().enterDuration` when you want submenu motion
    * to match the root explicitly.
@@ -489,7 +481,7 @@ export function DropdownSubmenuContent({
   const prefersReducedMotion = useReducedMotion() === true;
   const reduceMotion = root.respectReducedMotion && prefersReducedMotion;
 
-  // Local position state — top-left anchor, with `side` resolving to left or
+  // Local position state, top-left anchor, with `side` resolving to left or
   // right of the trigger after collision-flip.
   const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [resolvedSide, setResolvedSide] = useState<"right" | "left">(side);
@@ -533,7 +525,7 @@ export function DropdownSubmenuContent({
 
   // Cancel any pending hover-close when the cursor enters the panel; restart
   // the hover-close when it leaves. This is the lightweight "you can travel
-  // from trigger to panel without losing it" guarantee — Radix uses a
+  // from trigger to panel without losing it" guarantee, Radix uses a
   // safe-triangle for diagonal travel; we accept a brief vertical/horizontal
   // glitch through corners as a trade-off for far simpler implementation.
   const handlePointerEnter = useCallback(() => submenu.cancelScheduled(), [submenu]);
@@ -551,7 +543,7 @@ export function DropdownSubmenuContent({
     [submenu],
   );
 
-  // Motion variants — submenu owns its own enter/exit timing (faster than
+  // Motion variants, submenu owns its own enter/exit timing (faster than
   // the root dropdown by default) so chained-submenu cursor traversal
   // doesn't visibly overlap two panels. Easing still inherits from the
   // root so the panels visually belong to the same family. Reduced-motion
@@ -593,7 +585,7 @@ export function DropdownSubmenuContent({
 
   if (typeof document === "undefined") return null;
 
-  // Always portal to body — submenus inside an overflow-hidden parent menu
+  // Always portal to body, submenus inside an overflow-hidden parent menu
   // would otherwise be clipped.
   return createPortal(
     <AnimatePresence>

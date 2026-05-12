@@ -7,15 +7,13 @@ import React from "react";
 import { render, screen, waitFor } from "../test-utils/test-helpers";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
-import {
-  DropdownRoot,
-  DropdownTrigger,
-  DropdownContent,
-  DropdownList,
-  DropdownHeader,
-  DropdownFooter,
-  DropdownProvider,
-} from "../index";
+import { DropdownRoot } from "../DropdownRoot";
+import { DropdownTrigger } from "../DropdownTrigger";
+import { DropdownContent } from "../DropdownContent";
+import { DropdownList } from "../DropdownList";
+import { DropdownHeader } from "../DropdownHeader";
+import { DropdownFooter } from "../DropdownFooter";
+import { DropdownProvider } from "../DropdownContext";
 import { createMockDropdownContext } from "../test-utils/test-helpers";
 import type { DropdownRootProps } from "../types";
 

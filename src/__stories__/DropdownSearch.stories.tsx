@@ -1,12 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import {
-  DropdownRoot,
-  DropdownTrigger,
-  DropdownContent,
-  DropdownSearch,
-  DropdownList,
-} from '../index';
+import { DropdownRoot } from "../DropdownRoot";
+import { DropdownTrigger } from "../DropdownTrigger";
+import { DropdownContent } from "../DropdownContent";
+import { DropdownSearch } from "../DropdownSearch";
+import { DropdownList } from "../DropdownList";
 import {
   simpleItems,
   languages,
@@ -230,7 +228,7 @@ export const SearchWithHeader: Story = {
       >
         <DropdownTrigger displayValue={selected ?? ''} placeholder="Pick a fruit" />
         <DropdownContent>
-          <div className="px-3 py-2 bg-blue-50 border-b text-sm font-medium text-blue-900">
+          <div className="px-3 py-2 bg-sky-50 border-b text-sm font-medium text-sky-900">
             Available Fruits
           </div>
           <DropdownSearch
@@ -293,7 +291,7 @@ export const SearchWithFooter: Story = {
             getItemKey={(item: string) => item}
             getItemDisplay={(item: string) => item}
           />
-          <div className="px-3 py-2 bg-gray-50 border-t text-xs text-gray-600">
+          <div className="px-3 py-2 bg-zinc-50 border-t text-xs text-zinc-600">
             Can&apos;t find what you&apos;re looking for? Contact support
           </div>
         </DropdownContent>

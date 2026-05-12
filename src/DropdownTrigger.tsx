@@ -32,9 +32,9 @@ export function DropdownTrigger({
    */
   const buildTriggerClassName = () => {
     const baseClasses =
-      'w-full flex items-center justify-between px-3 py-2 text-left border border-gray-300 rounded-lg bg-white transition-colors';
+      'w-full flex items-center justify-between px-3 py-2 text-left border border-zinc-300 rounded-lg bg-white transition-colors';
     const interactiveClasses =
-      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#0B4F75] focus-visible:border-transparent hover:border-gray-400 cursor-pointer';
+      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#0B4F75] focus-visible:border-transparent hover:border-zinc-400 cursor-pointer';
     const disabledClasses = 'opacity-50 cursor-not-allowed';
 
     return `${baseClasses} ${disabled ? disabledClasses : interactiveClasses}`;
@@ -45,7 +45,7 @@ export function DropdownTrigger({
    * @returns CSS class string based on whether value exists
    */
   const buildTextClassName = () => {
-    return displayValue ? 'text-gray-900' : 'text-gray-400';
+    return displayValue ? 'text-zinc-900' : 'text-zinc-400';
   };
 
   return (

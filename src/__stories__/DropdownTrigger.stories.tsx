@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { DropdownTrigger, DropdownProvider } from "../index";
+import { DropdownTrigger } from "../DropdownTrigger";
+import { DropdownProvider } from "../DropdownContext";
 import { createMockContext } from "../__storybook__/story-helpers";
 
 /**
@@ -143,7 +144,7 @@ export const CustomStyling: Story = {
   args: {
     displayValue: "Custom",
     placeholder: "Select an option",
-    className: "bg-blue-50! text-blue-900! border-blue-300!",
+    className: "bg-sky-50! text-sky-900! border-blue-300!",
   },
   render: (args) => (
     <DropdownProvider value={createMockContext()}>

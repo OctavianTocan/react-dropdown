@@ -72,7 +72,7 @@ export const WithPreselection: Story = {
  */
 export const WithCustomFilter: Story = {
   render: function WithCustomFilterStory(args) {
-    const customFilter = (items: Language[], query: string) => {
+    const customFilter = (items: readonly Language[], query: string) => {
       const lowerQuery = query.toLowerCase();
       return items.filter(
         (item) =>

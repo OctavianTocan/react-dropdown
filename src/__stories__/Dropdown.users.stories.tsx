@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { DropdownRoot, DropdownTrigger, DropdownContent, DropdownSearch, DropdownList } from "../index";
+import { DropdownRoot } from "../DropdownRoot";
+import { DropdownTrigger } from "../DropdownTrigger";
+import { DropdownContent } from "../DropdownContent";
+import { DropdownSearch } from "../DropdownSearch";
+import { DropdownList } from "../DropdownList";
 import { createDropdownStory } from "../__storybook__/story-helpers";
 import { users, getUserKey, getUserDisplay, type User } from "../__storybook__/mock-data";
 
@@ -108,7 +112,7 @@ export const WithCustomComposition: Story = {
           data-testid="custom-user-dropdown-trigger"
         />
         <DropdownContent data-testid="custom-user-dropdown-content">
-          <div className="px-3 py-2 bg-blue-50 border-b border-blue-100 text-sm text-blue-800">
+          <div className="px-3 py-2 bg-sky-50 border-b border-blue-100 text-sm text-sky-800">
             Team Members ({filteredUsers.length})
           </div>
           <DropdownSearch
@@ -126,7 +130,7 @@ export const WithCustomComposition: Story = {
             getItemDisplay={getUserDisplay}
             data-testid="custom-user-dropdown-list"
           />
-          <div className="px-3 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
+          <div className="px-3 py-2 bg-zinc-50 border-t border-zinc-200 text-xs text-zinc-600">
             Need to add someone? Contact your admin
           </div>
         </DropdownContent>
