@@ -539,7 +539,7 @@ function DropdownOption<T>({
    * @description Calls the onSelect callback if the option is not disabled.
    * Prevents selection of disabled items.
    */
-  const handleClick = () => {
+  const selectOption = () => {
     if (!isDisabled) {
       onSelect(item);
     }
@@ -560,7 +560,7 @@ function DropdownOption<T>({
   return (
     <div
       data-key={dataKey}
-      onClick={handleClick}
+      onClick={selectOption}
       className={combinedClasses}
       style={isHovered && !isDisabled ? { backgroundColor: hoverBgColor } : undefined}
       role="option"

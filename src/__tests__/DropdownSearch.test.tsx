@@ -50,18 +50,18 @@ describe("DropdownSearch", () => {
   describe("Interaction", () => {
     it("calls onChange when input changes", () => {
       const mockContext = createMockDropdownContext();
-      const handleChange = vi.fn();
+      const updateSearchQuery = vi.fn();
 
       render(
         <DropdownProvider value={mockContext}>
-          <DropdownSearch value="" onChange={handleChange} />
+          <DropdownSearch value="" onChange={updateSearchQuery} />
         </DropdownProvider>,
       );
 
       const input = screen.getByTestId("dropdown-search");
       fireEvent.change(input, { target: { value: "new query" } });
 
-      expect(handleChange).toHaveBeenCalledWith("new query");
+      expect(updateSearchQuery).toHaveBeenCalledWith("new query");
     });
   });
 });
