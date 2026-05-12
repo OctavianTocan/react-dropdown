@@ -105,15 +105,20 @@ export function DropdownContextMenu({
 	// trigger's bounding rect, so the panel lands at the cursor with full
 	// collision-flip support for free.
 	const anchorRef = useRef<HTMLDivElement | null>(null);
+	/** Mirrors `position` so event handlers can read the pre-update value without a setState updater. */
+	const positionRef = useRef(position);
+	positionRef.current = position;
 
 	const openAt = useCallback((clientX: number, clientY: number): void => {
-		setPosition((currentPosition) => {
-			if (!currentPosition) {
-				onOpenChange?.(true);
-			}
-			return { x: clientX, y: clientY };
-		});
+		const wasClosed = positionRef.current === null;
+		setPosition({ x: clientX, y: clientY });
 		setOpenVersion((version) => version + 1);
+		// Never call `onOpenChange` inside a setState updater — it can update a
+		// parent (e.g. EntityRow) while React is still applying this component's
+		// update (React 19: "Cannot update a component while rendering a different component").
+		if (wasClosed) {
+			onOpenChange?.(true);
+		}
 	}, [onOpenChange]);
 
 	const close = useCallback((): void => {
@@ -245,7 +250,7 @@ function ContextMenuOpener({
  * context menu, JSX children carry the items.
  */
 const EMPTY_ITEMS: readonly never[] = [];
-const noop = (): void => {};
+const noop = (): void => { };
 const noopKey = (_: never): string => "";
 const noopDisplay = (_: never): string => "";
 
