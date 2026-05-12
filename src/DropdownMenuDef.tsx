@@ -107,13 +107,20 @@ function ActionRow({
  * @param onActionDone Closes the entire dropdown chain, fired on action click
  * @returns Array of rendered nodes
  */
-function renderItems(
-  items: readonly MenuItemDef[],
-  openSubmenuId: string | null,
-  onToggleSubmenu: (id: string) => void,
-  onActionDone: () => void,
-): ReactNode {
-  return items.map((item, index) => {
+function MenuItems({
+  items,
+  openSubmenuId,
+  onToggleSubmenu,
+  onActionDone,
+}: {
+  items: readonly MenuItemDef[];
+  openSubmenuId: string | null;
+  onToggleSubmenu: (id: string) => void;
+  onActionDone: () => void;
+}): React.JSX.Element {
+  return (
+    <>
+      {items.map((item, index) => {
     const key = buildKey(item, index);
     switch (item.type) {
       case 'separator':
@@ -148,7 +155,9 @@ function renderItems(
           />
         );
     }
-  });
+      })}
+    </>
+  );
 }
 
 /**
@@ -225,7 +234,12 @@ function SubmenuRow({
           aria-label={label}
           className="ml-4 mt-0.5 border-l border-border/50 pl-1"
         >
-          {renderItems(childItems, openChildSubmenuId, handleToggleChildSubmenu, onActionDone)}
+          <MenuItems
+            items={childItems}
+            openSubmenuId={openChildSubmenuId}
+            onToggleSubmenu={handleToggleChildSubmenu}
+            onActionDone={onActionDone}
+          />
         </div>
       )}
     </div>
@@ -286,6 +300,44 @@ export function DropdownMenuDef({
     [items],
   );
 
+  const renderMenuItem = useCallback(
+    (item: WrappedItem, _isSelected: boolean, onSelect: (item: WrappedItem) => void) => {
+      const { def } = item;
+      switch (def.type) {
+        case 'separator':
+          return <SeparatorRow />;
+        case 'label':
+          return <LabelRow text={def.text} />;
+        case 'action':
+          return (
+            <ActionRow
+              label={def.label}
+              icon={def.icon}
+              shortcut={def.shortcut}
+              disabled={def.disabled}
+              onClick={() => onSelect(item)}
+            />
+          );
+        case 'submenu':
+          return (
+            <SubmenuRow
+              id={def.id}
+              label={def.label}
+              icon={def.icon}
+              childItems={def.children}
+              isOpen={openSubmenuId === def.id}
+              onToggle={handleToggleSubmenu}
+              // Clicking a nested action triggers `onSelect(item)` on the
+              // parent WrappedItem so that `closeOnSelect` fires on the root
+              // dropdown and the entire chain closes.
+              onActionDone={() => onSelect(item)}
+            />
+          );
+      }
+    },
+    [handleToggleSubmenu, openSubmenuId],
+  );
+
   return (
     <DropdownMenu<WrappedItem>
       trigger={trigger}
@@ -310,40 +362,7 @@ export function DropdownMenuDef({
       contentClassName={contentClassName}
       onOpenChange={handleOpenChange}
       usePortal={usePortal}
-      renderItem={(item, _isSelected, onSelect) => {
-        const { def } = item;
-        switch (def.type) {
-          case 'separator':
-            return <SeparatorRow />;
-          case 'label':
-            return <LabelRow text={def.text} />;
-          case 'action':
-            return (
-              <ActionRow
-                label={def.label}
-                icon={def.icon}
-                shortcut={def.shortcut}
-                disabled={def.disabled}
-                onClick={() => onSelect(item)}
-              />
-            );
-          case 'submenu':
-            return (
-              <SubmenuRow
-                id={def.id}
-                label={def.label}
-                icon={def.icon}
-                childItems={def.children}
-                isOpen={openSubmenuId === def.id}
-                onToggle={handleToggleSubmenu}
-                // Clicking a nested action triggers `onSelect(item)` on the
-                // parent WrappedItem so that `closeOnSelect` fires on the root
-                // dropdown and the entire chain closes.
-                onActionDone={() => onSelect(item)}
-              />
-            );
-        }
-      }}
+      renderItem={renderMenuItem}
     />
   );
 }

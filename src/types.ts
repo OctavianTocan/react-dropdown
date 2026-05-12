@@ -87,6 +87,8 @@ export interface BaseDropdownProps {
  * ```
  */
 export interface DropdownRootProps<T> extends BaseDropdownProps {
+  /** Whether the internal open state starts open. */
+  defaultOpen?: boolean;
   /**
    * Array of items to display. Accepts both mutable and readonly arrays.
    * @example

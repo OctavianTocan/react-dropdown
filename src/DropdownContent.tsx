@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useReducer } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, domAnimation, LazyMotion, useReducedMotion } from "motion/react";
 import * as m from "motion/react-m";
@@ -20,6 +20,210 @@ import type { DropdownContentProps } from "./types";
  * viewport boundary which reads as "broken layout" rather than "deliberate".
  */
 const VIEWPORT_INSET = 8;
+
+type PortalPosition = {
+  top: number | null;
+  bottom: number | null;
+  left: number | null;
+  right: number | null;
+};
+
+interface DropdownContentPositionOptions {
+  activePlacementSeed: "top" | "bottom";
+  align: "start" | "center" | "end";
+  alignOffset: number;
+  anchorRef?: React.RefObject<HTMLElement | null>;
+  collisionDetection: boolean;
+  isOpen: boolean;
+  offset: number;
+  shouldUsePortal: boolean;
+  triggerRef?: React.RefObject<HTMLElement | null>;
+}
+
+function resolveHorizontalAnchor({
+  align,
+  alignOffset,
+  contentWidth,
+  triggerRect,
+}: {
+  align: "start" | "center" | "end";
+  alignOffset: number;
+  contentWidth: number;
+  triggerRect: DOMRect;
+}): Pick<PortalPosition, "left" | "right"> {
+  if (align === "start") {
+    return { left: triggerRect.left + alignOffset, right: null };
+  }
+  if (align === "center") {
+    const centerX = triggerRect.left + triggerRect.width / 2;
+    return { left: centerX - contentWidth / 2 + alignOffset, right: null };
+  }
+  return {
+    left: null,
+    right: window.innerWidth - triggerRect.right - alignOffset,
+  };
+}
+
+function resolveVerticalAnchor(
+  placement: "top" | "bottom",
+  triggerRect: DOMRect,
+  offset: number
+): Pick<PortalPosition, "top" | "bottom"> {
+  return placement === "top"
+    ? { top: null, bottom: window.innerHeight - (triggerRect.top - offset) }
+    : { top: triggerRect.bottom + offset, bottom: null };
+}
+
+function resolveCollisionPlacement({
+  collisionDetection,
+  computedPlacement,
+  contentHeight,
+  offset,
+  triggerRect,
+}: {
+  collisionDetection: boolean;
+  computedPlacement: "top" | "bottom";
+  contentHeight: number;
+  offset: number;
+  triggerRect: DOMRect;
+}): "top" | "bottom" {
+  if (!collisionDetection) return computedPlacement;
+  const spaceBelow = window.innerHeight - triggerRect.bottom - offset - VIEWPORT_INSET;
+  const spaceAbove = triggerRect.top - offset - VIEWPORT_INSET;
+  if (computedPlacement === "bottom" && contentHeight > spaceBelow && contentHeight <= spaceAbove) {
+    return "top";
+  }
+  if (computedPlacement === "top" && contentHeight > spaceAbove && contentHeight <= spaceBelow) {
+    return "bottom";
+  }
+  return computedPlacement;
+}
+
+function useDropdownContentPosition({
+  activePlacementSeed,
+  align,
+  alignOffset,
+  anchorRef,
+  collisionDetection,
+  isOpen,
+  offset,
+  shouldUsePortal,
+  triggerRef,
+}: DropdownContentPositionOptions): {
+  activePlacement: "top" | "bottom";
+  contentRef: React.RefObject<HTMLDivElement | null>;
+  portalPosition: PortalPosition;
+} {
+  const [portalPosition, setPortalPosition] = useState<PortalPosition>({
+    top: 0,
+    bottom: null,
+    left: null,
+    right: 0,
+  });
+  const [activePlacement, dispatchActivePlacement] = useReducer(
+    (
+      current: "top" | "bottom",
+      next: "top" | "bottom" | ((current: "top" | "bottom") => "top" | "bottom")
+    ): "top" | "bottom" => (typeof next === "function" ? next(current) : next),
+    activePlacementSeed
+  );
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    dispatchActivePlacement(activePlacementSeed);
+  }, [activePlacementSeed]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const anchor = anchorRef?.current ?? triggerRef?.current;
+    if (!anchor) return;
+    const triggerRect = anchor.getBoundingClientRect();
+    const contentEl = contentRef.current;
+    const nextPlacement = resolveCollisionPlacement({
+      collisionDetection,
+      computedPlacement: activePlacementSeed,
+      contentHeight: contentEl?.offsetHeight ?? 200,
+      offset,
+      triggerRect,
+    });
+    dispatchActivePlacement(nextPlacement);
+    if (!shouldUsePortal) return;
+    setPortalPosition({
+      ...resolveVerticalAnchor(nextPlacement, triggerRect, offset),
+      ...resolveHorizontalAnchor({
+        align,
+        alignOffset,
+        contentWidth: contentEl?.offsetWidth ?? 0,
+        triggerRect,
+      }),
+    });
+  }, [
+    isOpen,
+    shouldUsePortal,
+    triggerRef,
+    anchorRef,
+    offset,
+    align,
+    alignOffset,
+    activePlacementSeed,
+    collisionDetection,
+  ]);
+
+  useEffect(() => {
+    if (!isOpen || !collisionDetection || typeof ResizeObserver === "undefined") return;
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
+    const observer = new ResizeObserver(() => {
+      const anchor = anchorRef?.current ?? triggerRef?.current;
+      if (!anchor) return;
+      const triggerRect = anchor.getBoundingClientRect();
+      dispatchActivePlacement(
+        resolveCollisionPlacement({
+          collisionDetection,
+          computedPlacement: activePlacementSeed,
+          contentHeight: contentEl.offsetHeight,
+          offset,
+          triggerRect,
+        })
+      );
+    });
+    observer.observe(contentEl);
+    return () => observer.disconnect();
+  }, [isOpen, collisionDetection, anchorRef, triggerRef, offset, activePlacementSeed]);
+
+  useEffect(() => {
+    if (!isOpen || !shouldUsePortal) return;
+    let rafHandle: number | null = null;
+    const reposition = (): void => {
+      if (rafHandle !== null) return;
+      rafHandle = requestAnimationFrame(() => {
+        rafHandle = null;
+        const anchor = anchorRef?.current ?? triggerRef?.current;
+        if (!anchor) return;
+        const triggerRect = anchor.getBoundingClientRect();
+        const contentEl = contentRef.current;
+        setPortalPosition({
+          ...resolveVerticalAnchor(activePlacement, triggerRect, offset),
+          ...resolveHorizontalAnchor({
+            align,
+            alignOffset,
+            contentWidth: contentEl?.offsetWidth ?? 0,
+            triggerRect,
+          }),
+        });
+      });
+    };
+    window.addEventListener("resize", reposition, { passive: true });
+    window.addEventListener("scroll", reposition, { capture: true, passive: true });
+    return () => {
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, { capture: true });
+      if (rafHandle !== null) cancelAnimationFrame(rafHandle);
+    };
+  }, [isOpen, shouldUsePortal, anchorRef, triggerRef, offset, align, alignOffset, activePlacement]);
+
+  return { activePlacement, contentRef, portalPosition };
+}
 
 /**
  * @brief Pure dropdown container for composing dropdown contents
@@ -81,32 +285,19 @@ export function DropdownContent({
   } = useDropdownContext();
 
   // Support both prop-level and context-level portal settings
-  const shouldUsePortal = portal || contextUsePortal;
+  const shouldUsePortal = portal || contextUsePortal || false;
 
-  /**
-   * Portal position uses one vertical anchor and one horizontal anchor. The
-   * unused side stays `null` so we can drive `style` with a discriminated
-   * pin without conflicting `left`/`right` values.
-   */
-  const [portalPosition, setPortalPosition] = useState<{
-    top: number | null;
-    bottom: number | null;
-    left: number | null;
-    right: number | null;
-  }>({ top: 0, bottom: null, left: null, right: 0 });
-  // Final placement after collision-flip; falls back to the root's computed
-  // placement when collision detection is disabled or the viewport has room.
-  const [activePlacement, setActivePlacement] = useState<"top" | "bottom">(computedPlacement);
-
-  // Reset activePlacement whenever the root's placement intent changes (e.g.
-  // window resized between opens) so the next open re-decides cleanly.
-  useEffect(() => {
-    setActivePlacement(computedPlacement);
-  }, [computedPlacement]);
-
-  // Ref to the rendered motion.div so we can measure its height for collision
-  // detection. Motion forwards refs through `motion.div`.
-  const contentRef = useRef<HTMLDivElement>(null);
+  const { activePlacement, contentRef, portalPosition } = useDropdownContentPosition({
+    activePlacementSeed: computedPlacement,
+    align,
+    alignOffset,
+    anchorRef,
+    collisionDetection,
+    isOpen,
+    offset,
+    shouldUsePortal,
+    triggerRef,
+  });
 
   // Honor the OS reduced-motion preference. Returns `null` during SSR; default
   // to false so the first paint matches a non-reduced client.
@@ -119,169 +310,6 @@ export function DropdownContent({
     return portalContainer || document.body;
   }, [portalContainer]);
 
-  // Compute portal position + collision-flipped placement BEFORE paint to
-  // avoid a one-frame flash at top:0 / right:0 when the dropdown first mounts.
-  useLayoutEffect(() => {
-    if (!isOpen) return;
-
-    const anchor = anchorRef?.current ?? triggerRef?.current;
-    if (!anchor) return;
-    const triggerRect = anchor.getBoundingClientRect();
-
-    // Use the rendered content's measured size when available so we can decide
-    // whether the requested placement actually fits. On the very first frame
-    // contentRef may be null because Motion mounts the child after this effect
-    // resolves; we fall back to a conservative estimate (200 px) so the flip
-    // logic still fires for tiny menus, then re-measure on the second frame
-    // via the ResizeObserver below.
-    const contentEl = contentRef.current;
-    const contentHeight = contentEl?.offsetHeight ?? 200;
-
-    let nextPlacement: "top" | "bottom" = computedPlacement;
-    if (collisionDetection) {
-      const spaceBelow = window.innerHeight - triggerRect.bottom - offset - VIEWPORT_INSET;
-      const spaceAbove = triggerRect.top - offset - VIEWPORT_INSET;
-      if (computedPlacement === "bottom" && contentHeight > spaceBelow && contentHeight <= spaceAbove) {
-        nextPlacement = "top";
-      } else if (
-        computedPlacement === "top" &&
-        contentHeight > spaceAbove &&
-        contentHeight <= spaceBelow
-      ) {
-        nextPlacement = "bottom";
-      }
-    }
-    setActivePlacement(nextPlacement);
-
-    if (shouldUsePortal) {
-      // Vertical anchor: place top edge of content `offset` px below the
-      // trigger when bottom-placed; place bottom edge `offset` px above when
-      // top-placed. The opposite side stays `null` so the inline style
-      // doesn't conflict.
-      const verticalAnchor =
-        nextPlacement === "top"
-          ? { top: null, bottom: window.innerHeight - (triggerRect.top - offset) }
-          : { top: triggerRect.bottom + offset, bottom: null };
-
-      // Horizontal anchor depends on `align`. 'end' is the historical default
-      // (right edge of content to right edge of trigger). 'start' pins the
-      // left edge. 'center' pins the left edge to (trigger center − content
-      // half-width) so the content visually centers; needs `contentEl` to be
-      // mounted for the measurement.
-      let horizontalAnchor: { left: number | null; right: number | null };
-      if (align === "start") {
-        horizontalAnchor = { left: triggerRect.left + alignOffset, right: null };
-      } else if (align === "center") {
-        const contentWidth = contentEl?.offsetWidth ?? 0;
-        const centerX = triggerRect.left + triggerRect.width / 2;
-        horizontalAnchor = { left: centerX - contentWidth / 2 + alignOffset, right: null };
-      } else {
-        // 'end' (default)
-        horizontalAnchor = {
-          left: null,
-          right: window.innerWidth - triggerRect.right - alignOffset,
-        };
-      }
-
-      setPortalPosition({ ...verticalAnchor, ...horizontalAnchor });
-    }
-  }, [
-    isOpen,
-    shouldUsePortal,
-    triggerRef,
-    anchorRef,
-    offset,
-    align,
-    alignOffset,
-    computedPlacement,
-    collisionDetection,
-  ]);
-
-  // Re-measure content when it changes size while open (e.g. async data load
-  // expanding the menu) so collision flips stay accurate.
-  useEffect(() => {
-    if (!isOpen || !collisionDetection || typeof ResizeObserver === "undefined") return;
-    const contentEl = contentRef.current;
-    if (!contentEl) return;
-    const observer = new ResizeObserver(() => {
-      const anchor = anchorRef?.current ?? triggerRef?.current;
-      if (!anchor) return;
-      const triggerRect = anchor.getBoundingClientRect();
-      const contentHeight = contentEl.offsetHeight;
-      const spaceBelow = window.innerHeight - triggerRect.bottom - offset - VIEWPORT_INSET;
-      const spaceAbove = triggerRect.top - offset - VIEWPORT_INSET;
-      setActivePlacement((current) => {
-        if (computedPlacement === "bottom" && contentHeight > spaceBelow && contentHeight <= spaceAbove) {
-          return "top";
-        }
-        if (computedPlacement === "top" && contentHeight > spaceAbove && contentHeight <= spaceBelow) {
-          return "bottom";
-        }
-        // No flip needed → revert to the root's intent.
-        return computedPlacement;
-      });
-    });
-    observer.observe(contentEl);
-    return () => observer.disconnect();
-  }, [isOpen, collisionDetection, anchorRef, triggerRef, offset, computedPlacement]);
-
-  /**
-   * Re-evaluate portal position on window resize and ancestor scroll while
-   * the dropdown is open. Throttled via `requestAnimationFrame` so a noisy
-   * scroll event doesn't trigger a layout-thrash storm. Runs only when the
-   * portal is in use, non-portaled dropdowns inherit their position from
-   * the layout flow and don't need repositioning.
-   */
-  useEffect(() => {
-    if (!isOpen || !shouldUsePortal) return;
-
-    let rafHandle: number | null = null;
-    const reposition = (): void => {
-      if (rafHandle !== null) return;
-      rafHandle = requestAnimationFrame(() => {
-        rafHandle = null;
-        const anchor = anchorRef?.current ?? triggerRef?.current;
-        if (!anchor) return;
-        const triggerRect = anchor.getBoundingClientRect();
-        const contentEl = contentRef.current;
-
-        // Recompute vertical anchor (active placement may have flipped via
-        // the ResizeObserver above).
-        const verticalAnchor =
-          activePlacement === "top"
-            ? { top: null, bottom: window.innerHeight - (triggerRect.top - offset) }
-            : { top: triggerRect.bottom + offset, bottom: null };
-
-        let horizontalAnchor: { left: number | null; right: number | null };
-        if (align === "start") {
-          horizontalAnchor = { left: triggerRect.left + alignOffset, right: null };
-        } else if (align === "center") {
-          const contentWidth = contentEl?.offsetWidth ?? 0;
-          const centerX = triggerRect.left + triggerRect.width / 2;
-          horizontalAnchor = { left: centerX - contentWidth / 2 + alignOffset, right: null };
-        } else {
-          horizontalAnchor = {
-            left: null,
-            right: window.innerWidth - triggerRect.right - alignOffset,
-          };
-        }
-
-        setPortalPosition({ ...verticalAnchor, ...horizontalAnchor });
-      });
-    };
-
-    window.addEventListener("resize", reposition, { passive: true });
-    // Capture phase so we catch scrolls on any ancestor, including the
-    // document scrolling root.
-    window.addEventListener("scroll", reposition, { capture: true, passive: true });
-
-    return () => {
-      window.removeEventListener("resize", reposition);
-      window.removeEventListener("scroll", reposition, { capture: true });
-      if (rafHandle !== null) cancelAnimationFrame(rafHandle);
-    };
-  }, [isOpen, shouldUsePortal, anchorRef, triggerRef, offset, align, alignOffset, activePlacement]);
-
   // Lifecycle: fire onOpenAutoFocus right after the content mounts so consumers
   // can preventDefault() before the dropdown's own focus management runs.
   // Default behavior is delegated to whatever inner component owns focus
@@ -291,7 +319,11 @@ export function DropdownContent({
   useEffect(() => {
     if (isOpen && !wasOpenRef.current && onOpenAutoFocus) {
       let prevented = false;
-      onOpenAutoFocus({ preventDefault: () => { prevented = true; } });
+      onOpenAutoFocus({
+        preventDefault: () => {
+          prevented = true;
+        },
+      });
       // Caller-driven preventDefault is a hint to the focus owner; the actual
       // behavior is implemented by the focused child (search input, menu list,
       // etc.). We expose the flag via a data attribute so children can react.
@@ -300,7 +332,11 @@ export function DropdownContent({
     }
     if (!isOpen && wasOpenRef.current && onCloseAutoFocus) {
       let prevented = false;
-      onCloseAutoFocus({ preventDefault: () => { prevented = true; } });
+      onCloseAutoFocus({
+        preventDefault: () => {
+          prevented = true;
+        },
+      });
       // Restore focus to the trigger unless the consumer opted out.
       if (!prevented) {
         const triggerEl = triggerRef?.current;
@@ -310,7 +346,7 @@ export function DropdownContent({
       }
     }
     wasOpenRef.current = isOpen;
-  }, [isOpen, onOpenAutoFocus, onCloseAutoFocus, triggerRef]);
+  }, [contentRef, isOpen, onOpenAutoFocus, onCloseAutoFocus, triggerRef]);
 
   const placementClass = activePlacement === "top" ? "bottom-full mb-1" : "mt-1";
   const flexDirClass = activePlacement === "top" ? "flex-col-reverse" : "flex-col";
@@ -387,7 +423,7 @@ export function DropdownContent({
         transition: { duration: exitDuration * 0.5 },
       },
     }),
-    [enterDuration, exitDuration],
+    [enterDuration, exitDuration]
   );
 
   const dropdownContent = (
@@ -437,20 +473,20 @@ export function DropdownContent({
   const content = (
     <LazyMotion features={domAnimation}>
       <AnimatePresence>
-      {isOpen && backdrop && (
-        <m.div
-          key="dropdown-backdrop"
-          className={`fixed inset-0 z-40 ${backdropClassName}`}
-          onClick={closeDropdown}
-          initial={disableAnimation ? false : "initial"}
-          animate="animate"
-          exit={disableAnimation ? undefined : "exit"}
-          variants={backdropVariants}
-          data-testid="dropdown-backdrop"
-          aria-hidden="true"
-        />
-      )}
-      {isOpen && dropdownContent}
+        {isOpen && backdrop && (
+          <m.div
+            key="dropdown-backdrop"
+            className={`fixed inset-0 z-40 ${backdropClassName}`}
+            onClick={closeDropdown}
+            initial={disableAnimation ? false : "initial"}
+            animate="animate"
+            exit={disableAnimation ? undefined : "exit"}
+            variants={backdropVariants}
+            data-testid="dropdown-backdrop"
+            aria-hidden="true"
+          />
+        )}
+        {isOpen && dropdownContent}
       </AnimatePresence>
     </LazyMotion>
   );

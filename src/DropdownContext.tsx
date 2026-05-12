@@ -5,7 +5,7 @@
 
 "use client";
 
-import { createContext, useCallback, use, useEffect, useRef, useState } from "react";
+import { createContext, use, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { DropdownContextValue } from "./types";
 
@@ -141,8 +141,10 @@ export function useClickOutside(
   const closeDropdownRef = useRef(closeDropdown);
   closeDropdownRef.current = closeDropdown;
 
-  const handleClickOutside = useCallback(
-    (event: MouseEvent | TouchEvent) => {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (!dropdownRef.current) return;
 
       const target = event.target as Node;
@@ -154,19 +156,11 @@ export function useClickOutside(
       // walking the target up the tree to find that ancestor lets us
       // recognise option clicks as "inside" instead of closing the
       // dropdown before the click reaches the option's onClick.
-      if (
-        target instanceof Element &&
-        target.closest("[data-dropdown-portal-content]")
-      ) {
+      if (target instanceof Element && target.closest("[data-dropdown-portal-content]")) {
         return;
       }
       closeDropdownRef.current();
-    },
-    [dropdownRef]
-  );
-
-  useEffect(() => {
-    if (!isOpen) return;
+    };
 
     document.addEventListener("mousedown", handleClickOutside, { passive: true });
     document.addEventListener("touchstart", handleClickOutside, { passive: true });
@@ -175,5 +169,5 @@ export function useClickOutside(
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [isOpen, handleClickOutside]);
+  }, [dropdownRef, isOpen]);
 }

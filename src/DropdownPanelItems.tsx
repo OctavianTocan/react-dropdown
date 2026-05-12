@@ -26,7 +26,7 @@
 "use client";
 
 import type * as React from "react";
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
 import { Slot } from "./Slot";
 import { useDropdownContext } from "./DropdownContext";
 import { MENU_ROW_DISABLED_VISUAL_CLASSNAME } from "./menu-row-disabled-visual";

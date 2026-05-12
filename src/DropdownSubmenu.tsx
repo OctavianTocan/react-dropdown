@@ -23,7 +23,7 @@
 
 "use client";
 
-import { createContext, useCallback, use, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, use, useEffect, useMemo, useRef, useState, useReducer } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, domAnimation, LazyMotion, useReducedMotion } from "motion/react";
@@ -102,11 +102,7 @@ function useSubmenuGroup(): SubmenuGroupValue {
  * external callers usually only need this around the ROOT dropdown
  * panel's children when they want sibling submenus there to coordinate.
  */
-export function DropdownSubmenuGroupProvider({
-  children,
-}: {
-  children: ReactNode;
-}): React.JSX.Element {
+export function DropdownSubmenuGroupProvider({ children }: { children: ReactNode }): React.JSX.Element {
   const closeFnsRef = useRef<Set<() => void>>(new Set());
   const value = useMemo<SubmenuGroupValue>(
     () => ({
@@ -122,7 +118,7 @@ export function DropdownSubmenuGroupProvider({
         }
       },
     }),
-    [],
+    []
   );
   return <SubmenuGroupContext.Provider value={value}>{children}</SubmenuGroupContext.Provider>;
 }
@@ -152,9 +148,7 @@ const SubmenuContext = createContext<SubmenuContextValue | null>(null);
 function useSubmenuContext(): SubmenuContextValue {
   const ctx = use(SubmenuContext);
   if (!ctx) {
-    throw new Error(
-      "DropdownSubmenuTrigger / DropdownSubmenuContent must be rendered inside <DropdownSubmenu>.",
-    );
+    throw new Error("DropdownSubmenuTrigger / DropdownSubmenuContent must be rendered inside <DropdownSubmenu>.");
   }
   return ctx;
 }
@@ -245,7 +239,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
 
   const value = useMemo<SubmenuContextValue>(
     () => ({ isOpen, open, close, scheduleOpen, scheduleClose, cancelScheduled, triggerRef }),
-    [isOpen, open, close, scheduleOpen, scheduleClose, cancelScheduled],
+    [isOpen, open, close, scheduleOpen, scheduleClose, cancelScheduled]
   );
 
   return (
@@ -274,9 +268,7 @@ const DEFAULT_SUBMENU_TRIGGER_CLASSNAME =
   "focus:bg-foreground/[0.03] hover:bg-foreground/[0.03] [&>svg:not([class*='text-'])]:text-muted-foreground gap-2 rounded-[4px] px-2 py-1.5 pr-4 text-sm text-left [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 group/dropdown-submenu-trigger relative flex w-full cursor-default items-center outline-hidden select-none data-[state=open]:bg-foreground/[0.03] [&_svg]:pointer-events-none [&_svg]:shrink-0";
 
 function mergeSubmenuTriggerClassName(override: string | undefined): string {
-  return override
-    ? `${DEFAULT_SUBMENU_TRIGGER_CLASSNAME} ${override}`
-    : DEFAULT_SUBMENU_TRIGGER_CLASSNAME;
+  return override ? `${DEFAULT_SUBMENU_TRIGGER_CLASSNAME} ${override}` : DEFAULT_SUBMENU_TRIGGER_CLASSNAME;
 }
 
 /**
@@ -341,7 +333,7 @@ export function DropdownSubmenuTrigger({
       localRef.current = node;
       ctx.triggerRef.current = node;
     },
-    [ctx],
+    [ctx]
   );
 
   const handleClick = useCallback(() => {
@@ -359,13 +351,11 @@ export function DropdownSubmenuTrigger({
         open();
       }
     },
-    [disabled, open],
+    [disabled, open]
   );
 
   const mergedClassName = mergeSubmenuTriggerClassName(
-    [className, disabled ? MENU_ROW_DISABLED_VISUAL_CLASSNAME : undefined]
-      .filter(Boolean)
-      .join(" ") || undefined,
+    [className, disabled ? MENU_ROW_DISABLED_VISUAL_CLASSNAME : undefined].filter(Boolean).join(" ") || undefined
   );
 
   const handlers = {
@@ -382,10 +372,7 @@ export function DropdownSubmenuTrigger({
 
   const trailingChevron =
     !asChild && showChevron ? (
-      <span
-        aria-hidden
-        className="ml-auto flex shrink-0 items-center justify-center text-muted-foreground"
-      >
+      <span aria-hidden className="ml-auto flex shrink-0 items-center justify-center text-muted-foreground">
         <SubmenuChevronIcon className="size-3.5" />
       </span>
     ) : null;
@@ -485,7 +472,10 @@ export function DropdownSubmenuContent({
   // Local position state, top-left anchor, with `side` resolving to left or
   // right of the trigger after collision-flip.
   const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const [resolvedSide, setResolvedSide] = useState<"right" | "left">(side);
+  const [resolvedSide, setResolvedSide] = useReducer(
+    (_current: "right" | "left", next: "right" | "left"): "right" | "left" => next,
+    side
+  );
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Compute portal position when the submenu opens. Layout effect keeps the
@@ -541,7 +531,7 @@ export function DropdownSubmenuContent({
         submenu.triggerRef.current?.focus({ preventScroll: true });
       }
     },
-    [submenu],
+    [submenu]
   );
 
   // Motion variants, submenu owns its own enter/exit timing (faster than
@@ -617,6 +607,6 @@ export function DropdownSubmenuContent({
         )}
       </AnimatePresence>
     </LazyMotion>,
-    document.body,
+    document.body
   );
 }

@@ -5,86 +5,14 @@
 
 "use client";
 
-import React, { useRef, useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import { domAnimation, LazyMotion } from "motion/react";
-import * as m from "motion/react-m";
+import { useEffect, useMemo, useRef } from "react";
 import { useDropdownContext } from "./DropdownContext";
-import type { DropdownListProps, DropdownSectionMeta } from "./types";
-
-/**
- * @brief Container for a section of grouped items
- * @description Holds the section metadata and the items that belong to that section.
- * @template T The type of items in the dropdown
- */
-interface SectionBucket<T> {
-  /** Section metadata containing key, label, icon, and description */
-  meta: DropdownSectionMeta;
-  /** Array of items belonging to this section */
-  items: T[];
-}
-
-/**
- * @brief Result of grouping items by section
- * @description Contains items organized into sections and ungrouped items that don't
- * belong to any section.
- * @template T The type of items in the dropdown
- */
-interface GroupedItems<T> {
-  /** Array of section buckets, each containing section metadata and its items */
-  sections: SectionBucket<T>[];
-  /** Array of items that don't belong to any section */
-  ungrouped: T[];
-}
-
-/**
- * @brief Groups items into ordered buckets keyed by the provided section metadata
- * @description Organizes items into sections based on their section metadata while
- * preserving the original array order. Items without section metadata are placed in
- * the ungrouped array. This allows rendering grouped headers without mutating the
- * original array order.
- * @template T The type of items in the dropdown
- * @param items Array of items to group
- * @param resolveSection Optional function to extract section metadata from an item
- * @returns Object containing sections array and ungrouped items array
- */
-const groupItemsBySection = <T,>(
-  items: readonly T[],
-  resolveSection?: (item: T) => DropdownSectionMeta | null | undefined
-): GroupedItems<T> => {
-  if (!resolveSection) {
-    return { sections: [], ungrouped: [...items] };
-  }
-
-  const sectionIndex = new Map<string, number>();
-  const sections: SectionBucket<T>[] = [];
-  const ungrouped: T[] = [];
-
-  items.forEach((item) => {
-    const section = resolveSection(item);
-
-    if (!section) {
-      ungrouped.push(item);
-      return;
-    }
-
-    const existingIndex = sectionIndex.get(section.key);
-
-    if (existingIndex === undefined) {
-      sectionIndex.set(section.key, sections.length);
-      sections.push({ meta: section, items: [item] });
-      return;
-    }
-
-    // existingIndex was just registered via sectionIndex.set(section.key, sections.length)
-    // immediately before the bucket was pushed, so it always points at a real
-    // entry; the optional chain satisfies `noUncheckedIndexedAccess` without
-    // changing runtime behavior.
-    sections[existingIndex]?.items.push(item);
-  });
-
-  return { sections, ungrouped };
-};
+import {
+  buildRenderedItems,
+  groupItemsBySection,
+  type DropdownListAccessors,
+} from "./DropdownListItems";
+import type { DropdownListProps } from "./types";
 
 /**
  * @brief List component for displaying dropdown options
@@ -151,6 +79,7 @@ export function DropdownList<T>({
   } = useDropdownContext<T>();
   /** @brief Ref to the list element for scrolling and DOM queries */
   const listRef = useRef<HTMLUListElement>(null);
+  const selectedItemKey = selectedItem ? getItemKey(selectedItem) : null;
 
   /**
    * @brief Tracks previous open state to detect transitions
@@ -166,8 +95,8 @@ export function DropdownList<T>({
    */
   useEffect(() => {
     // Only scroll when transitioning from closed to open
-    if (isOpen && !prevIsOpenRef.current && listRef.current && selectedItem) {
-      const selectedElement = listRef.current.querySelector(`[data-key="${getItemKey(selectedItem)}"]`);
+    if (isOpen && !prevIsOpenRef.current && listRef.current && selectedItemKey) {
+      const selectedElement = listRef.current.querySelector(`[data-key="${selectedItemKey}"]`);
       if (selectedElement) {
         selectedElement.scrollIntoView({
           behavior: "auto",
@@ -176,7 +105,7 @@ export function DropdownList<T>({
       }
     }
     prevIsOpenRef.current = isOpen;
-  }, [isOpen, selectedItem, getItemKey]);
+  }, [isOpen, selectedItemKey]);
 
   /**
    * @brief Accessor function to retrieve description text for an item
@@ -231,89 +160,6 @@ export function DropdownList<T>({
   const groupedItems = useMemo(() => groupItemsBySection(items, sectionAccessor), [items, sectionAccessor]);
 
   /**
-   * @brief Resolves description text for an item
-   * @description Safely retrieves the description text for an item using the description
-   * accessor, returning null if no accessor is available or the accessor returns null/undefined.
-   * @param item The item to get the description for
-   * @returns Description text or null if not available
-   */
-  const resolveDescription = (item: T) => {
-    if (!descriptionAccessor) {
-      return null;
-    }
-
-    return descriptionAccessor(item) ?? null;
-  };
-
-  /**
-   * @brief Resolves icon element for an item
-   * @description Safely retrieves the icon element for an item using the icon accessor,
-   * returning undefined if no accessor is available or the accessor returns undefined.
-   * @param item The item to get the icon for
-   * @returns Icon element (ReactNode) or undefined if not available
-   */
-  const resolveIcon = (item: T) => {
-    if (!iconAccessor) {
-      return undefined;
-    }
-
-    return iconAccessor(item);
-  };
-
-  /**
-   * @brief Renders a section header for grouped items
-   * @description Creates a list item with section metadata (label, icon, description)
-   * that serves as a header for a group of related items.
-   * @param section Section bucket containing metadata and items
-   * @param index The index of this element for stagger animation
-   * @returns JSX element for the section header
-   */
-  const renderSectionHeader = (section: SectionBucket<T>, index: number) => {
-    const content = (
-      <li
-        key={`section-${section.meta.key}`}
-        role="presentation"
-        className="px-3 py-2 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-500"
-      >
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            {section.meta.icon && (
-              <span className="text-base text-zinc-500" aria-hidden>
-                {section.meta.icon}
-              </span>
-            )}
-            <span>{section.meta.label}</span>
-          </div>
-          {section.meta.description && (
-            <span className="text-[11px] font-normal normal-case text-zinc-400">{section.meta.description}</span>
-          )}
-        </div>
-      </li>
-    );
-
-    if (staggered) {
-      return (
-        <LazyMotion features={domAnimation}>
-          <m.div
-          key={`section-wrapper-${section.meta.key}`}
-          initial={{ opacity: 0, y: computedPlacement === "top" ? -10 : 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: enterDuration * 0.5,
-            delay: index * staggerDelay,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-        >
-          {content}
-          </m.div>
-        </LazyMotion>
-      );
-    }
-
-    return content;
-  };
-
-  /**
    * @brief Resolved onSelect handler with dropdown closing logic
    * @description Combines custom onSelect handler (if provided) with context handler,
    * and ensures the dropdown closes after selection if closeOnSelect is enabled.
@@ -333,82 +179,6 @@ export function DropdownList<T>({
   }, [customOnSelect, contextOnSelect, closeOnSelect, closeDropdown]);
 
   /**
-   * @brief Renders a single dropdown option item
-   * @description Creates a list item containing either a custom rendered item or the
-   * default DropdownOption component. Handles selection state, disabled state, and
-   * custom styling.
-   * @param item The item to render
-   * @param index The index of this element for stagger animation
-   * @returns JSX element for the option (wrapped in li)
-   */
-  const renderOption = (item: T, index: number) => {
-    const key = getItemKey(item);
-    const displayText = getItemDisplay(item);
-    const isSelected = selectedItem ? getItemKey(selectedItem) === key : false;
-    const isDisabled = disabledAccessor ? disabledAccessor(item) : false;
-    const customClassName = classNameAccessor ? classNameAccessor(item, isSelected, isDisabled) : "";
-    // Roving-tabindex / aria-activedescendant integration: when the menu is
-    // keyboard-driven (DropdownMenu wires `focusedIndex`), the matching <li>
-    // exposes a stable `id` and a `data-focused` attribute so the parent's
-    // `aria-activedescendant` resolves and consumers can style the active row.
-    const itemId = getItemId ? getItemId(item, index) : `dropdown-item-${key}`;
-    const isKeyboardFocused = focusedIndex !== undefined && focusedIndex === index;
-
-    const optionContent = renderItem ? (
-      <li
-        key={key}
-        id={itemId}
-        data-key={key}
-        data-focused={isKeyboardFocused ? "true" : undefined}
-        onMouseEnter={onItemPointerEnter ? () => onItemPointerEnter(index) : undefined}
-      >
-        {renderItem(item, isSelected, resolvedOnSelect)}
-      </li>
-    ) : (
-      <li
-        key={key}
-        id={itemId}
-        data-key={key}
-        data-focused={isKeyboardFocused ? "true" : undefined}
-        onMouseEnter={onItemPointerEnter ? () => onItemPointerEnter(index) : undefined}
-      >
-        <DropdownOption
-          dataKey={key}
-          item={item}
-          onSelect={resolvedOnSelect}
-          isSelected={isSelected}
-          displayText={displayText}
-          description={resolveDescription(item)}
-          icon={resolveIcon(item)}
-          isDisabled={isDisabled}
-          className={customClassName}
-        />
-      </li>
-    );
-
-    if (staggered) {
-      return (
-        <LazyMotion features={domAnimation}>
-          <m.div
-          key={`motion-${key}`}
-          initial={{ opacity: 0, y: computedPlacement === "top" ? -10 : 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: enterDuration * 0.5,
-            delay: index * staggerDelay,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-        >
-          {optionContent}
-          </m.div>
-        </LazyMotion>
-      );
-    }
-
-    return optionContent;
-  };
-
-  /**
    * @brief Renders empty state when no results are available
    * @description Shows a "No results found" message when hasResults is false.
    */
@@ -416,75 +186,30 @@ export function DropdownList<T>({
     return <div className={`p-4 text-center text-sm text-zinc-500 ${className}`}>No results found</div>;
   }
 
-  const renderedItems: ReactNode[] = [];
-  let itemIndex = 0;
-
-  /**
-   * @brief Renders a divider list item using design-system tokens
-   * @description Themed via Tailwind's `bg-border` so it adapts to dark mode
-   * and design-system overrides. Marked `aria-hidden` because separators are
-   * decorative, the `role="separator"` already announces the boundary to
-   * screen readers.
-   * @param key Unique React key for the separator
-   * @returns A list element rendering a 1-px horizontal rule
-   */
-  const renderSeparator = (key: string): ReactNode => (
-    <li
-      key={key}
-      role="separator"
-      aria-hidden="true"
-      className="mx-1 my-1 h-px bg-border list-none"
-    />
-  );
-
-  /**
-   * @brief Renders ungrouped items, emitting a separator BEFORE any item the
-   * accessor flags true
-   *
-   * Placement is "before" so consumers can think in terms of "draw a divider
-   * above this item", the typical case is grouping advanced/destructive
-   * actions at the bottom of a menu. The first item gets no separator above
-   * it even if marked, since a divider at the very top of the menu is rarely
-   * what the consumer means.
-   */
-  groupedItems.ungrouped.forEach((item) => {
-    const originalIndex = items.findIndex((i) => getItemKey(i) === getItemKey(item));
-    if (
-      separatorAccessor &&
-      originalIndex > 0 &&
-      separatorAccessor(item, originalIndex)
-    ) {
-      renderedItems.push(renderSeparator(`separator-${originalIndex}`));
-    }
-    renderedItems.push(renderOption(item, itemIndex));
-    itemIndex++;
+  const accessors: DropdownListAccessors<T> = {
+    description: descriptionAccessor,
+    icon: iconAccessor,
+    separator: separatorAccessor,
+    disabled: disabledAccessor,
+    className: classNameAccessor,
+  };
+  const finalItems = buildRenderedItems({
+    items,
+    groupedItems,
+    selectedItemKey,
+    getItemKey,
+    getItemDisplay,
+    renderItem,
+    accessors,
+    onSelect: resolvedOnSelect,
+    focusedIndex,
+    getItemId,
+    onItemPointerEnter,
+    computedPlacement,
+    enterDuration,
+    staggerDelay,
+    staggered,
   });
-
-  /**
-   * @brief Renders sectioned items with separators emitted BEFORE the marked
-   * item, same semantics as the ungrouped loop above, applied within each
-   * section's bucket
-   */
-  groupedItems.sections.forEach((section) => {
-    renderedItems.push(renderSectionHeader(section, itemIndex));
-    itemIndex++;
-    section.items.forEach((item, indexInSection) => {
-      const originalIndex = items.findIndex((i) => getItemKey(i) === getItemKey(item));
-      if (
-        separatorAccessor &&
-        originalIndex >= 0 &&
-        indexInSection > 0 &&
-        separatorAccessor(item, originalIndex)
-      ) {
-        renderedItems.push(renderSeparator(`separator-${originalIndex}`));
-      }
-      renderedItems.push(renderOption(item, itemIndex));
-      itemIndex++;
-    });
-  });
-
-  // Reverse items when opening upward with staggered animations
-  const finalItems = staggered && computedPlacement === "top" ? [...renderedItems].reverse() : renderedItems;
 
   return (
     <ul
@@ -495,96 +220,5 @@ export function DropdownList<T>({
     >
       {finalItems}
     </ul>
-  );
-}
-
-/**
- * @brief Default dropdown option component
- * @description Renders a clickable dropdown option with icon, label, and optional description.
- * Handles selection state, disabled state, and hover effects. Provides proper ARIA attributes
- * for accessibility.
- * @template T The type of the item
- * @param props Option configuration
- * @param props.item The item data
- * @param props.onSelect Callback function when the option is clicked
- * @param props.isSelected Whether this option is currently selected
- * @param props.displayText The text to display as the label
- * @param props.dataKey Unique key for the option element
- * @param props.description Optional description text shown below the label
- * @param props.icon Optional icon element to display before the label
- * @param props.isDisabled Whether this option is disabled
- * @param props.className Additional CSS classes for the option
- * @returns JSX element for the option
- */
-function DropdownOption<T>({
-  item,
-  onSelect,
-  isSelected,
-  displayText,
-  dataKey,
-  description,
-  icon,
-  isDisabled = false,
-  className = "",
-}: {
-  item: T;
-  onSelect: (item: T) => void;
-  isSelected: boolean;
-  displayText: string;
-  dataKey: string;
-  description: string | null;
-  icon?: ReactNode;
-  isDisabled?: boolean;
-  className?: string;
-}) {
-  const [isHovered, setIsHovered] = useState(false);
-
-  /**
-   * @brief Handles click events on the option
-   * @description Calls the onSelect callback if the option is not disabled.
-   * Prevents selection of disabled items.
-   */
-  const selectOption = () => {
-    if (!isDisabled) {
-      onSelect(item);
-    }
-  };
-
-  const baseClasses = "px-3 py-1.5 text-sm transition-colors";
-  const selectedClasses = isSelected ? "bg-sky-50 text-sky-600 font-medium" : "";
-  const hasCustomHover = className.includes("hover:");
-  const disabledClasses = isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer";
-  // Remove hover classes from className since we'll handle hover via inline styles
-  const classNameWithoutHover = className.replace(/hover:[^\s]+/g, "").trim();
-  const combinedClasses = `${baseClasses} ${selectedClasses} ${disabledClasses} ${classNameWithoutHover}`.trim();
-
-  // Extract hover background color from className if present
-  const hoverBgMatch = className.match(/hover:!?bg-\[([^\]]+)\]/);
-  const hoverBgColor = hoverBgMatch ? hoverBgMatch[1] : hasCustomHover ? "#fee2e2" : "#f3f4f6"; // red-100 or gray-100
-
-  return (
-    <div
-      data-key={dataKey}
-      onClick={selectOption}
-      className={combinedClasses}
-      style={isHovered && !isDisabled ? { backgroundColor: hoverBgColor } : undefined}
-      role="option"
-      aria-selected={isSelected}
-      aria-disabled={isDisabled}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col flex-1">
-          <span>{displayText}</span>
-          {description && <span className="text-xs font-normal text-zinc-500">{description}</span>}
-        </div>
-        {icon && (
-          <span className="text-base" aria-hidden>
-            {icon}
-          </span>
-        )}
-      </div>
-    </div>
   );
 }

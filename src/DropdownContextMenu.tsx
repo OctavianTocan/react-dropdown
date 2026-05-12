@@ -29,10 +29,9 @@
 
 "use client";
 
-import { createContext, useCallback, use, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, use, useMemo, useRef, useState, type ReactNode } from "react";
 import { DropdownRoot } from "./DropdownRoot";
 import { DropdownContent } from "./DropdownContent";
-import { useDropdownContext } from "./DropdownContext";
 import { Slot } from "./Slot";
 
 /**
@@ -100,6 +99,7 @@ export function DropdownContextMenu({
 	"data-testid": testId = "dropdown-context-menu",
 }: DropdownContextMenuProps): React.JSX.Element {
 	const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+	const [openVersion, setOpenVersion] = useState(0);
 	// The anchor element is rendered as a fixed-position 1×1 div at the cursor
 	// coordinates, DropdownContent's `anchorRef` positioning treats it as the
 	// trigger's bounding rect, so the panel lands at the cursor with full
@@ -107,8 +107,14 @@ export function DropdownContextMenu({
 	const anchorRef = useRef<HTMLDivElement | null>(null);
 
 	const openAt = useCallback((clientX: number, clientY: number): void => {
-		setPosition({ x: clientX, y: clientY });
-	}, []);
+		setPosition((currentPosition) => {
+			if (!currentPosition) {
+				onOpenChange?.(true);
+			}
+			return { x: clientX, y: clientY };
+		});
+		setOpenVersion((version) => version + 1);
+	}, [onOpenChange]);
 
 	const close = useCallback((): void => {
 		setPosition(null);
@@ -127,6 +133,7 @@ export function DropdownContextMenu({
 		<ContextMenuContext.Provider value={value}>
 			<ContextMenuOpener
 				position={position}
+				openVersion={openVersion}
 				anchorRef={anchorRef}
 				close={close}
 				onOpenChange={onOpenChange}
@@ -154,6 +161,7 @@ export function DropdownContextMenu({
 function ContextMenuOpener({
 	children,
 	position,
+	openVersion,
 	anchorRef,
 	close,
 	onOpenChange,
@@ -162,6 +170,7 @@ function ContextMenuOpener({
 }: {
 	children: ReactNode;
 	position: { x: number; y: number } | null;
+	openVersion: number;
 	anchorRef: React.MutableRefObject<HTMLDivElement | null>;
 	close: () => void;
 	onOpenChange?: (isOpen: boolean) => void;
@@ -218,6 +227,7 @@ function ContextMenuOpener({
 			 * a new cursor point still reflows correctly without a remount.
 			 */}
 			<DropdownRootShim
+				key={openVersion}
 				isOpen={isOpen}
 				onOpenChange={handleOpenChange}
 				anchorRef={anchorRef as React.RefObject<HTMLElement | null>}
@@ -278,43 +288,12 @@ function DropdownRootShim({
 			align="start"
 			offset={offset}
 			onOpenChange={onOpenChange}
+			defaultOpen={isOpen}
 			data-testid={testId}
 		>
-			<OpenSync isOpen={isOpen} />
 			{children}
 		</DropdownRoot>
 	);
-}
-
-/**
- * @brief Pulls open state in via {@link useDropdownContext}'s `setIsOpen`.
- *
- * Runs once when the shim mounts with `isOpen=true` to flip the dropdown's
- * own state without going through `toggleDropdown` (which would require a
- * synthetic click event). Both opens and closes propagate naturally —
- * `setIsOpen` (now backed by the shared `useToggleState` primitive) fires
- * `onOpenChange` on every transition, so the parent's `onOpenChange` prop on
- * `DropdownRoot` sees the open exactly the same way a trigger-driven
- * dropdown would.
- *
- * Uses a plain `useEffect` (not `useLayoutEffect`) so the very first paint
- * after the shim mounts shows `isOpen=false` (no panel rendered), and the
- * transition to `isOpen=true` happens on the next commit. That gives
- * `AnimatePresence` inside `DropdownContent` a clean "child appears"
- * sequence, which is what triggers the enter motion. With a layout
- * effect both states landed in the same paint cycle and Motion sometimes
- * skipped the enter animation, making the right-click menu pop into
- * view without the filter-blur / scale / y motion that regular
- * dropdowns get.
- */
-function OpenSync({ isOpen }: { isOpen: boolean }): null {
-	const { setIsOpen } = useDropdownContext();
-	useEffect(() => {
-		if (isOpen) {
-			setIsOpen(true);
-		}
-	}, [isOpen, setIsOpen]);
-	return null;
 }
 
 /**

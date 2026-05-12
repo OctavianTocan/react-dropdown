@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useCallback, useRef, useMemo, useLayoutEffect, useEffect } from "react";
+import { useState, useCallback, useRef, useMemo, useLayoutEffect, useEffect, useReducer } from "react";
 import { DropdownProvider, useClickOutside } from "./DropdownContext";
 import { useToggleState } from "./useToggleState";
 import type { DropdownRootProps, DropdownContextValue, DropdownAnimationState } from "./types";
@@ -54,9 +54,12 @@ function computePlacement(triggerRect: DOMRect | null, placement: "auto" | "top"
 function useAnimationStateTracker(
   isOpen: boolean,
   enterDuration: number,
-  exitDuration: number,
+  exitDuration: number
 ): DropdownAnimationState {
-  const [animationState, setAnimationState] = useState<DropdownAnimationState>("idle");
+  const [animationState, dispatchAnimationState] = useReducer(
+    (_current: DropdownAnimationState, next: DropdownAnimationState): DropdownAnimationState => next,
+    "idle"
+  );
   // We track the previous open state so that a remount with `isOpen=false`
   // doesn't briefly publish `"exiting"` when the dropdown was never open.
   const prevIsOpenRef = useRef(isOpen);
@@ -65,9 +68,9 @@ function useAnimationStateTracker(
     if (isOpen === prevIsOpenRef.current) return;
     prevIsOpenRef.current = isOpen;
 
-    setAnimationState(isOpen ? "entering" : "exiting");
+    dispatchAnimationState(isOpen ? "entering" : "exiting");
     const duration = (isOpen ? enterDuration : exitDuration) * 1000;
-    const timer = setTimeout(() => setAnimationState("idle"), duration);
+    const timer = setTimeout(() => dispatchAnimationState("idle"), duration);
     return () => clearTimeout(timer);
   }, [isOpen, enterDuration, exitDuration]);
 
@@ -86,6 +89,7 @@ function useAnimationStateTracker(
  */
 export function DropdownRoot<T>({
   children,
+  defaultOpen = false,
   items,
   selectedItem: initialSelectedItem = null,
   onSelect,
@@ -134,8 +138,11 @@ export function DropdownRoot<T>({
   // single source of truth across DropdownRoot + useDropdown + the
   // panel/context-menu shells. The hook handles the
   // "fire onOpenChange only on transition" rule.
-  const { isOpen, setIsOpen } = useToggleState({ onOpenChange });
-  const [selectedItem, setSelectedItem] = useState<T | null>(initialSelectedItem);
+  const { isOpen, setIsOpen } = useToggleState({ defaultOpen, onOpenChange });
+  const [selectedItem, setSelectedItem] = useReducer(
+    (_current: T | null, next: T | null): T | null => next,
+    initialSelectedItem
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [computedPlacement, setComputedPlacement] = useState<"top" | "bottom">(
     effectivePlacement === "auto" ? "bottom" : effectivePlacement

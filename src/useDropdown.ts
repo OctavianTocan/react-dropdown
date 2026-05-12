@@ -67,6 +67,7 @@ import {
   useRef,
   type HTMLAttributes,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MutableRefObject,
   type MouseEvent as ReactMouseEvent,
   type Ref,
 } from "react";
@@ -87,8 +88,7 @@ function composeRefs<T>(...refs: ReadonlyArray<Ref<T> | undefined>): (node: T | 
       if (typeof ref === "function") {
         ref(node);
       } else {
-        // biome-ignore lint/suspicious/noExplicitAny: writable mutable refs require a one-line escape; ref types are correct at the callsite.
-        (ref as any).current = node;
+        (ref as MutableRefObject<T | null>).current = node;
       }
     }
   };
@@ -174,6 +174,8 @@ export interface GetItemPropsArg
 
 /** Shape returned by {@link useDropdown}. */
 export interface UseDropdownReturn<T> {
+  /** Type anchor that preserves the item generic for exported helper types. */
+  readonly __itemType?: T;
   /** Whether the dropdown is currently open. */
   isOpen: boolean;
   /** Open the dropdown. No-op if already open. */
