@@ -13,6 +13,7 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
+import Link from "next/link";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DropdownPanelMenu } from "../DropdownPanelMenu";
@@ -112,7 +113,7 @@ describe("DropdownPanelMenu", () => {
 		render(
 			<DropdownPanelMenu trigger={<button type="button">Open</button>} asChild>
 				<DropdownMenuItem asChild>
-					<a href="/profile">Profile</a>
+					<Link href="/profile">Profile</Link>
 				</DropdownMenuItem>
 			</DropdownPanelMenu>,
 		);
