@@ -7,7 +7,8 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { AnimatePresence, domAnimation, LazyMotion, useReducedMotion } from "motion/react";
+import * as m from "motion/react-m";
 import { useDropdownContext } from "./DropdownContext";
 import { ELEVATED_SHADOW } from "./design-tokens";
 import { DropdownSubmenuGroupProvider } from "./DropdownSubmenu";
@@ -390,7 +391,7 @@ export function DropdownContent({
   );
 
   const dropdownContent = (
-    <motion.div
+    <m.div
       key="dropdown-content"
       ref={contentRef}
       className={`${shouldUsePortal ? "fixed" : "absolute"} z-50 ${shouldUsePortal ? "" : "w-full"} ${shouldUsePortal ? "" : "min-w-[320px]!"} ${shouldUsePortal ? "" : placementClass} flex ${flexDirClass} overflow-hidden ${className}`}
@@ -430,13 +431,14 @@ export function DropdownContent({
           don't accidentally close their cousins above. See
           `DropdownSubmenu.tsx` for the rationale. */}
       <DropdownSubmenuGroupProvider>{children}</DropdownSubmenuGroupProvider>
-    </motion.div>
+    </m.div>
   );
 
   const content = (
-    <AnimatePresence>
+    <LazyMotion features={domAnimation}>
+      <AnimatePresence>
       {isOpen && backdrop && (
-        <motion.div
+        <m.div
           key="dropdown-backdrop"
           className={`fixed inset-0 z-40 ${backdropClassName}`}
           onClick={closeDropdown}
@@ -449,7 +451,8 @@ export function DropdownContent({
         />
       )}
       {isOpen && dropdownContent}
-    </AnimatePresence>
+      </AnimatePresence>
+    </LazyMotion>
   );
 
   // Render in portal if enabled

@@ -7,7 +7,8 @@
 
 import React, { useRef, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { motion } from "motion/react";
+import { domAnimation, LazyMotion } from "motion/react";
+import * as m from "motion/react-m";
 import { useDropdownContext } from "./DropdownContext";
 import type { DropdownListProps, DropdownSectionMeta } from "./types";
 
@@ -292,7 +293,8 @@ export function DropdownList<T>({
 
     if (staggered) {
       return (
-        <motion.div
+        <LazyMotion features={domAnimation}>
+          <m.div
           key={`section-wrapper-${section.meta.key}`}
           initial={{ opacity: 0, y: computedPlacement === "top" ? -10 : 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -303,7 +305,8 @@ export function DropdownList<T>({
           }}
         >
           {content}
-        </motion.div>
+          </m.div>
+        </LazyMotion>
       );
     }
 
@@ -385,7 +388,8 @@ export function DropdownList<T>({
 
     if (staggered) {
       return (
-        <motion.div
+        <LazyMotion features={domAnimation}>
+          <m.div
           key={`motion-${key}`}
           initial={{ opacity: 0, y: computedPlacement === "top" ? -10 : 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -396,7 +400,8 @@ export function DropdownList<T>({
           }}
         >
           {optionContent}
-        </motion.div>
+          </m.div>
+        </LazyMotion>
       );
     }
 

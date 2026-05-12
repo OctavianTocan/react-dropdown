@@ -26,7 +26,8 @@
 import { createContext, useCallback, use, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { AnimatePresence, domAnimation, LazyMotion, useReducedMotion } from "motion/react";
+import * as m from "motion/react-m";
 import { useDropdownContext } from "./DropdownContext";
 import { Slot } from "./Slot";
 import { ELEVATED_SHADOW } from "./design-tokens";
@@ -588,32 +589,34 @@ export function DropdownSubmenuContent({
   // Always portal to body, submenus inside an overflow-hidden parent menu
   // would otherwise be clipped.
   return createPortal(
-    <AnimatePresence>
-      {submenu.isOpen && (
-        <motion.div
-          ref={contentRef}
-          key="dropdown-submenu-content"
-          role="menu"
-          className={`fixed z-50 ${className}`}
-          style={{
-            top: position.top,
-            left: position.left,
-            transformOrigin: resolvedSide === "right" ? "left top" : "right top",
-          }}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          variants={variants}
-          data-state={submenu.isOpen ? "open" : "closed"}
-          data-side={resolvedSide}
-          onPointerEnter={handlePointerEnter}
-          onPointerLeave={handlePointerLeave}
-          onKeyDown={handleKeyDown}
-        >
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>,
+    <LazyMotion features={domAnimation}>
+      <AnimatePresence>
+        {submenu.isOpen && (
+          <m.div
+            ref={contentRef}
+            key="dropdown-submenu-content"
+            role="menu"
+            className={`fixed z-50 ${className}`}
+            style={{
+              top: position.top,
+              left: position.left,
+              transformOrigin: resolvedSide === "right" ? "left top" : "right top",
+            }}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={variants}
+            data-state={submenu.isOpen ? "open" : "closed"}
+            data-side={resolvedSide}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={handlePointerLeave}
+            onKeyDown={handleKeyDown}
+          >
+            {children}
+          </m.div>
+        )}
+      </AnimatePresence>
+    </LazyMotion>,
     document.body,
   );
 }
