@@ -258,7 +258,7 @@ export function DropdownSubmenu({ children }: { children: ReactNode }): React.JS
  * renders with the same flex row layout (icon ◯ label ◯ trailing) as a sibling
  * `<MenuItem>`. Without this, consumers that didn't pass a `className` got an
  * unstyled `<button>` whose icon + label collapsed into block flow, labels
- * floated into the middle of the panel detached from their icons (ai-nexus
+ * floated into the middle of the panel detached from their icons (pawrrtal
  * sidebar conversation right-click menu, image #37).
  *
  * Consumer overrides are merged via {@link mergeSubmenuTriggerClassName} so
