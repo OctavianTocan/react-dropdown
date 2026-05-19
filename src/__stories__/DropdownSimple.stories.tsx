@@ -7,7 +7,7 @@ type DropdownStoryArgs = {
   selectedItem?: string | null;
   onSelect?: (item: string | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: "top" | "bottom";
+  placement?: "top" | "bottom";
   placeholder?: string;
   triggerProps?: Record<string, unknown>;
   dropdownProps?: Record<string, unknown>;

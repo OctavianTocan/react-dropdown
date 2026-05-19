@@ -54,7 +54,7 @@ describe("DropdownContent", () => {
 
   describe("Placement", () => {
     it("applies bottom placement classes by default", () => {
-      const mockContext = createMockDropdownContext({ isOpen: true, dropdownPlacement: "bottom" });
+      const mockContext = createMockDropdownContext({ isOpen: true, computedPlacement: "bottom" });
       render(
         <DropdownProvider value={mockContext}>
           <DropdownContent>

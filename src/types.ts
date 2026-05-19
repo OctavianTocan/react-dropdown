@@ -15,8 +15,7 @@ export type DropdownPlacement = "bottom" | "top" | "auto";
  *
  * - `'start'`, left edge of content aligned to left edge of anchor
  * - `'center'`, content horizontally centered over the anchor
- * - `'end'`, right edge of content aligned to right edge of anchor (default;
- *   matches the historical behavior before the prop existed)
+ * - `'end'` (default), right edge of content aligned to right edge of anchor
  */
 export type DropdownAlign = "start" | "center" | "end";
 
@@ -153,8 +152,6 @@ export interface DropdownRootProps<T> extends BaseDropdownProps {
    * ```
    */
   placement?: DropdownPlacement;
-  /** @deprecated Use `placement` instead. Will be removed in next major version. */
-  dropdownPlacement?: DropdownPlacement;
   /** Distance in pixels between trigger and dropdown content. Default: 8 */
   offset?: number;
   /**
@@ -460,16 +457,12 @@ export interface DropdownContextValue<T> {
   closeOnSelect: boolean;
   /** Function to close dropdown with exit animation */
   closeDropdown: () => void;
-  /** Function to close dropdown immediately without exit animation */
-  closeImmediate: () => void;
   /** Function to toggle dropdown open/closed state */
   toggleDropdown: () => void;
   /** Current animation state of the dropdown */
   animationState: DropdownAnimationState;
   /** Computed placement after auto-detection (always 'top' or 'bottom') */
   computedPlacement: "top" | "bottom";
-  /** @deprecated Use computedPlacement instead */
-  dropdownPlacement?: DropdownPlacement;
   /** Distance in pixels between trigger and dropdown content */
   offset: number;
   /** Horizontal alignment of content to anchor */

@@ -100,7 +100,6 @@ export function DropdownRoot<T>({
   placeholder: _placeholder,
   className = "",
   placement = "bottom",
-  dropdownPlacement,
   offset = 8,
   getItemDescription,
   getItemIcon,
@@ -131,8 +130,6 @@ export function DropdownRoot<T>({
   // Exit easing now defaults to ease-in-quint independently of enter easing,
   // but if consumer passes only `enterEase`, mirror it on exit (legacy behavior).
   const resolvedExitEase = exitEase;
-  // Support deprecated dropdownPlacement prop
-  const effectivePlacement = dropdownPlacement || placement;
 
   // Open-state delegated to the shared `useToggleState` primitive, the
   // single source of truth across DropdownRoot + useDropdown + the
@@ -145,7 +142,7 @@ export function DropdownRoot<T>({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [computedPlacement, setComputedPlacement] = useState<"top" | "bottom">(
-    effectivePlacement === "auto" ? "bottom" : effectivePlacement
+    placement === "auto" ? "bottom" : placement
   );
 
   // Refs for DOM manipulation
@@ -175,14 +172,14 @@ export function DropdownRoot<T>({
 
   // Compute placement when opening
   useEffect(() => {
-    if (isOpen && effectivePlacement === "auto") {
+    if (isOpen && placement === "auto") {
       const triggerElement = triggerRef?.current || dropdownRef.current?.querySelector("button");
       const rect = triggerElement?.getBoundingClientRect() || null;
-      setComputedPlacement(computePlacement(rect, effectivePlacement));
-    } else if (effectivePlacement !== "auto") {
-      setComputedPlacement(effectivePlacement);
+      setComputedPlacement(computePlacement(rect, placement));
+    } else if (placement !== "auto") {
+      setComputedPlacement(placement);
     }
-  }, [isOpen, effectivePlacement, triggerRef]);
+  }, [isOpen, placement, triggerRef]);
 
   /**
    * @brief Opens the dropdown and notifies the consumer synchronously
@@ -223,18 +220,6 @@ export function DropdownRoot<T>({
     setIsOpen(false);
     setSearchQuery("");
   }, [isOpen, setIsOpen]);
-
-  /**
-   * @brief Closes the dropdown, alias of {@link closeDropdown}
-   *
-   * Retained for backward compatibility with consumers that referenced
-   * `closeImmediate`. The previous "skip exit animation" behavior is no
-   * longer meaningful: state changes propagate immediately and the visible
-   * exit motion is owned by `DropdownContent`. Pass `disableAnimation` to
-   * `DropdownContent` (or set `exitDuration={0}`) when you genuinely need
-   * an instant teardown.
-   */
-  const closeImmediate = closeDropdown;
 
   /**
    * @brief Toggles dropdown open/closed state
@@ -294,11 +279,9 @@ export function DropdownRoot<T>({
       disabled,
       closeOnSelect,
       closeDropdown,
-      closeImmediate,
       toggleDropdown,
       animationState,
       computedPlacement,
-      dropdownPlacement: computedPlacement,
       offset,
       align,
       alignOffset,
@@ -336,7 +319,6 @@ export function DropdownRoot<T>({
       disabled,
       closeOnSelect,
       closeDropdown,
-      closeImmediate,
       toggleDropdown,
       animationState,
       computedPlacement,

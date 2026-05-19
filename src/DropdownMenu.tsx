@@ -76,7 +76,7 @@ export interface DropdownMenuProps<T>
  *
  * When `asChild` is true, the trigger renders via {@link Slot} so the
  * consumer's element receives the click + ARIA props directly (no wrapping
- * `<div>`). Otherwise, falls back to a `<div>` wrapper for legacy callers
+ * `<div>`). Otherwise, falls back to a `<div>` wrapper for callers
  * that compose multiple host elements as the trigger.
  */
 function MenuTrigger({
@@ -263,7 +263,6 @@ export function DropdownMenu<T>({
   placeholder,
   className = '',
   placement,
-  dropdownPlacement,
   closeOnSelect = true,
   trigger,
   asChild = false,
@@ -297,7 +296,6 @@ export function DropdownMenu<T>({
       placeholder={placeholder}
       className={className}
       placement={placement}
-      dropdownPlacement={dropdownPlacement}
       closeOnSelect={closeOnSelect}
       onOpenChange={onOpenChange}
       triggerRef={triggerRef}

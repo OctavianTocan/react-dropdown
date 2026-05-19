@@ -8,7 +8,7 @@ type DropdownStoryArgs = {
   selectedItem?: AIModel | null;
   onSelect?: (item: AIModel | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: "top" | "bottom";
+  placement?: "top" | "bottom";
   placeholder?: string;
   triggerProps?: Record<string, unknown>;
   dropdownProps?: Record<string, unknown>;
@@ -46,7 +46,7 @@ const meta: Meta<DropdownStoryArgs> = {
       description: "Disable the dropdown",
       control: { type: "boolean" },
     },
-    dropdownPlacement: {
+    placement: {
       description: "Where the dropdown appears relative to the trigger",
       control: { type: "select" },
       options: ["top", "bottom"],
