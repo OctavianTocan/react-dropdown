@@ -87,9 +87,7 @@ export const createMockDropdownContext = <T,>(
   overrides: Partial<DropdownContextValue<T>> = {}
 ): DropdownContextValue<T> => {
   const defaultFilter: DropdownContextValue<T>["filterItems"] = (items) => items;
-  // Derive computedPlacement from dropdownPlacement for backwards compatibility
-  const effectivePlacement = overrides.dropdownPlacement ?? "bottom";
-  const computedPlacement = effectivePlacement === "auto" ? "bottom" : effectivePlacement;
+  const computedPlacement = overrides.computedPlacement ?? "bottom";
   return {
     isOpen: overrides.isOpen ?? false,
     setIsOpen: overrides.setIsOpen ?? createNoop<DropdownContextValue<T>["setIsOpen"]>(),
@@ -106,11 +104,9 @@ export const createMockDropdownContext = <T,>(
     disabled: overrides.disabled ?? false,
     closeOnSelect: overrides.closeOnSelect ?? true,
     closeDropdown: overrides.closeDropdown ?? createNoop<DropdownContextValue<T>["closeDropdown"]>(),
-    closeImmediate: overrides.closeImmediate ?? createNoop<DropdownContextValue<T>["closeImmediate"]>(),
     toggleDropdown: overrides.toggleDropdown ?? createNoop<DropdownContextValue<T>["toggleDropdown"]>(),
     animationState: overrides.animationState ?? "idle",
-    computedPlacement: overrides.computedPlacement ?? computedPlacement,
-    dropdownPlacement: overrides.dropdownPlacement ?? "bottom",
+    computedPlacement,
     offset: overrides.offset ?? 8,
     getItemDescription: overrides.getItemDescription,
     getItemIcon: overrides.getItemIcon,

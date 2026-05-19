@@ -13,7 +13,7 @@ type DropdownStoryArgs = {
   selectedItem?: User | null;
   onSelect?: (item: User | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: "top" | "bottom";
+  placement?: "top" | "bottom";
   placeholder?: string;
   triggerProps?: Record<string, unknown>;
   dropdownProps?: Record<string, unknown>;
@@ -49,7 +49,7 @@ const meta: Meta<DropdownStoryArgs> = {
       description: "Disable the dropdown",
       control: { type: "boolean" as const },
     },
-    dropdownPlacement: {
+    placement: {
       description: "Where the dropdown appears relative to the trigger",
       control: { type: "select" as const },
       options: ["top", "bottom"],

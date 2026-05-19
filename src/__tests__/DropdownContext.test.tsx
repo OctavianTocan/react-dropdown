@@ -36,7 +36,6 @@ const createMockContext = (): DropdownContextValue<MockItem> => ({
   disabled: false,
   closeOnSelect: true,
   closeDropdown: vi.fn(),
-  closeImmediate: vi.fn(),
   toggleDropdown: vi.fn(),
   animationState: "idle",
   computedPlacement: "bottom",

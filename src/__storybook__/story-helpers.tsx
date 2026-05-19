@@ -51,7 +51,7 @@ export function createDropdownStory<T = string>(config: {
     selectedItem: initialSelectedItem = defaultSelectedItem,
     onSelect = () => {},
     disabled = false,
-    dropdownPlacement = "bottom",
+    placement = "bottom",
     placeholder = "Select an option",
     triggerProps = {},
     dropdownProps = {},
@@ -60,7 +60,7 @@ export function createDropdownStory<T = string>(config: {
     selectedItem?: T | null;
     onSelect?: (item: T | null) => void;
     disabled?: boolean;
-    dropdownPlacement?: "top" | "bottom";
+    placement?: "top" | "bottom";
     placeholder?: string;
     triggerProps?: Record<string, unknown>;
     dropdownProps?: Record<string, unknown>;
@@ -87,7 +87,7 @@ export function createDropdownStory<T = string>(config: {
         getItemSection={getItemSection}
         filterItems={filterItems}
         disabled={disabled}
-        dropdownPlacement={dropdownPlacement}
+        placement={placement}
         placeholder={placeholder}
       >
         <DropdownTrigger
@@ -140,7 +140,6 @@ export function createMockContext<T = unknown>(
     disabled: false,
     closeOnSelect: true,
     closeDropdown: () => {},
-    closeImmediate: () => {},
     toggleDropdown: () => {},
     animationState: "idle",
     computedPlacement: "bottom",
@@ -153,7 +152,6 @@ export function createMockContext<T = unknown>(
     collisionDetection: true,
     align: "end" as const,
     alignOffset: 0,
-    dropdownPlacement: "bottom" as const,
     ...overrides,
   };
 }
@@ -174,7 +172,7 @@ export const dropdownRootArgTypes = {
     description: "Disable the dropdown",
     control: { type: "boolean" as const },
   },
-  dropdownPlacement: {
+  placement: {
     description: "Where the dropdown appears relative to the trigger",
     control: { type: "select" as const },
     options: ["top", "bottom"],

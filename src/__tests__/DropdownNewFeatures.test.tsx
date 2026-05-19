@@ -196,9 +196,9 @@ describe("New Dropdown Features", () => {
       expect(screen.getByTestId("dropdown-root")).toBeInTheDocument();
     });
 
-    it("supports deprecated dropdownPlacement prop", () => {
+    it("accepts placement prop", () => {
       render(
-        <DropdownRoot {...defaultProps} dropdownPlacement="top">
+        <DropdownRoot {...defaultProps} placement="top">
           <DropdownTrigger displayValue="" placeholder="Select" />
           <DropdownContent>
             <DropdownList
@@ -384,18 +384,6 @@ describe("New Dropdown Features", () => {
     it("defaults animationState to idle", () => {
       const mockContext = createMockDropdownContext({ isOpen: false });
       expect(mockContext.animationState).toBe("idle");
-    });
-  });
-
-  describe("closeImmediate", () => {
-    it("exposes closeImmediate in context", () => {
-      const closeImmediate = vi.fn();
-      const mockContext = createMockDropdownContext({
-        isOpen: true,
-        closeImmediate,
-      });
-
-      expect(mockContext.closeImmediate).toBe(closeImmediate);
     });
   });
 

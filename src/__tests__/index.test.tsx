@@ -199,7 +199,6 @@ describe("Dropdown Module Exports", () => {
         disabled: false,
         closeOnSelect: true,
         closeDropdown: () => undefined,
-        closeImmediate: () => undefined,
         toggleDropdown: () => undefined,
         animationState: "idle",
         computedPlacement: "bottom",

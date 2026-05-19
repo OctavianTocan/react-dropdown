@@ -13,7 +13,7 @@ type DropdownStoryArgs = {
   selectedItem?: string | null;
   onSelect?: (item: string | null) => void;
   disabled?: boolean;
-  dropdownPlacement?: "top" | "bottom";
+  placement?: "top" | "bottom";
   placeholder?: string;
   triggerProps?: Record<string, unknown>;
   dropdownProps?: Record<string, unknown>;
@@ -87,7 +87,7 @@ export const TopPlacement: Story = {
   render: BasicTemplate,
   args: {
     items: simpleItems,
-    dropdownPlacement: "top",
+    placement: "top",
     placeholder: "Select an option",
     triggerProps: { "data-testid": "top-placement-trigger" },
   },
